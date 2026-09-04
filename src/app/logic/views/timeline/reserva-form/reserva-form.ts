@@ -74,7 +74,6 @@ import { MatMenuModule } from '@angular/material/menu';
 
 //ANGULAR MATERIAL
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { ReservaArchivoComponent } from '../../reserva_archivo/reserva_archivo';
 import { MatCheckboxModule } from '@angular/material/checkbox'
 
 @Component({
@@ -152,7 +151,6 @@ export class ReservaFormComponent {
   isDisabled: boolean = false;
   isEditReserva: boolean = false;
   isVisibleTabs: boolean = false;
-  isVisibleReservaArchivo: boolean = false;
   isVisibleServiciosExtra: boolean = false;
 
   //Comprobante              
@@ -209,8 +207,6 @@ export class ReservaFormComponent {
       this.cargarDatosTransaccion(this.reserva.id)
       this.btnVisibleCheckIn = true;
       this.btnVisibleCheckOut = true;
-      this.isVisibleReservaArchivo = true;
-
     }    
 
     effect(() => {
@@ -395,7 +391,6 @@ export class ReservaFormComponent {
           this.comunicacionService.executeActionReserva.set(true); //Señal para indicar que hubo accion en reserva               
           this.comunicacionService.loadBitacoraSignal.set({ reserva_id: this.reserva.id, trigger: Date.now() });
           this.triggerEstadoReserva.set(Date.now());
-          this.isVisibleReservaArchivo = true; //Para adjuntar archivos de reserva
 
         } else {
           this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
@@ -674,19 +669,6 @@ export class ReservaFormComponent {
     }
     let totalCalculado = (precio * cantidad) - descuento;
     this.reserva.total = Math.max(0, Math.round(totalCalculado * 100) / 100);
-  }
-
-  mostrarFormularioReservaArchivo() {
-    const dialogRef = this.dialog.open(ReservaArchivoComponent,
-      {
-        data: { reserva: this.reserva },
-        width: '50vw',
-        maxWidth: '95vw',
-        disableClose: true
-      });
-    dialogRef.afterClosed().subscribe(res => {
-      if (!res) { return; }
-    });
   }
 
   onProductoChange(fila: TransaccionModel) {

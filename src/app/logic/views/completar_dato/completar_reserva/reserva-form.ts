@@ -56,7 +56,6 @@ import moment from 'moment';
 
 //ANGULAR MATERIAL
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { ReservaArchivoComponent } from '../../reserva_archivo/reserva_archivo';
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { PersonaService } from '../../../../base/services/persona.service';
 
@@ -293,18 +292,6 @@ export class CompletarReservaFormComponent {
         })
     }
     
-    mostrarFormularioReservaArchivo(){     
-      const dialogRef = this.dialog.open(ReservaArchivoComponent,
-        { data: {reserva: this.reserva},
-          width: '50vw',
-          maxWidth: '95vw', 
-          disableClose:true
-        });
-      dialogRef.afterClosed().subscribe(res => {          
-          if(!res){return;}
-      });
-    }
-
     verificarNroDocumento(nro_documento:string){      
         if(this.reserva.id==null && nro_documento?.trim()){            
             this.personaService.personaPorNroDocumento(nro_documento).subscribe({
