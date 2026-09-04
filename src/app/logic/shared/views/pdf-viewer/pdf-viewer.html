@@ -1,9 +1,19 @@
-
-<h1 mat-dialog-title>{{titulo_documento}}</h1>
-<div mat-dialog-content>
-    <iframe [src]="pdfBase64" width="100%" height="550" frameborder="0"></iframe>
+<div class="pdf-viewer-header">
+    <h2 mat-dialog-title class="pdf-viewer-title">
+        <mat-icon class="title-icon">description</mat-icon>
+        <span>{{ titulo_documento }}</span>
+    </h2>
+    <button mat-icon-button type="button" class="btn-close-header" (click)="close()" aria-label="Cerrar ventana">
+        <mat-icon>close</mat-icon>
+    </button>
 </div>
-<div mat-dialog-actions>
-    <button mat-button (click)="close()">Cerrar</button>
+
+<div mat-dialog-content class="pdf-dialog-content">
+    <iframe [src]="pdfBase64" class="pdf-frame" frameborder="0"></iframe>
 </div>
 
+<div mat-dialog-actions align="end" class="pdf-dialog-actions">
+    <button mat-flat-button color="primary" type="button" class="btn-close-footer" (click)="close()">
+        <span>Cerrar</span>
+    </button>
+</div>

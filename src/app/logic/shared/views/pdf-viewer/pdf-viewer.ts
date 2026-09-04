@@ -3,13 +3,14 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-pdf-viewer',
   templateUrl: './pdf-viewer.html',
   styleUrls: ['./pdf-viewer.scss'],
   standalone: true,
-  imports: [MatDialogModule, MatButtonModule]
+  imports: [MatDialogModule, MatButtonModule, MatIconModule]
 })
 export class PdfViewerComponent {
   pdfBase64: SafeResourceUrl;
