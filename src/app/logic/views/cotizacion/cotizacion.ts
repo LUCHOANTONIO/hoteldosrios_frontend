@@ -59,13 +59,13 @@ export class CotizacionComponent implements AfterViewInit {
 
   displayedColumns: string[] = [
     'actions',
+    'documento_btn',
     'correlativo',
     'cliente',
     'documento',
     'fecha_ini',
     'fecha_fin',
-    'detalle',
-    'documento_btn'
+    'detalle'    
   ];
   dataSource: MatTableDataSource<CotizacionModel>;
 
