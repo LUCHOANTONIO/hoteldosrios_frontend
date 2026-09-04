@@ -11,6 +11,7 @@ export class CotizacionModel {
     segundo_apellido: string = '';
     telefono?: string = '';
     cliente?: string = '';
+    servicio?: string = '';
     fecha_ini: string = '';
     fecha_fin: string = '';
     detalle: string = '';

@@ -100,143 +100,251 @@
 
         <!-- CARD 3: DETALLE DE TARIFAS Y SERVICIOS -->
         <div class="form-section-card">
-            <div class="section-header">
-                <mat-icon class="section-icon">table_view</mat-icon>
-                <span class="section-title">Detalle de Tarifas y Servicios</span>
+            <div class="section-header justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <mat-icon class="section-icon">table_view</mat-icon>
+                    <span class="section-title">Detalle de Tarifas y Servicios</span>
+                </div>
+                <span class="badge bg-primary text-white px-2 py-1" *ngIf="detalles.length > 0">
+                    {{ detalles.length }} {{ detalles.length === 1 ? 'ítem' : 'ítems' }}
+                </span>
             </div>
 
-            <div class="table-responsive border rounded bg-white shadow-sm mb-2">
-                <table mat-table [dataSource]="dataSource" class="w-100 tabla-detalle">
+            <!-- PANEL DE ENTRADA RÁPIDA / FORMULARIO AGREGAR O EDITAR ITEM -->
+            <div class="quick-add-panel p-3 mb-3 rounded border">
+                <!-- Indicador exclusivo para cuando se está modificando un ítem -->
+                <div *ngIf="editandoIndex !== null" class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <span class="fw-bold fs-6 text-dark d-flex align-items-center gap-1">
+                        <mat-icon style="font-size: 20px; width: 20px; height: 20px;" class="text-warning">edit_note</mat-icon>
+                        Modificando Ítem #{{ editandoIndex + 1 }}
+                    </span>
+                    <button mat-button type="button" class="text-secondary btn-sm" (click)="cancelarEdicion()">
+                        <mat-icon style="font-size: 16px;">close</mat-icon> Cancelar
+                    </button>
+                </div>
 
-                    <!-- Columna Acciones -->
-                    <ng-container matColumnDef="acciones">
-                        <th mat-header-cell *matHeaderCellDef style="width: 48px;" class="text-center">
-                            <button mat-icon-button type="button" (click)="agregarFilaDetalle()"
-                                class="bg-success text-black btn-add-header" matTooltip="Agregar Fila">
-                                <mat-icon>add</mat-icon>
-                            </button>
-                        </th>
-                        <td mat-cell *matCellDef="let row; let i = index;" class="text-center">
-                            <button mat-icon-button type="button" class="text-danger" (click)="eliminarFilaDetalle(i)"
-                                matTooltip="Eliminar fila" [disabled]="detalles.length <= 1 && !row.tarifa_id">
-                                <mat-icon class="text-danger" style="font-size: 20px; width: 20px; height: 20px;">delete</mat-icon>
-                            </button>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna Tarifa -->
-                    <ng-container matColumnDef="tarifa">
-                        <th mat-header-cell *matHeaderCellDef style="min-width: 240px;">Tarifa / Servicio</th>
-                        <td mat-cell *matCellDef="let row; let i = index;">
-                            <div class="d-flex align-items-center gap-1 my-1">
-                                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-grow-1">
-                                    <mat-select placeholder="Seleccione Tarifa" [(ngModel)]="row.tarifa_id"
-                                        [name]="'tarifa_' + i" (selectionChange)="onTarifaChange(row)"
-                                        panelClass="tarifa-select-panel">
-                                        <mat-option [value]="null">
-                                            <div class="py-1 text-muted fst-italic">-- Sin Tarifa / Personalizado --</div>
-                                        </mat-option>
-                                        @for (t of tarifas; track t.id) {
-                                        <mat-option [value]="t.id" class="py-2 tarifa-option-item"
-                                            style="height: auto; min-height: 52px;">
-                                            <div class="d-flex flex-column py-1 w-100" style="line-height: 1.35;">
-                                                <div class="text-truncate">
-                                                    <strong class="text-primary">{{ t.servicio }}</strong>
-                                                    <span *ngIf="t.paquete" class="text-secondary"
-                                                        style="font-weight: 400;"> - {{ t.paquete }}</span>
-                                                </div>
-                                                <div
-                                                    class="d-flex justify-content-between align-items-center mt-1 text-nowrap gap-3">
-                                                    <small class="text-muted text-truncate" style="max-width: 200px;">{{
-                                                        t.tipo_hospedaje }}</small>
-                                                    <div class="d-flex align-items-center gap-2 text-nowrap flex-shrink-0">
-                                                        <span class="badge bg-light text-dark border px-2 py-1">
-                                                            <span style="color: #1b5e20; font-weight: 600;">Ad: Bs. {{
-                                                                t.tarifa_adulto | number:'1.2-2' }}</span>
-                                                        </span>
-                                                        <span class="badge bg-light text-dark border px-2 py-1"
-                                                            *ngIf="t.tarifa_ninio">
-                                                            <span style="color: #e65100; font-weight: 600;">Niñ: Bs. {{
-                                                                t.tarifa_ninio | number:'1.2-2' }}</span>
-                                                        </span>
-                                                    </div>
-                                                </div>
+                <div class="row g-2 align-items-center">
+                    <!-- Selector de Tarifa -->
+                    <div class="col-12 col-lg-4">
+                        <div class="d-flex align-items-center gap-1">
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                                <mat-label>Tarifa / Servicio</mat-label>
+                                <mat-select placeholder="Seleccione Tarifa (opcional)" [(ngModel)]="itemNuevo.tarifa_id"
+                                    name="item_tarifa_id" (selectionChange)="onTarifaChange(itemNuevo)"
+                                    panelClass="tarifa-select-panel">
+                                    <mat-option [value]="null">
+                                        <div class="py-1 text-muted fst-italic">-- Sin Tarifa / Personalizado --</div>
+                                    </mat-option>
+                                    @for (t of tarifas; track t.id) {
+                                    <mat-option [value]="t.id" class="py-2 tarifa-option-item" style="height: auto; min-height: 48px;">
+                                        <div class="d-flex flex-column py-1 w-100" style="line-height: 1.3;">
+                                            <div class="text-truncate">
+                                                <strong class="text-primary">{{ t.servicio }}</strong>
+                                                <span *ngIf="t.paquete" class="text-secondary"> - {{ t.paquete }}</span>
                                             </div>
-                                        </mat-option>
-                                        }
-                                    </mat-select>
-                                </mat-form-field>
-                                <button mat-icon-button type="button" (click)="abrirModalSeleccionarTarifa(row)"
-                                    class="text-primary flex-shrink-0"
-                                    matTooltip="Buscar en catálogo">
-                                    <mat-icon>search</mat-icon>
+                                            <div class="d-flex justify-content-between align-items-center mt-1 text-nowrap gap-2">
+                                                <small class="text-muted text-truncate">{{ t.tipo_hospedaje }}</small>
+                                                <span class="badge bg-light text-dark border px-1">
+                                                    <span style="color: #1b5e20; font-weight: 600;">Ad: Bs. {{ t.tarifa_adulto | number:'1.2-2' }}</span>
+                                                    <span *ngIf="t.tarifa_ninio" style="color: #e65100; font-weight: 600; margin-left: 4px;">| Niñ: Bs. {{ t.tarifa_ninio | number:'1.2-2' }}</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                            <button mat-icon-button type="button" (click)="abrirModalSeleccionarTarifa(true)"
+                                class="text-primary flex-shrink-0" matTooltip="Abrir catálogo">
+                                <mat-icon>search</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cantidad Adulto -->
+                    <div class="col-6 col-sm-3 col-lg-2">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                            <mat-label>Cant. Adultos</mat-label>
+                            <input type="number" matInput min="0" placeholder="1" [(ngModel)]="itemNuevo.cantidad_adulto"
+                                name="item_cant_ad" (input)="calcularSubtotal(itemNuevo)" (focus)="$any($event.target).select()" class="text-center">
+                            <mat-icon matPrefix style="font-size: 16px; margin-right: 2px;">person</mat-icon>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- P.U. Adulto -->
+                    <div class="col-6 col-sm-3 col-lg-2">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                            <mat-label>P.U. Adulto</mat-label>
+                            <input type="number" step="0.01" min="0" placeholder="0.00" matInput [(ngModel)]="itemNuevo.precio_unit_adulto"
+                                name="item_pu_ad" (input)="calcularSubtotal(itemNuevo)" (focus)="$any($event.target).select()" class="text-end">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Cantidad Niño -->
+                    <div class="col-6 col-sm-3 col-lg-2">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                            <mat-label>Cant. Niños</mat-label>
+                            <input type="number" min="0" placeholder="0" matInput [(ngModel)]="itemNuevo.cantidad_ninio"
+                                name="item_cant_ni" (input)="calcularSubtotal(itemNuevo)" (focus)="$any($event.target).select()" class="text-center">
+                            <mat-icon matPrefix style="font-size: 16px; margin-right: 2px;">child_care</mat-icon>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- P.U. Niño -->
+                    <div class="col-6 col-sm-3 col-lg-2">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                            <mat-label>P.U. Niño</mat-label>
+                            <input type="number" step="0.01" min="0" placeholder="0.00" matInput [(ngModel)]="itemNuevo.precio_unit_ninio"
+                                name="item_pu_ni" (input)="calcularSubtotal(itemNuevo)" (focus)="$any($event.target).select()" class="text-end">
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- SUB-BARRA: Subtotal en vivo + Botón Agregar/Actualizar -->
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small">Subtotal ítem:</span>
+                        <span class="fw-bold text-primary fs-6">Bs. {{ itemNuevo.subtotal || 0 | number:'1.2-2' }}</span>
+                    </div>
+                    <div>
+                        <button mat-raised-button type="button" (click)="agregarOActualizarItem()"
+                            [class.bg-success]="editandoIndex === null" [class.bg-warning]="editandoIndex !== null"
+                            class="text-dark fw-bold px-3">
+                            <mat-icon class="me-1">{{ editandoIndex !== null ? 'check' : 'add' }}</mat-icon>
+                            {{ editandoIndex !== null ? 'Actualizar Ítem' : 'Agregar Ítem' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LISTA DE ITEMS: MODO MOVIL (CARDS) (d-block d-md-none) -->
+            <div class="d-block d-md-none mobile-items-container mb-3">
+                @if (detalles.length === 0) {
+                    <div class="text-center py-3 px-3 bg-light rounded border text-muted">
+                        <mat-icon style="font-size: 28px; width: 28px; height: 28px;" class="text-secondary opacity-50 mb-1">receipt_long</mat-icon>
+                        <p class="mb-0 small">No hay tarifas agregadas. Usa el formulario de arriba y presiona <strong>"Agregar Ítem"</strong>.</p>
+                    </div>
+                }
+                @for (item of detalles; track $index) {
+                    <div class="item-card shadow-sm border rounded mb-2 bg-white" [class.border-primary]="editandoIndex === $index">
+                        <div class="item-card-header d-flex justify-content-between align-items-start p-2 border-bottom bg-light">
+                            <div class="pe-2">
+                                <strong class="text-primary d-block">{{ item.servicio || 'Cotización de Servicio' }}</strong>
+                                <small class="text-muted" *ngIf="item.tipo_hospedaje || item.paquete">
+                                    {{ item.tipo_hospedaje }} <span *ngIf="item.paquete">• {{ item.paquete }}</span>
+                                </small>
+                            </div>
+                            <div class="d-flex gap-1 flex-shrink-0">
+                                <button mat-icon-button type="button" class="btn-sm-action text-primary" (click)="editarItem($index)" matTooltip="Editar">
+                                    <mat-icon style="font-size: 18px;">edit</mat-icon>
+                                </button>
+                                <button mat-icon-button type="button" class="btn-sm-action text-danger" (click)="eliminarItem($index)" matTooltip="Eliminar">
+                                    <mat-icon style="font-size: 18px;">delete</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="item-card-body p-2">
+                            <div class="row g-1 small text-dark mb-2">
+                                <div class="col-6" *ngIf="item.cantidad_adulto > 0 || item.precio_unit_adulto > 0">
+                                    <span class="text-muted d-block" style="font-size: 11px;">Adultos:</span>
+                                    <span class="fw-semibold">{{ item.cantidad_adulto }} x Bs. {{ item.precio_unit_adulto | number:'1.2-2' }}</span>
+                                </div>
+                                <div class="col-6" *ngIf="item.cantidad_ninio > 0 || item.precio_unit_ninio > 0">
+                                    <span class="text-muted d-block" style="font-size: 11px;">Niños:</span>
+                                    <span class="fw-semibold">{{ item.cantidad_ninio }} x Bs. {{ item.precio_unit_ninio | number:'1.2-2' }}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pt-1 border-top">
+                                <span class="text-muted small fw-semibold">Subtotal:</span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-2 py-1 fw-bold">
+                                    Bs. {{ item.subtotal | number:'1.2-2' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- LISTA DE ITEMS: MODO ESCRITORIO (TABLA) (d-none d-md-block) -->
+            <div class="d-none d-md-block table-responsive border rounded bg-white shadow-sm mb-2">
+                <table mat-table [dataSource]="dataSource" class="w-100 tabla-detalle">
+                    <!-- Acciones -->
+                    <ng-container matColumnDef="acciones">
+                        <th mat-header-cell *matHeaderCellDef style="width: 80px;" class="text-center">Acciones</th>
+                        <td mat-cell *matCellDef="let row; let i = index;" class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <button mat-icon-button type="button" class="text-primary btn-sm-action" (click)="editarItem(i)" matTooltip="Editar fila">
+                                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">edit</mat-icon>
+                                </button>
+                                <button mat-icon-button type="button" class="text-danger btn-sm-action" (click)="eliminarItem(i)" matTooltip="Eliminar fila">
+                                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
                                 </button>
                             </div>
                         </td>
                     </ng-container>
 
-                    <!-- Columna Cantidad Adulto -->
+                    <!-- Tarifa -->
+                    <ng-container matColumnDef="tarifa">
+                        <th mat-header-cell *matHeaderCellDef style="min-width: 200px;">Tarifa / Servicio</th>
+                        <td mat-cell *matCellDef="let row;">
+                            <div class="py-1">
+                                <strong class="text-primary">{{ row.servicio || 'Cotización de Servicio' }}</strong>
+                                <div class="small text-muted" *ngIf="row.tipo_hospedaje || row.paquete">
+                                    {{ row.tipo_hospedaje }} <span *ngIf="row.paquete">- {{ row.paquete }}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Cant. Adulto -->
                     <ng-container matColumnDef="cantidad_adulto">
                         <th mat-header-cell *matHeaderCellDef style="width: 80px;" class="text-center">Cant. Ad.</th>
-                        <td mat-cell *matCellDef="let row; let i = index;" class="text-center">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1 cell-input">
-                                <input type="number" matInput min="0" [(ngModel)]="row.cantidad_adulto"
-                                    [name]="'cant_ad_' + i" (input)="calcularSubtotal(row)" required class="text-center">
-                            </mat-form-field>
+                        <td mat-cell *matCellDef="let row;" class="text-center fw-semibold">
+                            {{ row.cantidad_adulto }}
                         </td>
                     </ng-container>
 
-                    <!-- Columna Precio Adulto -->
+                    <!-- P.U. Adulto -->
                     <ng-container matColumnDef="precio_unit_adulto">
                         <th mat-header-cell *matHeaderCellDef style="width: 100px;" class="text-end">P.U. Adulto</th>
-                        <td mat-cell *matCellDef="let row; let i = index;" class="text-end">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1 cell-input">
-                                <input type="number" step="0.01" min="0" matInput [(ngModel)]="row.precio_unit_adulto"
-                                    [name]="'pu_ad_' + i" (input)="calcularSubtotal(row)" required class="text-end">
-                            </mat-form-field>
+                        <td mat-cell *matCellDef="let row;" class="text-end">
+                            Bs. {{ row.precio_unit_adulto | number:'1.2-2' }}
                         </td>
                     </ng-container>
 
-                    <!-- Columna Cantidad Niño -->
+                    <!-- Cant. Niño -->
                     <ng-container matColumnDef="cantidad_ninio">
                         <th mat-header-cell *matHeaderCellDef style="width: 80px;" class="text-center">Cant. Niñ.</th>
-                        <td mat-cell *matCellDef="let row; let i = index;" class="text-center">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1 cell-input">
-                                <input type="number" min="0" matInput [(ngModel)]="row.cantidad_ninio"
-                                    [name]="'cant_ni_' + i" (input)="calcularSubtotal(row)" class="text-center">
-                            </mat-form-field>
+                        <td mat-cell *matCellDef="let row;" class="text-center">
+                            {{ row.cantidad_ninio || 0 }}
                         </td>
                     </ng-container>
 
-                    <!-- Columna Precio Niño -->
+                    <!-- P.U. Niño -->
                     <ng-container matColumnDef="precio_unit_ninio">
                         <th mat-header-cell *matHeaderCellDef style="width: 100px;" class="text-end">P.U. Niño</th>
-                        <td mat-cell *matCellDef="let row; let i = index;" class="text-end">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1 cell-input">
-                                <input type="number" step="0.01" min="0" matInput [(ngModel)]="row.precio_unit_ninio"
-                                    [name]="'pu_ni_' + i" (input)="calcularSubtotal(row)" class="text-end">
-                            </mat-form-field>
+                        <td mat-cell *matCellDef="let row;" class="text-end">
+                            Bs. {{ row.precio_unit_ninio | number:'1.2-2' }}
                         </td>
                     </ng-container>
 
-                    <!-- Columna Subtotal -->
+                    <!-- Subtotal -->
                     <ng-container matColumnDef="subtotal">
-                        <th mat-header-cell *matHeaderCellDef style="width: 105px;" class="text-end">Subtotal</th>
-                        <td mat-cell *matCellDef="let row;" class="text-end fw-bold pe-2 text-primary"
-                            style="font-size: 14px;">
-                            {{ row.subtotal | number:'1.2-2' }}
+                        <th mat-header-cell *matHeaderCellDef style="width: 110px;" class="text-end">Subtotal</th>
+                        <td mat-cell *matCellDef="let row;" class="text-end fw-bold pe-2 text-primary" style="font-size: 14px;">
+                            Bs. {{ row.subtotal | number:'1.2-2' }}
                         </td>
                     </ng-container>
 
-                    <!-- Fila No Data -->
+                    <!-- No Data -->
                     <tr *matNoDataRow>
                         <td [attr.colspan]="displayedColumns.length" class="text-center py-3 text-muted">
-                            No hay items agregados en el detalle.
+                            No hay tarifas agregadas. Usa el panel superior para agregar.
                         </td>
                     </tr>
 
                     <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    <tr mat-row *matRowDef="let row; let i = index; columns: displayedColumns;" [class.table-warning]="editandoIndex === i"></tr>
                 </table>
             </div>
 

@@ -62,12 +62,27 @@
                         </td>
                     </ng-container>
 
-                    <!-- Columna Documento -->
-                    <ng-container matColumnDef="documento">
-                        <th mat-header-cell *matHeaderCellDef>Documento</th>
+                    <!-- Columna Teléfono -->
+                    <ng-container matColumnDef="telefono">
+                        <th mat-header-cell *matHeaderCellDef>Teléfono</th>
                         <td mat-cell *matCellDef="let x">
-                            <span *ngIf="x.dni">{{ x.tipo_doc ? x.tipo_doc + ': ' : '' }}{{ x.dni }}</span>
-                            <span *ngIf="!x.dni" class="text-muted">-</span>
+                            <span>{{ x.telefono || '-' }}</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Tipo Documento -->
+                    <ng-container matColumnDef="tipo_doc">
+                        <th mat-header-cell *matHeaderCellDef>Tipo Doc.</th>
+                        <td mat-cell *matCellDef="let x">
+                            <span>{{ x.tipo_doc || '-' }}</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Nro Documento / DNI -->
+                    <ng-container matColumnDef="dni">
+                        <th mat-header-cell *matHeaderCellDef>Nro. Doc.</th>
+                        <td mat-cell *matCellDef="let x">
+                            <span>{{ x.dni || '-' }}</span>
                         </td>
                     </ng-container>
 
