@@ -140,7 +140,6 @@
                                         <div class="d-flex flex-column py-1 w-100" style="line-height: 1.3;">
                                             <div class="text-truncate">
                                                 <strong class="text-primary">{{ t.servicio }}</strong>
-                                                <span *ngIf="t.paquete" class="text-secondary"> - {{ t.paquete }}</span>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center mt-1 text-nowrap gap-2">
                                                 <small class="text-muted text-truncate">{{ t.tipo_hospedaje }}</small>
@@ -230,8 +229,8 @@
                         <div class="item-card-header d-flex justify-content-between align-items-start p-2 border-bottom bg-light">
                             <div class="pe-2">
                                 <strong class="text-primary d-block">{{ item.servicio || 'Cotización de Servicio' }}</strong>
-                                <small class="text-muted" *ngIf="item.tipo_hospedaje || item.paquete">
-                                    {{ item.tipo_hospedaje }} <span *ngIf="item.paquete">• {{ item.paquete }}</span>
+                                <small class="text-muted" *ngIf="item.tipo_hospedaje">
+                                    {{ item.tipo_hospedaje }}
                                 </small>
                             </div>
                             <div class="d-flex gap-1 flex-shrink-0">
@@ -289,8 +288,8 @@
                         <td mat-cell *matCellDef="let row;">
                             <div class="py-1">
                                 <strong class="text-primary">{{ row.servicio || 'Cotización de Servicio' }}</strong>
-                                <div class="small text-muted" *ngIf="row.tipo_hospedaje || row.paquete">
-                                    {{ row.tipo_hospedaje }} <span *ngIf="row.paquete">- {{ row.paquete }}</span>
+                                <div class="small text-muted" *ngIf="row.tipo_hospedaje">
+                                    {{ row.tipo_hospedaje }}
                                 </div>
                             </div>
                         </td>
