@@ -216,56 +216,8 @@
                 </div>
             </div>
 
-            <!-- LISTA DE ITEMS: MODO MOVIL (CARDS) (d-block d-md-none) -->
-            <div class="d-block d-md-none mobile-items-container mb-3">
-                @if (detalles.length === 0) {
-                    <div class="text-center py-3 px-3 bg-light rounded border text-muted">
-                        <mat-icon style="font-size: 28px; width: 28px; height: 28px;" class="text-secondary opacity-50 mb-1">receipt_long</mat-icon>
-                        <p class="mb-0 small">No hay tarifas agregadas. Usa el formulario de arriba y presiona <strong>"Agregar Ítem"</strong>.</p>
-                    </div>
-                }
-                @for (item of detalles; track $index) {
-                    <div class="item-card shadow-sm border rounded mb-2 bg-white" [class.border-primary]="editandoIndex === $index">
-                        <div class="item-card-header d-flex justify-content-between align-items-start p-2 border-bottom bg-light">
-                            <div class="pe-2">
-                                <strong class="text-primary d-block">{{ item.servicio || 'Cotización de Servicio' }}</strong>
-                                <small class="text-muted" *ngIf="item.tipo_hospedaje">
-                                    {{ item.tipo_hospedaje }}
-                                </small>
-                            </div>
-                            <div class="d-flex gap-1 flex-shrink-0">
-                                <button mat-icon-button type="button" class="btn-sm-action text-primary" (click)="editarItem($index)" matTooltip="Editar">
-                                    <mat-icon style="font-size: 18px;">edit</mat-icon>
-                                </button>
-                                <button mat-icon-button type="button" class="btn-sm-action text-danger" (click)="eliminarItem($index)" matTooltip="Eliminar">
-                                    <mat-icon style="font-size: 18px;">delete</mat-icon>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="item-card-body p-2">
-                            <div class="row g-1 small text-dark mb-2">
-                                <div class="col-6" *ngIf="item.cantidad_adulto > 0 || item.precio_unit_adulto > 0">
-                                    <span class="text-muted d-block" style="font-size: 11px;">Adultos:</span>
-                                    <span class="fw-semibold">{{ item.cantidad_adulto }} x Bs. {{ item.precio_unit_adulto | number:'1.2-2' }}</span>
-                                </div>
-                                <div class="col-6" *ngIf="item.cantidad_ninio > 0 || item.precio_unit_ninio > 0">
-                                    <span class="text-muted d-block" style="font-size: 11px;">Niños:</span>
-                                    <span class="fw-semibold">{{ item.cantidad_ninio }} x Bs. {{ item.precio_unit_ninio | number:'1.2-2' }}</span>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center pt-1 border-top">
-                                <span class="text-muted small fw-semibold">Subtotal:</span>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-2 py-1 fw-bold">
-                                    Bs. {{ item.subtotal | number:'1.2-2' }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <!-- LISTA DE ITEMS: MODO ESCRITORIO (TABLA) (d-none d-md-block) -->
-            <div class="d-none d-md-block table-responsive border rounded bg-white shadow-sm mb-2">
+            <!-- LISTA DE ITEMS: TABLA RESPONSIVA -->
+            <div class="table-responsive border rounded bg-white shadow-sm mb-2">
                 <table mat-table [dataSource]="dataSource" class="w-100 tabla-detalle">
                     <!-- Acciones -->
                     <ng-container matColumnDef="acciones">
@@ -342,14 +294,14 @@
                         </td>
                     </tr>
 
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                     <tr mat-row *matRowDef="let row; let i = index; columns: displayedColumns;" [class.table-warning]="editandoIndex === i"></tr>
                 </table>
             </div>
 
             <!-- RESUMEN / TOTAL GENERAL -->
-            <div class="d-flex justify-content-end align-items-center px-3 py-2 bg-light border rounded mb-1 total-container">
-                <span class="fs-6 me-2 fw-bold text-dark">TOTAL COTIZACIÓN:</span>
+            <div class="d-flex justify-content-end align-items-center px-4 py-2 border rounded total-container">
+                <span class="fs-6 me-2 fw-bold" style="color: #0a4260;">TOTAL COTIZACIÓN:</span>
                 <span class="fs-5 fw-bold text-primary">Bs. {{ totalGeneral | number:'1.2-2' }}</span>
             </div>
         </div>
