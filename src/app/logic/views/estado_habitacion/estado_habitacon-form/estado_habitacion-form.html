@@ -1,0 +1,27 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+      HABITACIONES
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+      </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-1 px-0 pt-2">
+        <mat-form-field class="col">
+            <mat-label>Estado Habitacion</mat-label>
+            <mat-select placeholder="" [(ngModel)]="habitacion.estado_habitacion_id" name="estado_habitacion_id" #cboEstadoHabitacion appPreventEnterSelect required>
+                @for (x of estado_habitaciones;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner  diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+
+</form>
+

@@ -1,0 +1,20 @@
+<div class="stats-grid">
+  @for (card of cards; track card.title) {    
+    <div class="stat-card user-select-none" 
+         [style.cursor]="card.action ? 'pointer' : 'default'"
+         (click)="card.action?.()"
+         role="button">
+        <ng-container *ngTemplateOutlet="cardContent; context: { $implicit: card }"></ng-container>
+    </div>
+  }
+</div>
+
+<ng-template #cardContent let-card>
+  <div class="icon-circle" [style.background-color]="card.bg" [style.color]="card.iconColor">
+    <mat-icon>{{card.icon}}</mat-icon>
+  </div>
+  <div class="content">
+    <div class="value">{{card.value}}</div>
+    <div class="title">{{card.title}}</div>
+  </div>
+</ng-template>

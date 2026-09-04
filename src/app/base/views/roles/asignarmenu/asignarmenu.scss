@@ -1,0 +1,88 @@
+  
+li {
+  list-style-type: none;
+  margin: 0;  
+  padding: 5px 5px 5px 20px;
+  position: relative;
+}
+
+li::before,
+li::after {
+  content: '';
+  left: -20px;
+  position: absolute;
+  right: auto;
+}
+
+li::before {
+  border-left: 2px solid #f505ed;
+  bottom: 50px;
+  height: 100%;
+  top: -10px;
+  width: 1px;
+  content: "";
+}
+
+li::after {
+  border-top: 2px solid #f505ed;
+  height: 25px;
+  top: 25px;
+  width: 40px;
+  content: "";
+}
+
+li:last-child::before {
+  height: 35px
+}
+
+
+.dialog-content>ul>li::before,
+.dialog-content>ul>li::after {
+    border: 0
+}
+
+li>span {
+  color: blue;
+  background: white;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: 2px solid blue;
+  border-radius: 3px;
+  display: inline-block;
+  padding: 2px 5px;
+  margin-right: 5px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+li>span:hover {
+  background: yellow;
+  color: blue;
+  border: 2px solid blue;
+}
+
+ul ul {
+  transition: max-height 0.3s ease-out;
+  overflow: hidden;
+  height: 0px; /* Escondido por defecto */
+}
+
+ul ul.show {
+  transition: max-height 0.4s ease-in;
+  height: auto; /* Ajusta este valor según el contenido del <ul> */
+}
+
+// ::ng-deep .mat-mdc-checkbox {
+//   height: 24px; /* Ajusta esta altura según tus necesidades */
+//   line-height: 24px; /* Ajusta esta línea de altura para alinear el contenido correctamente */
+// }
+
+// :host {
+//   ::ng-deep .mat-mdc-checkbox .mdc-checkbox .mdc-checkbox__ripple {
+//     display: none;
+//   }
+
+//   ::ng-deep .mat-mdc-checkbox .mdc-checkbox__native-control:focus-visible {
+//     outline: none;
+//   }
+// }

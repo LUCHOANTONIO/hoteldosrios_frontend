@@ -1,0 +1,28 @@
+<h3 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="bg-primary text-white">
+    Ir a Fecha
+</h3>
+
+<mat-dialog-content class="mat-typography d-flex flex-column alignment-stretch pt-3">    
+    <mat-form-field class="w-100">
+        <mat-label>Selecciona la Fecha</mat-label>
+        <input matInput 
+               [matDatepicker]="picker_ir_fecha"  
+               [(ngModel)]="fechaSeleccionada" 
+               name="fecha_nav" 
+               required 
+               readonly>           
+        <mat-datepicker-toggle matIconSuffix [for]="picker_ir_fecha"></mat-datepicker-toggle>
+        <mat-datepicker #picker_ir_fecha></mat-datepicker>
+    </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions class="d-flex justify-content-around bg-light p-2">
+    <button mat-raised-button mat-dialog-close color="accent">Cancelar</button>
+    <button mat-raised-button 
+            [mat-dialog-close]="fechaSeleccionada" 
+            [disabled]="!fechaSeleccionada" 
+            color="primary" 
+            cdkFocusInitial>
+        Aceptar
+    </button>
+</mat-dialog-actions>

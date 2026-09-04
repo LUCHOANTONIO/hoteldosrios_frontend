@@ -1,0 +1,69 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+      REGISTRAR EGRESO
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+      </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography row px-0 pt-2">
+
+        <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+            <mat-label>Cuentas</mat-label>
+            <mat-select placeholder="" [(ngModel)]="egreso.cuenta_id" name="cuenta_id" #cboCuenta (keydown.enter)="txtMonto.focus()" appPreventEnterSelect required>
+                @for (x of cuentas;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field> 
+
+        <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+            <mat-label>Fecha</mat-label>
+            <input matInput [matDatepicker]="picker"  [(ngModel)]="egreso.fecha" name="fecha_ini"  #txtFecha required>           
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+         <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+            <mat-label>Agencia</mat-label>
+            <mat-select placeholder="" [(ngModel)]="egreso.agencia_id" name="agencia_id" #cboAgencia appPreventEnterSelect (keydown.enter)="txtCantidad.focus()" required>
+                @for (x of agencias;track $index) {
+                    <mat-option [value]="x.id">{{x.nombre}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>        
+        
+        <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">                       
+            <mat-label>Cantidad</mat-label>
+            <input type="number" matInput min="0" placeholder="" [(ngModel)]="egreso.cantidad" name="cantidad" #txtCantidad (keydown)="bloquearNegativos($event)" required>              
+        </mat-form-field>
+
+        <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">                       
+            <mat-label>Monto Total</mat-label>
+            <input type="number" matInput min="0" placeholder="" [(ngModel)]="egreso.monto" name="monto" #txtMonto (keydown)="bloquearNegativos($event)" required>              
+        </mat-form-field>
+
+        <mat-form-field class="col-6">
+            <mat-label>Forma de Pago</mat-label>
+            <mat-select [(ngModel)]="egreso.forma_pago_id" name="forma_pago_id" #cboFormaPago (keydown.enter)="txtMonto.focus()" appPreventEnterSelect required>
+                @for (x of forma_pagos;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+        
+        <mat-form-field class="col-12">
+           <mat-label>Descripcion</mat-label>
+           <input matInput placeholder="" [(ngModel)]="egreso.detalle" name="detalle" #txtDetalle required>
+        </mat-form-field>
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner  diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+
+</form>
+

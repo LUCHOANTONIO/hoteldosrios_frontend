@@ -1,0 +1,137 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco
+    [dialogRef]="dialogRef">
+
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle
+        class="text-bg-dark dialog-header">
+        COBRAR
+        <button mat-icon-button (click)="cerrarVentana()" type="button">
+            <mat-icon style="color:white">close</mat-icon>
+        </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography row px-0 pt-2">
+
+        <!-- BARRA RESUMEN -->
+        <div class="col-12 mb-3">
+            <div class="d-flex justify-content-between p-2 rounded text-white shadow-sm"
+                style="background-color: #0f4c75;">
+                <div class="text-center">
+                    <small>Total Deuda</small><br>
+                    <strong>{{monto_total | number:'1.2-2'}}</strong>
+                </div>
+                <div class="text-center">
+                    <small>Pagado</small><br>
+                    <strong>{{total_pagado | number:'1.2-2'}}</strong>
+                </div>
+                <div class="text-center text-warning">
+                    <small>Saldo</small><br>
+                    <strong>{{saldo_pendiente | number:'1.2-2'}}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA DE TABLA (LISTA DE PAGOS) -->
+        @if (!mostrandoFormulario) {
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                <h5 class="text-secondary m-0">Historial de Pagos</h5>
+                <button type="button" mat-icon-button class="bg-success text-white" (click)="nuevoPago()"
+                    [disabled]="saldo_pendiente <= 0" matTooltip="Añadir Pago">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+
+            @if (pagos.length > 0) {
+            <div class="table-responsive mat-elevation-z2">
+                <table mat-table [dataSource]="dataSource" class="w-100">
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef style="width: 100px;">Acciones</th>
+                        <td mat-cell *matCellDef="let x">
+                            <button type="button" mat-icon-button class="text-primary" (click)="editarPago(x)"
+                                matTooltip="Editar">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button type="button" mat-icon-button class="text-danger" (click)="eliminarPago(x)"
+                                matTooltip="Eliminar">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                        <td mat-cell *matCellDef="let x">{{x.fecha}}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="detalle">
+                        <th mat-header-cell *matHeaderCellDef>Detalle</th>
+                        <td mat-cell *matCellDef="let x">{{x.detalle}}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="forma_pago">
+                        <th mat-header-cell *matHeaderCellDef>Forma Pago</th>
+                        <td mat-cell *matCellDef="let x">{{x.forma_pago}}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="monto">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: right;">Monto</th>
+                        <td mat-cell *matCellDef="let x" style="text-align: right;">{{x.monto}}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-light"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+            } @else {
+            <div class="text-center p-3 text-muted">
+                No hay pagos registrados para esta deuda.
+            </div>
+            }
+        </div>
+        }
+
+        <!-- FORMULARIO DE PAGO -->
+        @if (mostrandoFormulario) {
+        <div class="col-12 row m-0">
+            <div class="col-12 mb-2">
+                <h5 class="text-primary m-0 border-bottom pb-2">{{ pagoEditadoId ? 'Editar Pago' : 'Registrar Nuevo
+                    Pago' }}</h5>
+            </div>
+            <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <mat-label>Monto</mat-label>
+                <input type="number" matInput min="0" placeholder="" [(ngModel)]="cuentaCobrar.monto" name="monto"
+                    #txtMonto (keypress)="bloquearNegativos($event)" required>
+            </mat-form-field>
+
+            <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <mat-label>Forma de Pago</mat-label>
+                <mat-select [(ngModel)]="cuentaCobrar.forma_pago_id" name="forma_pago_id" #cboFormaPago
+                    (keydown.enter)="txtMonto.focus()" appPreventEnterSelect required>
+                    @for (x of forma_pagos;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="col-12">
+                <mat-label>Descripcion</mat-label>
+                <input matInput placeholder="" [(ngModel)]="cuentaCobrar.detalle" name="detalle" #txtDetalle required>
+            </mat-form-field>
+        </div>
+        }
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        @if (!mostrandoFormulario) {
+        <button type="button" mat-raised-button class="bg-primary text-white" (click)="cerrarVentana()">Cerrar</button>
+        }
+
+        @if (mostrandoFormulario) {
+        <button type="button" mat-raised-button (click)="cancelarPago()">Cancelar</button>
+        <button type="submit" mat-raised-button class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon
+                class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon> Guardar </button>
+        }
+    </mat-dialog-actions>
+
+</form>

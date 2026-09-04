@@ -1,0 +1,119 @@
+<mat-card class="my-1" appearance="outlined">
+    <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center;">
+        <!--padding:5px ajusta el tamaño del card header-->
+        <div style="display: flex; align-items: center; flex: 1;">
+            <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
+                CUENTAS POR COBRAR
+            </mat-card-title>
+        </div>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto; width: 400px;">
+            <mat-label style="font-size: 14px;">Texto búsqueda</mat-label>
+            <input matInput type="search" placeholder="" (keydown.enter)="busqueda(txtBusqueda.value)" #txtBusqueda>
+            <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusqueda.value)"
+                style="padding: 0;">
+                <mat-icon>search</mat-icon>
+            </button>
+        </mat-form-field>
+    </mat-card-header>
+
+    <mat-card-content class="bg-white p-0">
+        <div class="mat-elevation-z8">
+            <div class="table-responsive">
+                <table mat-table [dataSource]="dataSource">
+
+                    <!-- Fila para mostrar "No hay datos disponibles" -->
+                    <tr *matNoDataRow>
+                        <td [attr.colspan]="displayedColumns.length" class="text-center" style="font-size:18px;">
+                            No hay datos disponibles
+                        </td>
+                    </tr>
+
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                        <td mat-cell *matCellDef="let x; let i = index">
+                            <button mat-raised-button (click)="mostrarFormularioPagar(x)" color="primary" style="border-radius: 20px;">
+                                <mat-icon>payments</mat-icon> Cobrar
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="documento">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: center;">Documento</th>
+                        <td mat-cell *matCellDef="let x" style="text-align: center;">
+                            <button mat-icon-button (click)="mostrarVisorPdf(x.id)" title="Imprimir Comprobante">
+                                <mat-icon style="color: #f44336;">picture_as_pdf</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="id">
+                        <th mat-header-cell *matHeaderCellDef>Id </th>
+                        <td mat-cell *matCellDef="let x"> {{x.id}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="reserva_id">
+                        <th mat-header-cell *matHeaderCellDef>Reserva Id</th>
+                        <td mat-cell *matCellDef="let x"> {{x.reserva_id}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="correlativo">
+                        <th mat-header-cell *matHeaderCellDef>Nro. Reserva</th>
+                        <td mat-cell *matCellDef="let x"> {{x.correlativo}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="nro_habitacion">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: center;">Nro. Hab.</th>
+                        <td mat-cell *matCellDef="let x" style="text-align: center;"> {{x.nro_habitacion}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                        <td mat-cell *matCellDef="let x"> {{x.fecha}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="cliente">
+                        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                        <td mat-cell *matCellDef="let x"> {{x.cliente}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="detalle">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: left;">Detalle</th>
+                        <td mat-cell *matCellDef="let x"> {{x.detalle}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="monto">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: right;">Crédito</th>
+                        <td mat-cell *matCellDef="let x" style="text-align: right;">
+                            {{ x.monto }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="pago">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: right;">Pagado</th>
+                        <td mat-cell *matCellDef="let x" style="text-align: right;">
+                            {{ x.pago }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="saldo">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: right;">Saldo</th>
+                        <td mat-cell *matCellDef="let x" style="text-align: right;">
+                            <div style="display: flex; align-items: center; justify-content: flex-end;">
+                                {{ x.saldo }}
+                                <mat-icon style="margin-left: 8px; color: #4caf50;">money</mat-icon>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" id="fila{{row.id}}"></tr>
+
+                </table>
+            </div>
+            <mat-divider></mat-divider>
+            <mat-paginator [pageSizeOptions]="[5, 10, 20]" [pageSize]="20" showFirstLastButtons class="bg-light">
+            </mat-paginator>
+        </div>
+    </mat-card-content>
+</mat-card>

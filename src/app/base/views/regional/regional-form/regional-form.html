@@ -1,0 +1,31 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+      REGIONAL
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+      </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-2 px-0 pt-2">
+        <mat-form-field class="col">
+            <mat-label>Nombre</mat-label>
+            <input matInput placeholder="" [(ngModel)]="regional.nombre" name="nombre" #txtNombre (keydown.enter)="txtObservacion.focus()" required cdkFocusInitial>
+            <!-- <mat-icon matSuffix>face</mat-icon> -->
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Observación</mat-label>
+            <input matInput placeholder="" [(ngModel)]="regional.observacion" name="observacion" #txtObservacion required cdkFocusInitial>
+            <!-- <mat-icon matSuffix>face</mat-icon> -->
+        </mat-form-field>
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner  diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+
+</form>
+

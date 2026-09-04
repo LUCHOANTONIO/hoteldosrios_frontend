@@ -1,0 +1,67 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+      HABITACIONES
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+      </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-2 px-0 pt-2">
+
+        <mat-form-field class="col">
+            <mat-label>Tipo Habitacion</mat-label>
+            <mat-select placeholder="" [(ngModel)]="habitacion.tipo_habitacion_id" name="tipo_habitacion_id" #cboTipoHabitacion (keydown.enter)="txtDescripcion.focus()" appPreventEnterSelect required>
+                @for (x of tipo_habitaciones;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <!-- <mat-form-field class="col">
+            <mat-label>Estado Habitacion</mat-label>
+            <mat-select placeholder="" [(ngModel)]="habitacion.estado_habitacion_id" name="estado_habitacion_id" #cboEstadoHabitacion (keydown.enter)="txtDescripcion.focus()" appPreventEnterSelect required>
+                @for (x of estado_habitaciones;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field> -->
+
+        <mat-form-field class="col">
+            <mat-label>Agencia</mat-label>
+            <mat-select placeholder="" [(ngModel)]="habitacion.agencia_id" name="agencia_id" #cboAgencia required>
+                @for (v_agencia of agencias;track $index) {
+                    <mat-option [value]="v_agencia.id">{{v_agencia.nombre}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field> 
+
+        <mat-form-field class="col">
+            <mat-label>Nombre Habitacion</mat-label>
+            <input matInput placeholder="" [(ngModel)]="habitacion.descripcion" name="descripcion" #txtDescripcion (keydown.enter)="txtNumHabitacion.focus()" required>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Num. Habitacion</mat-label>
+            <input matInput placeholder="" [(ngModel)]="habitacion.nro_habitacion" name="nro_habitacion" #txtNumHabitacion (keydown.enter)="txtPiso.focus()" required>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Piso</mat-label>
+            <input matInput placeholder="" [(ngModel)]="habitacion.piso" name="piso" #txtPiso (keydown.enter)="txtPrecio.focus()" required>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Precio</mat-label>
+            <input type="number" matInput placeholder="" [(ngModel)]="habitacion.precio" name="precio" #txtPrecio required>
+        </mat-form-field>
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner  diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+
+</form>
+

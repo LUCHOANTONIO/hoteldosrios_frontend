@@ -1,0 +1,77 @@
+<div class="disponibilidad-wrapper">
+  <header class="page-header">
+    <div class="header-title-container">
+      <div class="header-icon">
+        <mat-icon color="primary">grid_on</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Disponibilidad de Habitaciones</h1>
+      </div>
+    </div>
+
+    <div class="date-controls">
+      <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 160px;">
+        <mat-label>Fecha</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="fecha_filter" (dateChange)="cargarDatos()" readonly>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" style="border-radius: 6px; height: 44px; margin-left: 8px;"
+        (click)="cargarDatos()" matTooltip="Refrescar">
+        <mat-icon>refresh</mat-icon> Refrescar
+      </button>
+    </div>
+  </header>
+
+  <main class="rooms-container">
+    @for (piso of pisos; track piso) {
+    <div class="floor-section">
+      <div class="matrix-grid">
+        @for (habitacion of habitacionesPorPiso[piso]; track habitacion.habitacion_id) {
+        <div class="room-card" [class.is-occupied]="habitacion.cliente"
+          [class.status-disponible]="habitacion.estado === 'Disponible'"
+          [class.status-reserva]="habitacion.estado === 'Reserva'" [class.status-checkin]="habitacion.estado === 'Check In'"
+          [class.status-permanencia]="habitacion.estado === 'Permanencia'">
+
+          <div class="room-header">
+            <span class="room-num">{{ habitacion.nro_habitacion }} {{ habitacion.tipo_habitacion }}</span>
+          </div>
+
+          <div class="room-body">
+            @if (habitacion.cliente) {
+            <div class="guest-info">
+              <div class="guest-name">{{ habitacion.cliente }}</div>
+              <div class="dates">
+                <div class="date-line"><span class="label">ENTRADA:</span> {{ formatFechaSimple(habitacion.fecha_ini) }}
+                </div>
+                <div class="date-line"><span class="label">SALIDA:</span> {{ formatFechaSimple(habitacion.fecha_fin) }}
+                </div>
+              </div>
+            </div>
+            <div class="status-footer">
+              <span class="status-badge">{{ habitacion.estado | uppercase }}</span>
+            </div>
+            } @else {
+            <div class="empty-state">
+              <div class="empty-lines">
+                <div class="dot-line"></div>
+                <div class="dot-line"></div>
+              </div>
+              <div class="dates empty-dates">
+                <div class="date-line"><span class="label">ENTRADA:</span> </div>
+                <div class="date-line"><span class="label">SALIDA:</span> </div>
+              </div>
+              <div class="add-btn-overlay">
+                <mat-icon>add_circle</mat-icon>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </main>
+</div>

@@ -1,0 +1,103 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+      HABITACIONES ALTERNAS
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+      </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography row px-0 pt-2">            
+
+        <div class="mat-elevation-z8">                            
+              <div class="table-responsive">
+                  <table mat-table [dataSource]="dataSource">
+                    
+                      <ng-container matColumnDef="actions">
+                          <th mat-header-cell *matHeaderCellDef style="text-align: left; vertical-align: middle;">
+                            <div style="display: flex; align-items: center;">
+                              <button mat-icon-button (click)="adicionarFila()" type="button" [class.bg-success]=true [class.text-black]=true>
+                                <mat-icon>add</mat-icon>
+                              </button>
+                              <span style="margin-left: 8px;">Acciones</span>
+                            </div>
+                          </th>
+                          <td mat-cell *matCellDef="let x; let row; let i=index;">
+                            <button mat-icon-button (click)="eliminar('0ms', '0ms',x)" type="button" class="text-danger">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </td>                      
+                      </ng-container>                                    
+
+                      <ng-container matColumnDef="id">
+                          <th mat-header-cell *matHeaderCellDef>Id </th>
+                          <td mat-cell *matCellDef="let x"> {{x.id}} </td>                      
+                      </ng-container>
+
+                      <ng-container matColumnDef="habtacion_id">
+                          <th mat-header-cell *matHeaderCellDef>habitacion ID</th>
+                          <td mat-cell *matCellDef="let x"> {{x.habtacion_id}} </td>                      
+                      </ng-container>                    
+                                          
+                      <ng-container matColumnDef="tipo_habitacion">
+                        <th mat-header-cell *matHeaderCellDef>Tipo Habitacion</th>
+                        <td mat-cell *matCellDef="let x; let i = index" style="padding-top: 8px;">
+                          <mat-form-field appearance="outline" style="width: 100%;">
+                            <mat-select [(ngModel)]="x.tipo_habitacion_id" name="tipo_habitacion_id{{i}}" required>
+                              @for (th of tipo_habitaciones; track th.id) {
+                                <mat-option [value]="th.id">
+                                  {{ th.descripcion }}
+                                </mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
+                        </td>                       
+                      </ng-container>  
+                      
+                      <ng-container matColumnDef="precio">
+                        <th mat-header-cell *matHeaderCellDef>Precio</th>
+                        <td mat-cell *matCellDef="let x; let i = index" style="padding-top: 8px;">
+                          <mat-form-field appearance="outline" style="width: 100%;">
+                            <input matInput type="number" [(ngModel)]="x.precio" name="precio{{i}}" required placeholder="0">
+                          </mat-form-field>
+                        </td>                    
+                      </ng-container>
+
+                      <ng-container matColumnDef="estado">
+                        <th mat-header-cell *matHeaderCellDef>Estado</th>
+                        <td mat-cell *matCellDef="let x; let i = index" style="padding-top: 8px;">
+                          <mat-form-field appearance="outline" style="width: 100%;">
+                            <input matInput [(ngModel)]="x.estado" name="estado{{i}}">
+                          </mat-form-field>
+                        </td>                    
+                      </ng-container> 
+                                        
+                      <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>                      
+                      <tr mat-row *matRowDef="let row; columns: displayedColumns;" [id]="'fila' + row.id" [hidden]="row.estado === 'eliminado'"></tr>                      
+
+                  </table>
+              </div>
+              <mat-divider></mat-divider>
+              
+        </div>        
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner  diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+
+</form>
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+

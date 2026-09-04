@@ -1,0 +1,55 @@
+
+.timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+  
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    margin-bottom: 20px;
+  }
+  
+  .timeline-line {
+    position: absolute;
+    left: 19px; /* Ajusta según el tamaño del punto */
+    top: 24px; /* Ajusta para alinear con el contenido */
+    bottom: 0;
+    width: 2px;
+    background-color: #ccc;
+  }
+  
+  .timeline-dot {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // background-color: green;
+    background-color: rgb(37, 174, 76);
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .timeline-dot mat-icon {
+    color: white; /* Color del icono */ 
+  }
+  
+  .timeline-content {
+    margin-left: 20px; /* Espacio entre el punto y el contenido */
+    flex: 1; /* Ocupa el espacio restante */
+    background-color: #e8efea; /* Color celeste agua */
+    padding: 16px; /* Añade un poco de padding para que el contenido no esté pegado a los bordes */
+    border-radius: 8px; /* Bordes redondeados para un aspecto más suave */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera para dar profundidad */
+  }
+  
+  .descripcion {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    margin: 0;
+  }

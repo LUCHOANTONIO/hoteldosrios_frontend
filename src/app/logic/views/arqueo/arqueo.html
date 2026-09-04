@@ -1,0 +1,155 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco
+  [dialogRef]="dialogRef">
+
+  <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle
+    class="text-bg-dark dialog-header d-flex justify-content-between align-items-center mb-0">
+    <span class="fs-5 fw-bold"><mat-icon class="align-middle me-2">point_of_sale</mat-icon> ARQUEO DE CAJA</span>
+    <button mat-icon-button mat-dialog-close class="btn-close-custom">
+      <mat-icon style="color:white">close</mat-icon>
+    </button>
+  </h1>
+
+  <mat-dialog-content class="mat-typography row px-0 pt-2">
+
+    <mat-form-field appearance="outline" class="col-12 col-md-4 mb-1">
+      <mat-label>Fecha</mat-label>
+      <input matInput placeholder="" [(ngModel)]="arqueo.fecha" name="fecha" #txtFecha readonly>
+      <mat-icon matSuffix class="text-secondary">calendar_today</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="col-12 col-md-8 mb-1">
+      <mat-label>Descripción</mat-label>
+      <input matInput placeholder="Ej. Cierre de turno" [(ngModel)]="arqueo.detalle" name="detalle" #txtDetalle
+        required>
+    </mat-form-field>
+
+    <div class="mat-elevation-z8" style="margin-top: -8px;">
+      <div class="table-responsive" style="max-height: 45vh; overflow: auto;">
+        <table mat-table [dataSource]="dataSource" style="width: 100%;">
+
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>Id </th>
+            <td mat-cell *matCellDef="let x"> {{x.id}} </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
+
+          <ng-container matColumnDef="forma_pago">
+            <th mat-header-cell *matHeaderCellDef style="width: 18%;">Forma Pago</th>
+            <td mat-cell *matCellDef="let x; let i = index" style="width: 18%;">
+              <mat-form-field appearance="outline" class="readonly-field" style="width: 100%; pointer-events: none;">
+                <mat-select [(ngModel)]="x.forma_pago_id" name="forma_pago_{{x.uid}}" required tabindex="-1"
+                  [ngClass]="{'text-primary': x.estado === 'nuevo'}">
+                  @for (te of forma_pagos; track te.id) {
+                  <mat-option [value]="te.id">
+                    {{ te.descripcion }}
+                  </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="text-end pe-3 fw-bold fs-6"> Total: </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nro_habitacion">
+            <th mat-header-cell *matHeaderCellDef style="width: 10%;">Nro. Hab.</th>
+            <td mat-cell *matCellDef="let x; let i = index" style="width: 10%;">
+              <mat-form-field appearance="outline" class="readonly-field" style="width: 100%;">
+                <input matInput [(ngModel)]="x.nro_habitacion" name="nro_habitacion_{{x.uid}}" readonly
+                  [ngClass]="{'text-primary': x.estado === 'nuevo'}">
+              </mat-form-field>
+            </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nro_personas">
+            <th mat-header-cell *matHeaderCellDef style="width: 8%;">Nro. Per.</th>
+            <td mat-cell *matCellDef="let x; let i = index" style="width: 8%;">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput [(ngModel)]="x.nro_personas" name="nro_personas_{{x.uid}}"
+                  [ngClass]="{'text-primary': x.estado === 'nuevo'}">
+              </mat-form-field>
+            </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
+
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef style="width: 12%;">Monto</th>
+            <td mat-cell *matCellDef="let x; let i = index" style="width: 12%;">
+              <mat-form-field appearance="outline" class="readonly-field" style="width: 100%;">
+                <input matInput type="number" [(ngModel)]="x.monto" name="monto_{{x.uid}}" required placeholder="0"
+                  readonly [ngClass]="{'text-primary': x.estado === 'nuevo'}">
+              </mat-form-field>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="fw-bold fs-6"> {{ getTotalSum() }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="detalle">
+            <th mat-header-cell *matHeaderCellDef style="width: 25%;">Detalle</th>
+            <td mat-cell *matCellDef="let x; let i = index" style="width: 25%;">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput [(ngModel)]="x.detalle" name="detalle_{{x.uid}}"
+                  [ngClass]="{'text-primary': x.estado === 'nuevo'}">
+              </mat-form-field>
+            </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
+
+          <ng-container matColumnDef="factura">
+            <th mat-header-cell *matHeaderCellDef style="width: 10%;">Factura</th>
+            <td mat-cell *matCellDef="let x; let i = index" style="width: 10%;">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-select [(ngModel)]="x.factura" name="factura_{{x.uid}}" required
+                  [ngClass]="{'text-primary': x.estado === 'nuevo'}">
+                  <mat-option value="SI">SI</mat-option>
+                  <mat-option value="NO">NO</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nro_factura">
+            <th mat-header-cell *matHeaderCellDef style="width: 17%;">Nro. Factura</th>
+            <td mat-cell *matCellDef="let x; let i = index" style="width: 17%;">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput [(ngModel)]="x.nro_factura" name="nro_factura_{{x.uid}}"
+                  [ngClass]="{'text-primary': x.estado === 'nuevo'}">
+              </mat-form-field>
+            </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
+
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white table-header-custom"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" [id]="'fila' + row.id"
+            [ngClass]="{'fila-nueva': row.estado === 'nuevo'}"
+            [hidden]="row.estado === 'eliminado'"></tr>
+          <tr mat-footer-row *matFooterRowDef="displayedColumns" class="footer-row"
+            [hidden]="!dataSource || !dataSource.data || dataSource.data.length === 0"></tr>
+
+        </table>
+      </div>
+      <mat-divider></mat-divider>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="d-flex justify-content-around px-4 py-3 bg-light border-top rounded-bottom">
+    <button mat-raised-button mat-dialog-close class="bg-primary text-white btn-cancelar">
+      Cancelar
+    </button>
+    <button mat-raised-button type="submit" class="bg-success text-black btn-guardar shadow-sm" appBotonGuardar
+      [form]="f" [disabled]="buttonDisabled">
+      <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>
+      Guardar
+    </button>
+
+    <div class="div" id="mnuOpciones" [hidden]="!mnuVisibleOpciones">
+      <button mat-button type="button" [matMenuTriggerFor]="menu">Opciones</button>
+      <mat-menu #menu="matMenu" [overlapTrigger]="false" yPosition="above">
+        <button mat-menu-item type="button" (click)="voucherArqueo(arqueo.id);">Voucher</button>
+      </mat-menu>
+    </div>
+
+  </mat-dialog-actions>
+
+</form>

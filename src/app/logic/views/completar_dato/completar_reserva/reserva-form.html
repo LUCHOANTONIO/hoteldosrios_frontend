@@ -1,0 +1,179 @@
+
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+    RESERVA
+    <button type="button" mat-icon-button (click)="onClose()">
+       <mat-icon style="color:white">close</mat-icon>
+    </button>
+</h1>
+
+<mat-tab-group>    
+    <form autocomplete="off" #reservaForm="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef" style="display: flex; flex-direction: column; height: 100%;">                                       
+        <mat-tab label="RESERVA">  
+            <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-2">             
+                <mat-form-field class="col">
+                    <mat-label>DNI</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="reserva.nro_documento" name="nro_documento" #txtNroDocumento (blur)="verificarNroDocumento(reserva.nro_documento)" (keydown.enter)="cboTipoDocId.focus()">
+                </mat-form-field>
+               
+        
+                <mat-form-field class="col">
+                    <mat-label>Tipo Documento</mat-label>
+                    <mat-select placeholder="" [(ngModel)]="reserva.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtNombre.focus()" appPreventEnterSelect>
+                        @for (x of tipo_documentos;track $index) {
+                            <mat-option [value]="x.id">{{x.tipo_documento}}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+        
+                <mat-form-field class="col">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="reserva.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>
+                </mat-form-field>
+        
+                <mat-form-field class="col">
+                    <mat-label>Primer Apellido</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="reserva.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()" required>
+                </mat-form-field>
+        
+                <mat-form-field class="col">
+                    <mat-label>Segundo Apellido</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="reserva.segundo_apellido" name="segundo_apellido" #txtSegundoApellido (keydown.enter)="txtTelefono.focus()">
+                </mat-form-field>
+
+                <mat-form-field class="col">
+                    <mat-label>Telefono</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="reserva.telefono" name="telefono" #txtTelefono (keydown.enter)="cboHabitacion.focus()">
+                </mat-form-field>                               
+                
+                <div class="divider-with-text">
+                    <mat-divider></mat-divider>
+                    <span class="divider-text">DATOS RESERVA</span>
+                    <mat-divider></mat-divider>
+                </div>
+    
+                <mat-form-field class="col">
+                    <mat-label>Habitacion</mat-label>
+                    <mat-select placeholder="" [(ngModel)]="reserva.habitacion_id" name="habitacion_id" #cboHabitacion (selectionChange)="onSelectionChange($event)"  (keydown.enter)="cboCanalReserva.focus()" appPreventEnterSelect required>
+                        @for (x of habitaciones;track $index) {
+                            <mat-option [value]="x.id">{{x.nro_habitacion}} {{x.descripcion}}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field> 
+        
+                <mat-form-field class="col">
+                    <mat-label>Canal Reserva</mat-label>
+                    <mat-select placeholder="" [(ngModel)]="reserva.canal_reserva_id" name="canal_reserva_id" #cboCanalReserva (keydown.enter)="cboPaisProcedencia.focus()" appPreventEnterSelect required>
+                        @for (x of canal_reservas;track $index) {
+                            <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>                
+
+                <mat-form-field>
+                    <mat-label>País de Procedencia</mat-label>
+                    <input
+                        matInput
+                        type="text"
+                        placeholder="Buscar país..."
+                        [value]="busquedaPais()"
+                        (input)="onBuscarPais($event)"                                              
+                        [matAutocomplete]="autoPais" 
+                        #cboPaisProcedencia 
+                        (keydown.enter)="txtFechaIni.focus()" 
+                        [(ngModel)]="reserva.pais_procedencia_id" name="pais_procedencia_id" required/>
+                        
+                    <mat-autocomplete
+                        #autoPais="matAutocomplete"
+                        [displayWith]="displayPais"
+                        (optionSelected)="paisSeleccionado.set($event.option.value)">
+                        @for (pais of filteredPaises(); track pais.id) {
+                            <mat-option [value]="pais.id">{{ pais.descripcion }}</mat-option>
+                        }
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <mat-form-field class="col">
+                    <mat-label>Cantidad Huesped</mat-label>
+                    <input type="number" matInput [(ngModel)]="reserva.cantidad_huesped" name="cantidad_huesped" #txtCantidadHuesped required (keydown.enter)="txtFechaFin.focus()" placeholder="0" min="1" step="1" (keydown)="bloquearNegativos($event)">
+                </mat-form-field>
+
+                <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <mat-label>Fecha Inicial</mat-label>
+                    <input matInput [matDatepicker]="picker_fecha_ini"  [(ngModel)]="reserva.fecha_ini" name="fecha_ini"  #txtFechaIni required>           
+                    <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"></mat-datepicker-toggle>
+                    <mat-datepicker #picker_fecha_ini></mat-datepicker>
+                </mat-form-field>
+                
+                <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <mat-label>Fecha Final</mat-label>
+                    <input matInput [matDatepicker]="picker_fecha_fin"  [(ngModel)]="reserva.fecha_fin" name="fecha_fin"  #txtFechaFin required>           
+                    <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin"></mat-datepicker-toggle>
+                    <mat-datepicker #picker_fecha_fin></mat-datepicker>
+                </mat-form-field>
+                
+                <mat-form-field class="col">
+                    <mat-label>Cantidad</mat-label>
+                    <input type="number" matInput placeholder="" [(ngModel)]="reserva.cantidad" name="cantidad" #txtCantidad required (ngModelChange)="calcularFechaFin()" (keydown.enter)="txtPrecioUnitario.focus()" placeholder="0" min="1" step="1" (keydown)="bloquearNegativos($event)">
+                </mat-form-field>
+        
+                <mat-form-field class="col">
+                    <mat-label>Precio Unitario</mat-label>
+                    <input type="number" matInput placeholder="" [(ngModel)]="reserva.precio_unitario" name="precio_unitario" #txtPrecioUnitario required (input)="calcularTotal()" (keydown.enter)="txtPrecioTotal.focus()" placeholder="0" min="0" (keydown)="bloquearSignosNegativos($event)">
+                </mat-form-field>
+
+                <mat-form-field class="col">
+                    <mat-label>Descuento</mat-label>
+                    <input type="number" matInput [(ngModel)]="reserva.descuento" name="descuento" #txtDescuento (input)="calcularDescuentoPorcentaje()" (keydown.enter)="txtPrecioTotal.focus()" placeholder="" min="0" (keydown)="bloquearSignosNegativos($event)">
+                    <mat-icon matSuffix style="color: #0b7dd4;">sell</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field class="col">
+                    <mat-label>Descuento %</mat-label>
+                    <input type="number" matInput [(ngModel)]="reserva.descuento_porcentaje" name="descuento_porcentaje" #txtDescuentoPorcentaje (input)="calcularDescuento()" placeholder="" min="0" (keydown)="bloquearSignosNegativos($event)">                   
+                    <mat-icon matSuffix style="color: #0b7dd4;">percent</mat-icon>
+                </mat-form-field>                
+    
+                <mat-form-field class="col">
+                    <mat-label>Precio Total</mat-label>
+                    <input type="number" matInput placeholder="" [(ngModel)]="reserva.total" name="precio_total" #txtPrecioTotal readonly required>                    
+                    <mat-icon matSuffix style="color: #0b7dd4;">payments</mat-icon>
+                </mat-form-field>                                                                         
+                                                                                                                                                   
+            </mat-dialog-content>
+
+            <br>
+
+            <mat-dialog-actions class="d-flex justify-content-around bg-light">
+                <button mat-raised-button mat-dialog-close class="bg-primary text-white">Salir</button>
+                <button mat-raised-button type="button" class="bg-success text-black" [hidden]="!btnVisibleSaveReserva" appBotonGuardar [form]="reservaForm" (click)="submitReserva(reservaForm)">
+                    <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Guardar
+                </button>                               
+            </mat-dialog-actions>
+        </mat-tab>
+    </form>
+          
+    @if (!cargando() && this.panel_visible()) {
+        <mat-tab>       
+            <ng-template mat-tab-label>
+                <mat-icon>money</mat-icon>
+            </ng-template>
+            <app-completar_pago-form [reserva]="reserva" [forma_pagos]="forma_pagos"></app-completar_pago-form>                  
+        </mat-tab>             
+
+        <mat-tab> 
+            <ng-template mat-tab-label>
+                <mat-icon>notifications</mat-icon>
+            </ng-template>
+            <app-completar_nota-form [reserva]="reserva"></app-completar_nota-form> 
+        </mat-tab>        
+    }
+                       
+</mat-tab-group>
+
+
+
+
+
+
+
+

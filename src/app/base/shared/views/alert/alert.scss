@@ -1,0 +1,14 @@
+.alert-icon {
+    font-size: 80px;
+    animation: pulse 2s infinite;
+    width: 80px;
+    height: 80px;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  
+  

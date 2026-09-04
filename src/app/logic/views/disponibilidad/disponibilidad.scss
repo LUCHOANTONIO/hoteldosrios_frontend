@@ -1,0 +1,318 @@
+.disponibilidad-wrapper {
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  background: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  .header-title-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .header-icon {
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+    }
+
+    .page-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .page-subtitle {
+      color: #64748b;
+      font-size: 13px;
+    }
+  }
+
+  .date-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.rooms-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.floor-section {
+  margin-bottom: 24px;
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.room-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  border: 1px solid #e2e8f0;
+  border-top: 4px solid #cbd5e1; /* Default top border */
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  height: 135px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+
+    .add-btn-overlay {
+      opacity: 1;
+    }
+  }
+
+  .room-header {
+    background-color: transparent;
+    padding: 10px 12px 4px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+
+    .room-num {
+      font-weight: 800;
+      font-size: 15px;
+      color: #1e293b; /* Dark slate */
+      line-height: 1;
+    }
+
+    .room-type {
+      font-size: 9px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #64748b; /* Medium slate */
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .room-body {
+    padding: 8px 12px 10px 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background-color: transparent;
+
+    .guest-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .guest-name {
+      font-size: 11px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dates {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      
+      .date-line {
+        font-size: 10px;
+        color: #475569;
+
+        .label {
+          font-weight: 700;
+          color: #94a3b8;
+          display: inline-block;
+          width: 55px;
+        }
+      }
+    }
+
+    .status-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .status-badge {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        color: #475569;
+        background-color: #f1f5f9;
+        border: 1px solid #e2e8f0;
+      }
+
+      .edit-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        color: #94a3b8;
+        transition: color 0.2s;
+      }
+    }
+
+    /* Empty state styling */
+    .empty-state {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .empty-lines {
+      margin-bottom: 6px;
+      .dot-line {
+        border-bottom: 2px dotted #e2e8f0;
+        height: 11px;
+        margin-bottom: 3px;
+      }
+    }
+
+    .empty-dates .date-line {
+      color: #cbd5e1;
+      .label { color: #cbd5e1; }
+    }
+
+    .add-btn-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(1px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      mat-icon {
+        color: #10b981;
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+      }
+    }
+  }
+
+  /* =========================================
+     UX/UI Color Harmony for Statuses (High Specificity)
+     ========================================= */
+
+  /* 1. DISPONIBLE (Premium White/Silver) */
+  &.status-disponible {
+    border-top-color: #94a3b8; /* Slate 400: un plata/gris más definido y elegante */
+    background-color: #ffffff;
+    
+    .room-header .room-num { color: #1e293b; } /* Slate 800: alto contraste */
+    .room-header .room-type { color: #64748b; }
+    
+    .room-body {
+      .empty-lines .dot-line { border-bottom-color: #cbd5e1; }
+      .empty-dates .date-line { color: #94a3b8; }
+      .empty-dates .date-line .label { color: #94a3b8; }
+      
+      .status-footer .status-badge { 
+        background: linear-gradient(to bottom, #ffffff, #f1f5f9);
+        color: #334155;
+        border-color: #cbd5e1;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03); /* Ligero relieve */
+      }
+    }
+  }
+
+  /* 2. CHECK IN (Green: Active, Confirmed) */
+  &.status-checkin {
+    border-top-color: #10b981;
+    background-color: #f0fdf4;
+
+    .room-header .room-num { color: #059669; }
+    .room-header .room-type { color: #34d399; }
+    
+    .room-body {
+      .guest-name { color: #064e3b; }
+      .dates .date-line { color: #047857; }
+      .dates .date-line .label { color: #10b981; }
+      
+      .status-footer .status-badge { 
+        background-color: #d1fae5;
+        color: #065f46;
+        border-color: #a7f3d0;
+      }
+      .edit-icon { color: #10b981; }
+    }
+  }
+
+  /* 3. PERMANENCIA (Orange/Yellow: Ongoing stay) */
+  &.status-permanencia {
+    border-top-color: #f59e0b;
+    background-color: #fffbeb;
+
+    .room-header .room-num { color: #d97706; }
+    .room-header .room-type { color: #fbbf24; }
+    
+    .room-body {
+      .guest-name { color: #92400e; }
+      .dates .date-line { color: #b45309; }
+      .dates .date-line .label { color: #d97706; }
+      
+      .status-footer .status-badge { 
+        background-color: #fef3c7;
+        color: #b45309;
+        border-color: #fde68a;
+      }
+      .edit-icon { color: #f59e0b; }
+    }
+  }
+
+  /* 4. RESERVA (Blue: Trust, Planned, Stable) */
+  &.status-reserva {
+    border-top-color: #3b82f6;
+    background-color: #eff6ff;
+
+    .room-header .room-num { color: #2563eb; }
+    .room-header .room-type { color: #60a5fa; }
+    
+    .room-body {
+      .guest-name { color: #1e40af; }
+      .dates .date-line { color: #1d4ed8; }
+      .dates .date-line .label { color: #3b82f6; }
+      
+      .status-footer .status-badge { 
+        background-color: #dbeafe;
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+      }
+      .edit-icon { color: #3b82f6; }
+    }
+  }
+}

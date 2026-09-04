@@ -1,0 +1,22 @@
+<!-- <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="bg-dark text-white p-1">CLIENTES</h1> -->
+
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+    SELECCIONE ROL
+    <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+    </button>
+</h1>
+
+<!-- <p>Bienvenido {{ Auth::user()->nombre }}!! usted cuenta con {{Auth::user()->roles->count()}} Roles, seleccione uno:</p> -->
+
+<mat-dialog-content class="mat-typography row row-cols-1 px-1 px-md-4 pt-2">
+    <p>Bienvenido {{nombreUsuario}}!! usted cuenta con {{roles.length}} Roles, seleccione uno:</p>
+    @for (x of roles; track $index) {
+        <button mat-raised-button (click)="seleccion(x)" class="bg-dark text-white my-2"> {{x.nombre}} </button>
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions class="d-flex justify-content-around bg-light">
+    <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+    <!-- <button mat-raised-button type="submit" class="bg-success text-black"><mat-icon><mat-spinner  diameter="18"></mat-spinner> </mat-icon> Guardar </button> -->
+</mat-dialog-actions>

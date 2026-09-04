@@ -1,0 +1,43 @@
+
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef" class="p-0">
+
+    <h3 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle
+        class="text-bg-dark dialog-header">
+        <span class="fs-5">Permisos para rol:</span> <span class="text-warning fs-5">{{rol.nombre}}</span>
+        <button mat-icon-button mat-dialog-close>
+            <mat-icon style="color:white">close</mat-icon>
+        </button>
+    </h3>
+
+    <mat-dialog-content class="mat-typography ">
+        <div class="row row-cols-1 row-cols-md-4">
+            @for (m of permisosPorModulo; track $index) {
+                <div class="col">
+                    <mat-card class="my-1" appearance="raised">
+                        <mat-card-header class="bg-dark p-1">
+                            <mat-card-title class="text-bg-dark">
+                                <span class="fs-6">{{m.modulo}}</span>
+                            </mat-card-title>
+                        </mat-card-header>
+                    
+                        <mat-card-content class="bg-white p-0">
+                            <div class="mat-elevation-z8 p-1">
+                                @for (pa of m.permisosAsignados; track $index) {
+                                    <mat-checkbox [(ngModel)]="pa.asignado" name="asignado_{{pa.id}}" > {{pa.nombre}} </mat-checkbox>
+                                    <br>
+                                }
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            }
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+
+</form>
+

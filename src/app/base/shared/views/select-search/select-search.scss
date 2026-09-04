@@ -1,0 +1,51 @@
+// Reset del panel de Material para que el buscador pegajoso funcione
+::ng-deep .custom-select-panel {
+  padding-top: 0 !important;
+  scroll-behavior: auto !important;
+  min-height: 150px;
+}
+
+.search-item-wrapper {
+  z-index: 10;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  contain: layout; // Optimización de renderizado
+  background-color: white;
+  
+  .search-item-content {
+    display: flex;
+    align-items: center;
+    height: 40px; 
+    padding: 0 12px;
+    gap: 10px;
+
+    mat-icon {
+      color: rgba(0, 0, 0, 0.54);
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    input {
+      border: none;
+      outline: none;
+      width: 100%;
+      font-size: 14px;
+      background: transparent;
+      color: rgba(0, 0, 0, 0.87);
+
+      &::placeholder {
+        color: rgba(0, 0, 0, 0.38);
+      }
+    }
+  }
+}
+
+// Margen para que el scroll por teclado no quede oculto bajo el buscador
+::ng-deep .mat-mdc-option {
+  scroll-margin-top: 40px; 
+}
+
+// Resaltado visual del teclado
+::ng-deep .mat-mdc-option.mat-mdc-option-active {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}

@@ -1,0 +1,139 @@
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">    
+    <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+    </button>
+</h1>
+
+<mat-dialog-content class="mat-typography px-1 py-1 bg-secondary">
+
+    <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource">
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>
+                    <button mat-icon-button (click)="mostrarFormularioNuevo()"
+                        class="bg-success text-black"><mat-icon>add</mat-icon></button>
+                </th>
+
+                <td mat-cell *matCellDef="let x;let row; let i=index;">
+                    <button mat-icon-button (click)="mostrarEditar(x)"
+                        class="text-primary"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="mostrarConfirmarEliminar('0ms', '0ms',x)"
+                        class="text-danger"><mat-icon>delete</mat-icon></button>
+                </td>
+            </ng-container>
+
+            <!-- Fila para mostrar "No hay datos disponibles" -->
+            <tr *matNoDataRow>
+                <td [attr.colspan]="displayedColumns.length" class="text-center" style="font-size:18px;">
+                    No hay datos disponibles
+                </td>
+            </tr>
+
+            <td mat-cell *matCellDef="let x; let i = index" class="p-0">
+                <img [src]="x.base64_min ? x.base64_min : 'assets/img/no-image.png'" 
+                    class="img-fluid img-thumbnail" 
+                    style="max-width: 50px; cursor: pointer;"
+                    appImageViewer>
+            </td>
+
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>Id </th>
+                <td mat-cell *matCellDef="let x"> {{x.id}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="url">
+                <th mat-header-cell *matHeaderCellDef>Imagen</th>
+                <td mat-cell *matCellDef="let x" class="p-0">
+                    <img [src]="x.base64_min ? x.base64_min : 'assets/img/no-image.png'" 
+                        [alt]="x.url" 
+                        class="img-fluid img-thumbnail" 
+                        style="max-width: 50px; cursor: pointer;"
+                        appImageViewer 
+                        [url_imagenes]="url_imagenes">
+                </td>
+            </ng-container>
+            
+            <ng-container matColumnDef="tipo_doc_id">
+                <th mat-header-cell *matHeaderCellDef>Tipo Doc Id </th>
+                <td mat-cell *matCellDef="let x"> {{x.tipo_doc_id}} </td>
+            </ng-container> 
+
+             <ng-container matColumnDef="huesped_id">
+                <th mat-header-cell *matHeaderCellDef>Huesped ID</th>
+                <td mat-cell *matCellDef="let x"> {{x.huesped_id}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="nro_documento">
+                <th mat-header-cell *matHeaderCellDef>Nro Documento</th>
+                <td mat-cell *matCellDef="let x"> {{x.nro_documento}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="nombre">
+                <th mat-header-cell *matHeaderCellDef>Nombre </th>
+                <td mat-cell *matCellDef="let x"> {{x.nombre}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="primer_apellido">
+                <th mat-header-cell *matHeaderCellDef>Primer Apellido</th>
+                <td mat-cell *matCellDef="let x"> {{x.primer_apellido}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="segundo_apellido">
+                <th mat-header-cell *matHeaderCellDef>Segundo Apellido</th>
+                <td mat-cell *matCellDef="let x"> {{x.segundo_apellido}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="tipo_documento">
+                <th mat-header-cell *matHeaderCellDef>Tipo Documento</th>
+                <td mat-cell *matCellDef="let x"> {{x.tipo_documento}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="extension">
+                <th mat-header-cell *matHeaderCellDef>Ext. </th>
+                <td mat-cell *matCellDef="let x"> {{x.extension}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="peso_bytes">
+                <th mat-header-cell *matHeaderCellDef>Peso Bytes </th>
+                <td mat-cell *matCellDef="let x"> {{x.peso_bytes}} </td>
+            </ng-container>                        
+
+             <ng-container matColumnDef="nombre_archivo">
+                <th mat-header-cell *matHeaderCellDef>Nombre Archivo</th>
+                <td mat-cell *matCellDef="let x"> {{x.nombre_archivo}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="detalle">
+                <th mat-header-cell *matHeaderCellDef>Detalle</th>
+                <td mat-cell *matCellDef="let x"> {{x.detalle}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="predeterminado">
+                <th mat-header-cell *matHeaderCellDef>predeterminado </th>
+                <td mat-cell *matCellDef="let x"> {{x.predeterminado}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="usuario_alta_id">
+                <th mat-header-cell *matHeaderCellDef>usuario_alta_id </th>
+                <td mat-cell *matCellDef="let x"> {{x.usuario_alta_id}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fecha_alta">
+                <th mat-header-cell *matHeaderCellDef>fecha_alta </th>
+                <td mat-cell *matCellDef="let x"> {{x.fecha_alta}} </td>
+            </ng-container>
+            
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" id="activoArchivofila{{row.id}}"></tr>
+
+        </table>
+    </div>
+    <mat-divider></mat-divider>
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons class="bg-light">
+    </mat-paginator>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="d-flex justify-content-around bg-light">
+    <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cerrar</button>
+</mat-dialog-actions>

@@ -1,0 +1,62 @@
+
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef" class="p-0">
+
+    <h3 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle
+        class="text-bg-dark dialog-header">
+        <span class="fs-5">Menus para rol:</span> <span class="text-warning fs-5">{{rol.nombre}}</span>
+        <button mat-icon-button mat-dialog-close>
+            <mat-icon style="color:white">close</mat-icon>
+        </button>
+    </h3>
+
+    <ng-template #menuRecursivo let-nodo="nodoOrigen">
+        @if (nodo.subMenus.length>0) {
+            <li>
+              <span (click)="nodo.expandido=!nodo.expandido">
+                <mat-icon [hidden]="!nodo.expandido">add</mat-icon> 
+                <mat-icon [hidden]="nodo.expandido">remove</mat-icon>
+              </span>
+              <span class="">
+                @if(nodo.icono){
+                  <mat-icon>{{nodo.icono}}</mat-icon>
+                }
+                {{nodo.nombre}}
+                <!-- <mat-checkbox [(ngModel)]="nodo.asignado" name="asignado_{{nodo.id}}">
+                  {{nodo.nombre}}
+                </mat-checkbox> -->
+              </span>
+              <ul [ngClass]="{'show':!nodo.expandido}">
+                @for (x of nodo.subMenus; track $index) {
+                  <ng-container  [ngTemplateOutlet]="menuRecursivo" [ngTemplateOutletContext]="{nodoOrigen: x }"></ng-container>
+                }
+              </ul>
+            </li>
+        }
+        @else {
+            <li>
+              <span>
+                <mat-checkbox [(ngModel)]="nodo.asignado"  name="asignado_{{nodo.id}}">
+                  @if(nodo.icono){
+                    <mat-icon>{{nodo.icono}}</mat-icon>
+                  }
+                  {{nodo.nombre}}
+                </mat-checkbox>
+              </span>
+            </li>
+        }
+    </ng-template>
+
+    <mat-dialog-content class="dialog-content px-0 d-flex">
+        @if(menuRaiz){
+          <ul class="px-0">
+            <ng-container  [ngTemplateOutlet]="menuRecursivo" [ngTemplateOutletContext]="{nodoOrigen: menuRaiz }"></ng-container>
+          </ul>
+        }
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+
+</form>

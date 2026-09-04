@@ -1,0 +1,19 @@
+/*BEGIN: Linea mat-dividir */
+.divider-with-text {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.divider-with-text mat-divider {
+  flex: 1;
+}
+
+.divider-with-text .divider-text {
+  padding: 0 16px;
+  white-space: nowrap;
+  color: #3f51b5; /* Cambia este valor al color que prefieras */
+  font-weight: bold;
+}
+/*END: Linea mat-dividir */

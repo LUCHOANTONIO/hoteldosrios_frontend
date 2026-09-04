@@ -1,0 +1,57 @@
+// .mat-sidenav-container{
+//   height: calc(205vh - 115vh);
+// }
+
+mat-sidenav{
+  width: 250px;
+  border-radius: 0;
+  background: radial-gradient(circle, rgb(18, 18, 18) 14%, rgb(35, 59, 85) 72%, rgba(4, 20, 52, 0.992) 100%);
+
+  //background:#122033;
+
+  box-shadow: 3px 3px gray;
+  //box-shadow:#122033;
+}
+
+.contenedor {
+  display: grid;
+  grid-template-rows: auto 1fr; /* auto para el encabezado, 1fr toma el resto para el cuerpo */
+  height: 100vh;
+}
+
+// ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar {
+//   //display: none;
+//   width: 0.5em; /* Ancho del scrollbar */
+// } 
+// ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar-track {
+//   box-shadow: inset 0 0 6px rgba(150, 237, 68, 0.992); /* Sombra del track */
+// }
+
+// --------------
+::ng-deep .mat-drawer-inner-container::-webkit-scrollbar {
+  width: 0.4em; /* Ancho del scrollbar */
+}
+
+::ng-deep .mat-drawer-inner-container::-webkit-scrollbar-thumb {
+  background-color: skyblue; /* Color del thumb (barra de desplazamiento) */
+}
+
+::ng-deep .mat-drawer-inner-container::-webkit-scrollbar-track {
+  background-color: white; /* Color del track (fondo del scrollbar) */
+  //box-shadow: inset 0 0 6px rgba(150, 237, 68, 0.992); /* Sombra del track */
+}
+
+/* Agregamos las flechas de desplazamiento */
+// ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar-button:start:decrement,
+// ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar-button:end:increment {
+//   display: block;
+//   height: 16px;
+//   width: 16px;
+//   background-color: #c41212; /* Color de fondo de las flechas */
+// }
+
+/* Estilo de las flechas */
+// ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar-button {
+//   display: none; /* Ocultamos las flechas por defecto */
+// }
+

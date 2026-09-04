@@ -1,0 +1,27 @@
+// .example-spacer {
+//     flex: 1 1 auto;
+//   }
+
+// mat-toolbar{
+//   background-color: black;
+//   color:white;
+// }
+
+mat-icon {
+  color: gray;
+}
+
+mat-icon:hover {
+  color: cyan;
+}
+
+mat-toolbar {
+  border-radius: 0;
+  background: radial-gradient(circle, rgb(18, 18, 18) 14%, rgb(35, 59, 85) 72%, rgba(4, 20, 52, 0.992) 100%);
+  min-height: 40px !important;
+}
+
+mat-toolbar-row {
+  min-height: 40px !important;
+  height: 40px !important;
+}

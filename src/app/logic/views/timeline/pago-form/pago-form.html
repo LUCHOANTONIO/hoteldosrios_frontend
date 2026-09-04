@@ -1,0 +1,142 @@
+<form autocomplete="off" #pagoForm="ngForm" appPreventEnterSubmit AnimarPerderFocoDirective>
+    <mat-dialog-content class="mat-typography">
+        <div class="row">
+            <div class="divider-with-text">
+                <mat-divider></mat-divider>
+                <span class="divider-text">RESUMEN</span>
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="table-resumen-container">
+                <table class="table-resumen">
+                    <thead>
+                        <tr>
+                            <th class="th-detalle">Detalle</th>
+                            <th class="th-monto">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of balance()?.detalles; track item.categoria_id || $index) {
+                        @if (item.monto > 0) {
+                        <tr class="row-categoria">
+                            <td class="td-detalle">{{ item.detalle }}</td>
+                            <td class="td-monto">Bs. {{ item.monto | number:'1.2-2' }}</td>
+                        </tr>
+                        }
+                        }
+                        <tr class="row-total">
+                            <td class="td-detalle">TOTAL</td>
+                            <td class="td-monto">Bs. {{ balance()?.total | number:'1.2-2' }}</td>
+                        </tr>
+                        <tr class="row-pagado">
+                            <td class="td-detalle">PAGADO</td>
+                            <td class="td-monto">Bs. {{ balance()?.pago | number:'1.2-2' }}</td>
+                        </tr>
+                        <tr class="row-saldo">
+                            <td class="td-detalle">SALDO</td>
+                            <td class="td-monto">Bs. {{ balance()?.saldo | number:'1.2-2' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="divider-with-text">
+                <mat-divider></mat-divider>
+                <span class="divider-text">DATOS PAGO</span>
+                <mat-divider></mat-divider>
+            </div>
+
+            <mat-form-field class="col-6">
+                <mat-label>Forma de Pago</mat-label>
+                <mat-select [(ngModel)]="transaccion_pago.forma_pago_id" name="forma_pago_id" #cboFormaPago
+                    (keydown.enter)="txtMonto.focus()" appPreventEnterSelect required>
+                    @for (x of forma_pagos;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="col-6">
+                <mat-label>Monto</mat-label>
+                <input matInput type="number" [(ngModel)]="transaccion_pago.monto" name="pago_monto" #txtMonto required>
+            </mat-form-field>
+
+            <mat-form-field class="col-12">
+                <mat-label>Detalle</mat-label>
+                <input matInput placeholder="" [(ngModel)]="transaccion_pago.detalle" name="detalle" #txtDetalle>
+            </mat-form-field>
+        </div>
+
+        <div class="row d-flex justify-content-between">
+            <div class="col-6">
+                <button mat-raised-button type="button" #btnGuardarPago
+                    class="bg-success text-black rounded-button w-100" (click)="submitPago(pagoForm)" appBotonGuardar
+                    [form]="pagoForm" [disabled]="isProcessing || isLoadingPdf">
+                    <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Procesar
+                </button>
+            </div>
+            <div class="col-6">
+                <button mat-raised-button type="button" class="bg-info text-black rounded-button w-100"
+                    (click)="mostrarVisorPdf('');" [disabled]="isLoadingPdf || isProcessing">
+                    <mat-icon [class.d-none]="isLoadingPdf">receipt</mat-icon>
+                    <mat-icon [class.d-none]="!isLoadingPdf"><mat-spinner diameter="18"></mat-spinner></mat-icon>Estado Cuenta
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table mat-table [dataSource]="dataSourceMovimientos" class="mat-elevation-z8 w-100">
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                            <td mat-cell *matCellDef="let data">
+                                <button mat-icon-button [hidden]="!mostrar_btn_destroy" class="text-danger"
+                                    (click)="eliminarMovimiento('0ms', '0ms',data)"><mat-icon>delete</mat-icon></button>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="id">
+                            <th mat-header-cell *matHeaderCellDef>Id</th>
+                            <td mat-cell *matCellDef="let data"> {{ data.id}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="reserva_id">
+                            <th mat-header-cell *matHeaderCellDef>Reserva Id</th>
+                            <td mat-cell *matCellDef="let data"> {{ data.reserva_id}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="fecha">
+                            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                            <td mat-cell *matCellDef="let data"> {{ data.fecha}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="detalle">
+                            <th mat-header-cell *matHeaderCellDef>Detalle</th>
+                            <td mat-cell *matCellDef="let data"> {{ data.detalle}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="usuario">
+                            <th mat-header-cell *matHeaderCellDef>Registrado Por</th>
+                            <td mat-cell *matCellDef="let data"> {{ data.usuario }} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="monto">
+                            <th mat-header-cell *matHeaderCellDef>Monto</th>
+                            <td mat-cell *matCellDef="let data"> {{ data.monto }} </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumnsPagos" class="bg-light"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumnsPagos;"></tr>
+                    </table>
+                </div>
+
+                <mat-divider></mat-divider>
+                <mat-paginator [pageSizeOptions]="[5, 10, 20]" [pageSize]="20" showFirstLastButtons
+                    class="bg-light"></mat-paginator>
+            </div>
+        </div>
+
+    </mat-dialog-content>
+
+</form>

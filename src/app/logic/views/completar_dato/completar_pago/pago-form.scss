@@ -1,0 +1,133 @@
+  /*BEGIN: Linea mat-dividir */
+  .divider-with-text {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0;
+  }
+  
+  .divider-with-text mat-divider {
+    flex: 1;
+  }
+  
+  .divider-with-text .divider-text {
+    padding: 0 16px;
+    white-space: nowrap;
+    color: #3f51b5; /* Cambia este valor al color que prefieras */
+    font-weight: bold;
+  }
+  /*END: Linea mat-dividir */
+
+/*: TABLA RESUMEN DINAMICA */
+.table-resumen-container {
+  width: 100%;
+  margin: 0 auto 12px auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+.table-resumen {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: inherit;
+
+  thead {
+    tr {
+      background-color: #2c3e50;
+      color: #ffffff;
+
+      th {
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+
+        &.th-detalle {
+          text-align: left;
+        }
+
+        &.th-monto {
+          text-align: right;
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #f0f3f6;
+      transition: background-color 0.15s ease;
+
+      td {
+        padding: 7px 18px;
+        font-size: 13.5px;
+
+        &.td-detalle {
+          text-align: left;
+        }
+
+        &.td-monto {
+          text-align: right;
+          white-space: nowrap;
+        }
+      }
+
+      &.row-categoria {
+        .td-detalle {
+          font-weight: 700;
+          color: #2c3e50;
+        }
+        .td-monto {
+          color: #4b5563;
+          font-weight: 600;
+        }
+
+        &:hover {
+          background-color: #f8fafc;
+        }
+      }
+
+      &.row-total {
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        .td-detalle,
+        .td-monto {
+          font-weight: 800;
+          font-size: 14px;
+          color: #1e293b;
+        }
+      }
+
+      &.row-pagado {
+        border-bottom: 1px solid #e2e8f0;
+        .td-detalle,
+        .td-monto {
+          font-weight: 800;
+          font-size: 14px;
+          color: #16a34a;
+        }
+      }
+
+      &.row-saldo {
+        background-color: #f1f5f9;
+        border-bottom: none;
+        .td-detalle,
+        .td-monto {
+          font-weight: 800;
+          font-size: 14px;
+          color: #1e293b;
+        }
+      }
+    }
+  }
+}
+
+/*: ALINEAR ICONO */
+mat-icon {
+  font-size: 20px;
+  vertical-align: middle; 
+}
+
+  

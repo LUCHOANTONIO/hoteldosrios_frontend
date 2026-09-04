@@ -1,0 +1,65 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+      AGENCIAS
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+      </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-2 px-0 pt-2">
+        <mat-form-field class="col">
+            <mat-label>Nombre</mat-label>
+            <input matInput placeholder="" [(ngModel)]="agencia.nombre" name="nombre" #txtNombre (keydown.enter)="cboRegional.focus()" required cdkFocusInitial>          
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Regional</mat-label>
+            <mat-select placeholder="" [(ngModel)]="agencia.regional_id" name="regional_id" #cboRegional (keydown.enter)="cboCiudad.focus()" appPreventEnterSelect required>
+                @for (x of regionales; track $index) {
+                    <mat-option [value]="x.id">
+                        {{x.nombre}}
+                    </mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Ciudad</mat-label>
+            <mat-select placeholder="" [(ngModel)]="agencia.ciudad_id" name="ciudad_id" #cboCiudad (keydown.enter)="txtTelefono.focus()" appPreventEnterSelect required>
+                @for (x of ciudades;track $index) {
+                    <mat-option [value]="x.id">{{x.nombre}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Telefono</mat-label>
+            <input matInput placeholder="" [(ngModel)]="agencia.telefono" name="telefono" #txtTelefono (keydown.enter)="txtDireccion.focus()">
+            <mat-icon matSuffix>phone</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Direccion</mat-label>
+            <input matInput placeholder="" [(ngModel)]="agencia.direccion" name="direccion" #txtDireccion (keydown.enter)="txtDetalle.focus()">
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Detalle</mat-label>
+            <input matInput placeholder="" [(ngModel)]="agencia.detalle" name="detalle" #txtDetalle>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Selecciona un color</mat-label>
+            <input matInput type="color" [(ngModel)]="agencia.color_fondo" name="color">
+        </mat-form-field>
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner  diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+
+</form>
+

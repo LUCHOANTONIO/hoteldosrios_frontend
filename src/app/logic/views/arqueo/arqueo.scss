@@ -1,0 +1,132 @@
+.dialog-header {
+  padding: 16px 24px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+  .btn-close-custom {
+    color: rgba(255,255,255,0.8);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      color: white;
+      transform: scale(1.1);
+    }
+  }
+}
+
+.table-responsive {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1rem;
+}
+
+table[mat-table] {
+  width: 100%;
+  table-layout: fixed;
+  background: white;
+}
+
+.table-header-custom {
+  th.mat-mdc-header-cell {
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.5px;
+    border-bottom: none;
+    padding: 12px 8px !important;
+  }
+}
+
+.footer-row {
+  background-color: #f1f5f9;
+  font-weight: bold;
+  td {
+    color: #0f172a;
+    border-top: 2px solid #e2e8f0;
+  }
+}
+
+/* Aplicar color secondary automáticamente cuando el botón está disabled */
+button.mat-mdc-raised-button:disabled {
+  background-color: var(--bs-secondary, #6c757d) !important;
+  color: white !important;
+  opacity: 0.65;
+}
+
+/* Fondo para campos de solo lectura (inputs y selects) */
+::ng-deep .readonly-field .mat-mdc-text-field-wrapper {
+  background-color: #f8fafc !important;
+  border: 1px dashed #cbd5e1;
+}
+::ng-deep .readonly-field input {
+  color: #64748b !important;
+}
+
+/* Forzar color azul (primary) cuando el input tiene la clase text-primary por estado 'nuevo' */
+::ng-deep .readonly-field input.text-primary,
+::ng-deep table[mat-table] input.text-primary {
+  color: #0d6efd !important;
+  font-weight: 600;
+}
+
+/* Mejoras UX/UI para la tabla: campos más compactos y sin scroll horizontal */
+::ng-deep table[mat-table] .mat-mdc-form-field-subscript-wrapper {
+  display: none; /* Oculta el espacio vacío debajo de los inputs */
+}
+
+::ng-deep table[mat-table] .mat-mdc-text-field-wrapper {
+  padding: 0 8px;
+  border-radius: 4px;
+}
+
+::ng-deep table[mat-table] td.mat-mdc-cell {
+  padding: 6px 4px !important;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Suavizar los bordes de los form-fields dentro de la tabla */
+::ng-deep table[mat-table] mat-form-field:not(.mat-form-field-invalid):not(.ng-invalid) .mdc-notched-outline__leading,
+::ng-deep table[mat-table] mat-form-field:not(.mat-form-field-invalid):not(.ng-invalid) .mdc-notched-outline__notch,
+::ng-deep table[mat-table] mat-form-field:not(.mat-form-field-invalid):not(.ng-invalid) .mdc-notched-outline__trailing {
+  border-color: #e2e8f0 !important;
+}
+
+::ng-deep table[mat-table] mat-form-field.mat-focused:not(.mat-form-field-invalid):not(.ng-invalid) .mdc-notched-outline__leading,
+::ng-deep table[mat-table] mat-form-field.mat-focused:not(.mat-form-field-invalid):not(.ng-invalid) .mdc-notched-outline__notch,
+::ng-deep table[mat-table] mat-form-field.mat-focused:not(.mat-form-field-invalid):not(.ng-invalid) .mdc-notched-outline__trailing {
+  border-color: #3b82f6 !important; /* Azul más vibrante al enfocar */
+}
+
+/* Campos vacíos obligatorios en rojo y corrección de notch */
+::ng-deep mat-form-field.ng-invalid:not(.mat-focused) .mdc-notched-outline__leading,
+::ng-deep mat-form-field.ng-invalid:not(.mat-focused) .mdc-notched-outline__notch,
+::ng-deep mat-form-field.ng-invalid:not(.mat-focused) .mdc-notched-outline__trailing {
+  border-color: #f44336 !important;
+}
+
+::ng-deep .mdc-notched-outline__notch {
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* Filas con estado nuevo en azul */
+::ng-deep tr.fila-nueva {
+  input.mat-mdc-input-element,
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-trigger,
+  .mat-mdc-form-field-input-control {
+    color: #0d6efd !important;
+    font-weight: 500;
+  }
+}
+
+.btn-guardar {
+  min-width: 120px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+.btn-cancelar {
+  font-weight: 500;
+}

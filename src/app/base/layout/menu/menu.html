@@ -1,0 +1,44 @@
+<div class="row row-cols-1 text-center w-100 mb-3 mt-3">
+    <div class="col fs-6 fw-bold" style="letter-spacing: 1px; color: #f8c146;">
+        <span>{{appService.session.REGIONAL_NOMBRE}}</span>
+    </div>
+    <div class="col fs-6" style="opacity: 0.9; color: #f8c146;">
+         <span>{{appService.agenciaNombre()}}</span>        
+    </div>
+</div>
+<hr class="border-secondary mx-3 mb-2" style="opacity: 0.3;">
+
+<ng-template #menuRecursivo let-nodo="menuOrigen">
+    @if (nodo.subMenus.length > 0) {
+        <mat-expansion-panel class="mat-elevation-z0 custom-panel" expanded="true">
+            <mat-expansion-panel-header class="custom-panel-header">
+                <mat-panel-title class="panel-title">
+                    <mat-icon class="me-2">{{nodo.icono}}</mat-icon> 
+                    <span>{{nodo.nombre}}</span>
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <mat-list class="py-0 custom-list">
+                @for (x of nodo.subMenus; track $index) {
+                    <ng-container [ngTemplateOutlet]="menuRecursivo" [ngTemplateOutletContext]="{menuOrigen:x}"></ng-container>
+                }
+            </mat-list>
+        </mat-expansion-panel>
+    }
+    @else {
+        <mat-list-item class="custom-list-item">
+            <a [routerLink]="nodo.url" (click)="click()" class="d-flex align-items-center w-100 h-100">
+                <mat-icon class="me-3 menu-icon">{{nodo.icono}}</mat-icon> 
+                <span class="menu-text">{{nodo.nombre}}</span>
+            </a>
+        </mat-list-item>
+    }
+</ng-template>
+
+<mat-accordion multi class="custom-accordion">
+    @if(menuPadre){
+        @for (x of menuPadre.subMenus; track $index) {
+            <ng-container [ngTemplateOutlet]="menuRecursivo" [ngTemplateOutletContext]="{menuOrigen:x}"></ng-container>
+        }
+    }
+</mat-accordion>

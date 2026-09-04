@@ -1,0 +1,56 @@
+/*BEGIN: Linea mat-dividir */
+.divider-with-text {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0;
+  }
+  
+  .divider-with-text mat-divider {
+    flex: 1;
+  }
+  
+  .divider-with-text .divider-text {
+    padding: 0 16px;
+    white-space: nowrap;
+    color: #3f51b5; /* Cambia este valor al color que prefieras */
+    font-weight: bold;
+  }
+  /*END: Linea mat-dividir */
+
+
+ //BEGIN: Ajustes para la tabla de transacciones
+  /* Clase general para las columnas numéricas para ahorrar código */
+.col-numerica {
+    width: 100px !important;
+    max-width: 100px !important;
+    text-align: center;
+}
+
+/* Ajustes específicos por columna */
+.mat-column-cantidad {
+    width: 100px !important;
+    max-width: 100px !important;
+}
+
+.mat-column-precio_unitario, 
+.mat-column-total {
+    width: 120px !important;
+    max-width: 120px !important;
+}
+
+/* Reducir el padding interno de las celdas para que el input quepa mejor */
+.mat-mdc-table .mat-mdc-cell, 
+.mat-mdc-table .mat-mdc-header-cell {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+/* Hacer los inputs dentro de la tabla más compactos */
+.mat-column-cantidad mat-form-field,
+.mat-column-precio_unitario mat-form-field,
+.mat-column-total mat-form-field {
+    width: 100%;
+}
+//END: Ajustes para la tabla de transacciones
+  

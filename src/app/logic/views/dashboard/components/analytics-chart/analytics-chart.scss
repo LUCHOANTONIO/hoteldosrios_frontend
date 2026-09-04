@@ -1,0 +1,31 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #343a40;
+        margin: 0;
+    }
+
+    .menu-btn {
+        border: none;
+        background: none;
+        font-size: 20px;
+        color: #adb5bd;
+        cursor: pointer;
+    }
+}
+
+.echart {
+    height: 300px;
+    width: 100%;
+}

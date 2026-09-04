@@ -1,0 +1,42 @@
+<mat-form-field class="w-100">
+  @if (showCleanButton() && selectedValue() !== undefined && selectedValue() !== null) {
+      <button mat-icon-button matPrefix type="button"title="Limpiar selección" [disabled]="disabled()" (click)="reset($event)">
+          <mat-icon>close</mat-icon>
+      </button>
+    }
+  <mat-label>{{ label() }}</mat-label>
+  <mat-select #miSelect
+              [ngModel]="selectedValue()" 
+              (selectionChange)="onSelect($event.value)" 
+              (opened)="enfocar()"
+              (closed)="limpiarFiltro()"
+              [required]="required()"
+              [disabled]="disabled()"
+              disableOptionCentering
+              panelClass="custom-select-panel">
+
+    <div class="search-item-wrapper sticky-top bg-white" (keydown)="$event.stopPropagation()">
+      <div class="search-item-content">
+        <mat-icon>search</mat-icon>
+        <input #txtFiltro 
+               [ngModel]="filterText()"
+               (ngModelChange)="filterText.set($event)"
+               (keydown)="handleKeydown($event, miSelect)" 
+               [placeholder]="placeholder()"
+               autocomplete="off">
+      </div>
+    </div>
+
+    @for (item of filteredItems(); track item[value()]) {
+      <mat-option [value]="item[value()]">
+        <ng-container *ngTemplateOutlet="externalTemplate || defaultTemplate; context: { $implicit: item }"></ng-container>
+      </mat-option>
+    } @empty {
+      <div class="p-3 text-center text-muted">No se encontraron resultados</div>
+    }
+
+    <ng-template #defaultTemplate let-item>
+      {{ item[text()] }}
+    </ng-template>
+  </mat-select>
+</mat-form-field>

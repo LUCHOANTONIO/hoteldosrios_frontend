@@ -1,0 +1,24 @@
+<form autocomplete="off" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco>
+   <h1 mat-dialog-title 
+        cdkDrag 
+        cdkDragRootElement=".cdk-overlay-pane" 
+        cdkDragHandle 
+        class="text-bg-dark dialog-header d-flex align-items-center justify-content-between">        
+        <span>CHECK OUT</span>
+        <button mat-icon-button mat-dialog-close type="button">
+            <mat-icon style="color:white">close</mat-icon>
+        </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography">
+        <app-reserva_checkout></app-reserva_checkout>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        
+    </mat-dialog-actions>
+  
+</form>
+
+
+

@@ -1,0 +1,17 @@
+table {
+    width: 100%;
+}
+
+//Para ajustar el ancho de celda de la tabla
+table[mat-table] {
+  width: 100%;
+  table-layout: fixed;
+}
+
+
+table[mat-table] { width: 100%; }
+.footer-row { background-color: #e9ecef; font-weight: bold; }
+
+
+
+

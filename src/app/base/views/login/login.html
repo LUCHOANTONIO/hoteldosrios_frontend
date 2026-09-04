@@ -1,0 +1,48 @@
+<div class="classic-login-wrapper">
+    <div class="classic-login-card-container">
+        <mat-card class="classic-improved-card">
+            <!-- Encabezado Sólido (Estilo Preferido por el Usuario) -->
+            <div class="classic-card-header">
+                <h2 class="header-main-title">LOGIN</h2>
+            </div>
+
+            <mat-card-content class="classic-card-body">
+                <form class="classic-login-form" (ngSubmit)="login(f)" #f="ngForm" autocomplete="off">
+                    <mat-form-field appearance="outline" class="w-100 no-vertical-line">
+                        <mat-label>Usuario</mat-label>
+                        <mat-icon matPrefix>person</mat-icon>
+                        <input matInput [(ngModel)]="usuario" name="usuario" type="text" required
+                            (keydown.enter)="txtPassword.focus()" #txtUsuario placeholder="Ingrese su cuenta">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-100 no-vertical-line">
+                        <mat-label>Contraseña</mat-label>
+                        <mat-icon matPrefix>vpn_key</mat-icon>
+                        <input matInput [(ngModel)]="password" name="password" [type]="hide() ? 'password' : 'text'"
+                            required (keydown.enter)="login(f)" #txtPassword autocomplete="current-password"
+                            placeholder="Ingrese su clave">
+
+                        <button type="button" mat-icon-button matSuffix (click)="clickEvent($event)" tabindex="-1"
+                            class="classic-eye-btn">
+                            <mat-icon>{{hide() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                    </mat-form-field>
+
+                    @if (mensaje) {
+                    <div class="classic-error-box">
+                        <mat-icon>warning_amber</mat-icon>
+                        <span>{{mensaje}}</span>
+                    </div>
+                    }
+                </form>
+            </mat-card-content>
+
+            <!-- Botón Tipo Píldora (Estilo Preferido por el Usuario) -->
+            <mat-card-actions class="classic-card-actions">
+                <button mat-button class="classic-pill-btn" (click)="login(f)" [disabled]="!f.valid">
+                    <span>INGRESAR</span>
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>

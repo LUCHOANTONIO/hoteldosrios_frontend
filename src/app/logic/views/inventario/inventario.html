@@ -1,0 +1,83 @@
+<mat-card class="my-1" appearance="outlined">
+  <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center;">
+    <div style="display: flex; align-items: center; flex: 1;">
+      <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
+        INVENTARIO
+      </mat-card-title>
+    </div>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto;">
+      <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
+      <input matInput type="search" class="text-bg-light" placeholder="" (keydown.enter)="busqueda(txtBusqueda.value)"
+        #txtBusqueda>
+      <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusqueda.value)" style="padding: 0;">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+  </mat-card-header>
+
+  <mat-card-content class="bg-white p-0">
+    <div class="mat-elevation-z8">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource">
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef style="text-align: left; vertical-align: middle;">
+              <div style="display: flex; align-items: center;">
+                <button mat-icon-button (click)="mostrarFormularioNuevo()" [class.bg-success]="buttonEnabled"
+                  [class.text-black]="buttonEnabled" [disabled]="!buttonEnabled">
+                  <mat-icon>add</mat-icon>
+                </button>
+                <span style="margin-left: 8px;">Acciones</span>
+              </div>
+            </th>
+
+            <td mat-cell *matCellDef="let x;let row; let i=index;">
+              <button mat-icon-button (click)="mostrarEditar(x)" class="text-primary"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button (click)="mostrarConfirmarEliminar('0ms', '0ms',x)"
+                class="text-danger"><mat-icon>delete</mat-icon></button>
+            </td>
+          </ng-container>
+
+          <tr *matNoDataRow>
+            <td [attr.colspan]="displayedColumns.length" class="text-center" style="font-size:18px;">
+              No hay datos disponibles
+            </td>
+          </tr>
+
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>Id </th>
+            <td mat-cell *matCellDef="let x"> {{x.id}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fecha">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let x"> {{x.fecha}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="descripcion">
+            <th mat-header-cell *matHeaderCellDef>Descripción</th>
+            <td mat-cell *matCellDef="let x"> {{x.descripcion}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="tipo_movimiento">
+            <th mat-header-cell *matHeaderCellDef>Tipo Mov.</th>
+            <td mat-cell *matCellDef="let x"> {{x.tipo_movimiento}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="cantidad">
+            <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+            <td mat-cell *matCellDef="let x"> {{x.cantidad}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" id="fila{{row.id}}"></tr>
+
+        </table>
+      </div>
+
+      <mat-divider></mat-divider>
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" [pageSize]="20" showFirstLastButtons
+        class="bg-light"></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>

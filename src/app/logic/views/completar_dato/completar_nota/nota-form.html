@@ -1,0 +1,34 @@
+<form autocomplete="off" #notaForm="ngForm" appPreventEnterSubmit AnimarPerderFocoDirective>   
+  <mat-dialog-content class="mat-typography"> 
+
+    <mat-form-field class="col-12">
+        <mat-label>Nota</mat-label>
+        <input matInput placeholder="" [(ngModel)]="nota.descripcion" name="nota" #txtNota required cdkFocusInitial (keydown.enter)="submitNota(notaForm)">
+    </mat-form-field>
+      
+    <div class="timeline">
+      @for (nota of notas; track nota) {
+        <div class="timeline-item">
+          <div class="timeline-line"></div>
+          <div class="timeline-dot">
+            <mat-icon>circle</mat-icon> 
+          </div>
+          <mat-card class="timeline-content">
+            <mat-card-header>
+              <strong>{{ nota.usuario }} :</strong>  {{ nota.fecha }}
+            </mat-card-header>
+            <mat-card-content>
+              <p class="descripcion">{{ nota.descripcion }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+                           
+  </mat-dialog-content>  
+  
+  <mat-dialog-actions class="d-flex justify-content-around bg-light">                          
+  </mat-dialog-actions> 
+
+</form>
+  

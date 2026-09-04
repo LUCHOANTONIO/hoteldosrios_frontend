@@ -1,0 +1,121 @@
+
+<mat-card class="my-1" appearance="outlined">
+  <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center;"> <!--padding:5px ajusta el tamaño del card header-->
+      <div style="display: flex; align-items: center; flex: 1;">
+          <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
+            CAJA
+          </mat-card-title>
+      </div>
+
+      <!-- Campo de búsqueda alineado a la derecha -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto;">
+          <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
+          <input matInput type="search" class="text-bg-light" placeholder="" (keydown.enter)="busqueda(txtBusqueda.value)" #txtBusqueda>
+          <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusqueda.value)" style="padding: 0;">
+            <mat-icon>search</mat-icon>
+          </button>
+      </mat-form-field>
+  </mat-card-header>
+
+  <!-- <mat-card-content [class]="buttonEnabled==true?'bg-white p-0':'d-none'"> -->
+  <mat-card-content class="bg-white p-0">
+      <div class="mat-elevation-z8">
+          <div class="table-responsive">
+              <table mat-table [dataSource]="dataSource">
+                  <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef style="text-align: left; vertical-align: middle;">
+                        <div style="display: flex; align-items: center;">
+                          <button mat-icon-button
+                                  (click)="confirmarCrearCaja()"
+                                  [class.bg-success]="buttonEnabled"
+                                  [class.text-black]="buttonEnabled"
+                                  [disabled]="!buttonEnabled">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                          <span style="margin-left: 8px;">Acciones</span>
+                        </div>
+                      </th>
+
+                      <td mat-cell *matCellDef="let x;let row; let i=index;">
+                          <!-- <button mat-icon-button (click)="mostrarEditar(x)" class="text-primary"><mat-icon>edit</mat-icon></button>
+                          <button mat-icon-button (click)="mostrarConfirmarEliminar('0ms', '0ms',x)" class="text-danger"><mat-icon>delete</mat-icon></button> -->
+                          <!-- <button type="button" class="btn text-white btn-danger btn-sm" (click)="confirmarCerrarCaja()">Cerrar</button> -->
+                          
+                          <button 
+                            type="button" 
+                            class="btn text-white btn-sm" 
+                            [class.btn-primary]="x.estado_id !== 2"
+                            [class.btn-secondary]="x.estado_id === 2"
+                            [disabled]="x.estado_id === 2"
+                            (click)="confirmarCerrarCaja()">
+                            Cerrar
+                          </button>
+                      </td>
+                  </ng-container>
+
+                  <!-- Fila para mostrar "No hay datos disponibles" -->
+                  <tr *matNoDataRow>
+                    <td [attr.colspan]="displayedColumns.length" class="text-center" style="font-size:18px;">
+                      No hay datos disponibles
+                    </td>
+                  </tr>
+
+                  <ng-container matColumnDef="id">
+                      <th mat-header-cell *matHeaderCellDef>Id </th>
+                      <td mat-cell *matCellDef="let x"> {{x.id}} </td>
+                  </ng-container>
+
+
+                  <ng-container matColumnDef="usuario">
+                      <th mat-header-cell *matHeaderCellDef>Usuario</th>
+                      <td mat-cell *matCellDef="let x"> {{x.usuario}} </td>
+                  </ng-container> 
+                  
+                   <ng-container matColumnDef="nro_documento">
+                      <th mat-header-cell *matHeaderCellDef>Codigo</th>
+                      <td mat-cell *matCellDef="let x"> {{x.nro_documento}} </td>
+                  </ng-container> 
+
+                  <ng-container matColumnDef="fecha_ini">
+                      <th mat-header-cell *matHeaderCellDef>INICIADO</th>
+                      <td mat-cell *matCellDef="let x"> {{x.fecha_ini}} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="fecha_fin">
+                      <th mat-header-cell *matHeaderCellDef>FINALIZADO</th>
+                      <td mat-cell *matCellDef="let x"> {{x.fecha_fin}} </td>
+                  </ng-container>                 
+
+                  <ng-container matColumnDef="estado">
+                      <th mat-header-cell *matHeaderCellDef>Estado</th>
+                      <td mat-cell *matCellDef="let x"> {{x.estado}} </td>
+                  </ng-container>                                    
+
+                  <ng-container matColumnDef="arqueo">
+                      <th mat-header-cell *matHeaderCellDef>Arqueo</th>
+                      <td mat-cell *matCellDef="let x">
+                        <button mat-raised-button class="bg-primary text-white rounded-button" (click)="arqueoCaja(x.id,x.estado_id)">Arqueo</button>                                                  
+                      </td>
+                  </ng-container> 
+                  
+                  <ng-container matColumnDef="detalle">
+                      <th mat-header-cell *matHeaderCellDef>Detalle</th>
+                      <td mat-cell *matCellDef="let x">
+                        <button mat-raised-button class="bg-info text-black rounded-button" (click)="voucherCierreCaja(x.id)">Detalle</button>
+                      </td>
+                  </ng-container>
+                  
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;" id="fila{{row.id}}"></tr>
+
+              </table>
+          </div>
+          <mat-divider></mat-divider>
+          <mat-paginator [pageSizeOptions]="[5, 10, 20]" [pageSize]="20" showFirstLastButtons class="bg-light">
+          </mat-paginator>
+      </div>
+  </mat-card-content>   
+</mat-card>
+
+
+

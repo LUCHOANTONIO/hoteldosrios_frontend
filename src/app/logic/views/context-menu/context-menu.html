@@ -1,0 +1,23 @@
+
+<div 
+  [style.position]="'fixed'"
+  [style.top]="menuTop"
+  [style.left]="menuLeft"
+  [style.width.px]="1"
+  [style.height.px]="1"
+  [style.overflow]="'hidden'"
+  #menuAnchor>
+ 
+  <button 
+    mat-button 
+    [matMenuTriggerFor]="menu" 
+    #trigger="matMenuTrigger"
+    style="position: absolute; top: 0; left: 0; opacity: 0; pointer-events: auto;">
+  </button>
+</div>
+
+<mat-menu #menu="matMenu" yPosition="below" xPosition="after">
+  <button mat-menu-item (click)="mostrarAgruparReserva()">Agrupar</button>
+</mat-menu>
+
+

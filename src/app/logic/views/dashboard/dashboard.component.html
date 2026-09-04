@@ -1,0 +1,19 @@
+<div class="dashboard-container">
+    <header class="header">
+        <h1>{{ fechaActual }}</h1>
+    </header>
+
+    <section class="stats-section">
+        <app-stats-cards></app-stats-cards>
+    </section>
+
+    <section class="charts-row">
+        <div class="chart-container revenue">
+            <app-revenue-chart></app-revenue-chart>
+        </div>
+        <div class="chart-container analytics">
+            <app-analytics-chart></app-analytics-chart>
+        </div>
+    </section>
+   
+</div>

@@ -1,0 +1,234 @@
+<form autocomplete="off" #huespedForm="ngForm" appPreventEnterSubmit AnimarPerderFocoDirective>
+    <div class="container">
+        <button mat-raised-button type="button" #btnAddHuesped (click)="toggleContainerHuesped()"
+            [hidden]="!hiddenContainerHuesped" class="bg-success text-black rounded-button">Adicionar</button>
+    </div>
+
+    <div id="data_huesped" class="container" [hidden]="hiddenContainerHuesped">
+        <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-2">
+            <mat-form-field class="col">
+                <mat-label>DNI</mat-label>
+                <input matInput placeholder="" [(ngModel)]="huesped.nro_documento" name="huesped_nro_documento"
+                    #txtHuespedNroDocumento (blur)="dniHuesped(huesped.nro_documento)"
+                    (keydown.enter)="cboHuespedTipoDocId.focus()" required cdkFocusInitial>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Tipo Documento</mat-label>
+                <mat-select placeholder="" [(ngModel)]="huesped.tipo_doc_id" name="huesped_tipo_doc_id"
+                    #cboHuespedTipoDocId (keydown.enter)="txtHuespedNombre.focus()" appPreventEnterSelect required>
+                    @for (x of tipo_documentos;track $index) {
+                    <mat-option [value]="x.id">{{x.tipo_documento}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Nombre</mat-label>
+                <input matInput placeholder="" [(ngModel)]="huesped.nombre" name="huesped_nombre" #txtHuespedNombre
+                    (keydown.enter)="txtHuespedPrimerApellido.focus()" required>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Primer Apellido</mat-label>
+                <input matInput placeholder="" [(ngModel)]="huesped.primer_apellido" name="huesped_primer_apellido"
+                    #txtHuespedPrimerApellido (keydown.enter)="txtHuespedSegundoApellido.focus()" required>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Segundo Apellido</mat-label>
+                <input matInput placeholder="" [(ngModel)]="huesped.segundo_apellido" name="huesped_segundo_apellido"
+                    #txtHuespedSegundoApellido (keydown.enter)="txtFechaNacimiento.focus()">
+            </mat-form-field>
+
+            <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <mat-label>Fecha Nacimiento</mat-label>
+                <input matInput [matDatepicker]="picker_fecha_nacimiento" [(ngModel)]="huesped.fecha_nacimiento"
+                    name="fecha_nacimiento" #txtFechaNacimiento (keydown.enter)="EstadoCivilId.focus()">
+                <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_nacimiento"></mat-datepicker-toggle>
+                <mat-datepicker #picker_fecha_nacimiento></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Estado Civil</mat-label>
+                <mat-select placeholder="" [(ngModel)]="huesped.estado_civil_id" name="estado_civil_id" #EstadoCivilId
+                    (keydown.enter)="txtHuespedTelefono.focus()" appPreventEnterSelect>
+                    @for (x of estado_civil;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Telefono</mat-label>
+                <input matInput placeholder="" [(ngModel)]="huesped.telefono" name="huesped_telefono"
+                    #txtHuespedTelefono (keydown.enter)="cboHuespedProcedencia.focus()">
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>Nacionalidad</mat-label>
+                <input matInput type="text" placeholder="Buscar nacionalidad" [value]="busquedaNacionalidad()"
+                    (input)="onBuscarNacionalidad($event)" [matAutocomplete]="autoNacionalidad" #cboNacionalidad
+                    (keydown.enter)="cboPaisProcedencia.focus()" [(ngModel)]="huesped.nacionalidad_id"
+                    name="huesped_nacionalidad_id" #cboHuespedNacionalidad required />
+
+                <mat-autocomplete #autoNacionalidad="matAutocomplete" [displayWith]="displayNacionalidad"
+                    (optionSelected)="nacionalidadSeleccionado.set($event.option.value)">
+                    @for (nacionalidad of filteredNacionalidad(); track nacionalidad.id) {
+                    <mat-option [value]="nacionalidad.id">{{ nacionalidad.descripcion }}</mat-option>
+                    }
+                </mat-autocomplete>
+            </mat-form-field>
+
+            <div class="divider-with-text">
+                <mat-divider></mat-divider>
+                <span class="divider-text">DATOS RESERVA</span>
+                <mat-divider></mat-divider>
+            </div>
+
+            <mat-form-field>
+                <mat-label>País de Procedencia</mat-label>
+                <input matInput type="text" placeholder="Buscar país Procedencia" [value]="busquedaPaisProcedencia()"
+                    (input)="onBuscarPaisProcedencia($event)" [matAutocomplete]="autoProcedencia" #cboPaisProcedencia
+                    (keydown.enter)="cboHuespedMotivo.focus()" [(ngModel)]="huesped.pais_procedencia_id"
+                    name="huesped_pais_procedencia_id" #cboHuespedProcedencia required />
+
+                <mat-autocomplete #autoProcedencia="matAutocomplete" [displayWith]="displayPaisProcedencia"
+                    (optionSelected)="paisProcedenciaSeleccionado.set($event.option.value)">
+                    @for (pais of filteredPaisesProcedencia(); track pais.id) {
+                    <mat-option [value]="pais.id">{{ pais.descripcion }}</mat-option>
+                    }
+                </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Motivo</mat-label>
+                <mat-select placeholder="" [(ngModel)]="huesped.motivo_id" name="huesped_motivo_id" #cboHuespedMotivo
+                    (keydown.enter)="cboHuespedTipoHuesped.focus()" appPreventEnterSelect required>
+                    @for (x of motivos;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Tipo Huesped</mat-label>
+                <mat-select placeholder="" [(ngModel)]="huesped.tipo_huesped_id" name="tipo_huesped_id"
+                    #cboHuespedTipoHuesped appPreventEnterSelect required>
+                    @for (x of tipo_huespedes;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="col">
+                <mat-label>Cargo Extra</mat-label>
+                <input type="number" matInput placeholder="" [(ngModel)]="huesped.cargo_extra"
+                    name="huesped_cargo_extra" #txtCargoExtra placeholder="0">
+                <mat-icon matSuffix style="color: #FF5F1F;">payments</mat-icon>
+            </mat-form-field>
+
+        </mat-dialog-content>
+
+        <mat-dialog-actions class="d-flex justify-content-around bg-light">
+            <button mat-raised-button type="button" #btnAddHuesped (click)="cancelarHuesped()"
+                class="bg-primary text-white rounded-button">Cancelar</button>
+            <button mat-raised-button type="button" #btnGuardarHuesped class="bg-success text-black rounded-button"
+                (click)="submitHuesped(huespedForm)" appBotonGuardar [form]="huespedForm">
+                <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Guardar
+            </button>
+        </mat-dialog-actions>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table mat-table [dataSource]="dataSourceHuesped" class="mat-elevation-z8 w-100">
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                            <td mat-cell *matCellDef="let huespedData">
+                                <button mat-icon-button class="text-primary"
+                                    (click)="editarHuesped(huespedData)"><mat-icon>edit</mat-icon></button>
+                                <button mat-icon-button class="text-danger"
+                                    (click)="eliminarHuesped('0ms', '0ms',huespedData)"><mat-icon>delete</mat-icon></button>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="huesped_id">
+                            <th mat-header-cell *matHeaderCellDef>Id</th>
+                            <td mat-cell *matCellDef="let huespedData"> {{ huespedData.huesped_id}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="nacionalidad_id">
+                            <th mat-header-cell *matHeaderCellDef>Id</th>
+                            <td mat-cell *matCellDef="let huespedData"> {{ huespedData.nacionalidad_id}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="fecha_ingreso">
+                            <th mat-header-cell *matHeaderCellDef>Fecha Ingreso</th>
+                            <td mat-cell *matCellDef="let huespedData"> {{ huespedData.fecha_ingreso}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="fecha_salida">
+                            <th mat-header-cell *matHeaderCellDef>Fecha Salida</th>
+                            <td mat-cell *matCellDef="let huespedData"> {{ huespedData.fecha_salida}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="huesped">
+                            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                            <td mat-cell *matCellDef="let huespedData"> {{ huespedData.huesped}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="nro_documento">
+                            <th mat-header-cell *matHeaderCellDef>DNI</th>
+                            <td mat-cell *matCellDef="let huespedData"> {{ huespedData.nro_documento}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="cargo_extra">
+                            <th mat-header-cell *matHeaderCellDef>Cargo Extra</th>
+                            <td mat-cell *matCellDef="let huespedData"> {{ huespedData.cargo_extra }} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="estado_huesped">
+                            <th mat-header-cell *matHeaderCellDef>Estado</th>
+                            <td mat-cell *matCellDef="let huespedData"> {{ huespedData.estado_huesped }} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="opcion">
+                            <th mat-header-cell *matHeaderCellDef>Opción</th>
+                            <td mat-cell *matCellDef="let huespedData">
+                                @if (huespedData.estado_huesped_id === 1) {
+                                <button mat-button class="bg-primary text-white rounded-button small-text"
+                                    (click)="mostrarConfirmarEstado('¿Está seguro de realizar el Check-In?','0ms', '0ms',huespedData.huesped_id,2)"
+                                    appBotonGuardar>
+                                    <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Check
+                                    In
+                                </button>
+                                } @else if (huespedData.estado_huesped_id === 2) {
+                                <button mat-button class="bg-success text-black rounded-button small-text"
+                                    (click)="mostrarConfirmarEstado('¿Está seguro de realizar el Check-Out?','0ms', '0ms',huespedData.huesped_id,3)"
+                                    appBotonGuardar>
+                                    <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Check
+                                    Out
+                                </button>
+                                } @else {
+                                <button mat-button class="bg-secondary text-white rounded-button small-text" disabled>{{
+                                    huespedData.estado_huesped }}</button>
+                                }
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumnsHuesped" class="bg-light"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumnsHuesped;"></tr>
+                    </table>
+                </div>
+
+                <mat-divider></mat-divider>
+                <mat-paginator [pageSizeOptions]="[5, 10, 20]" [pageSize]="20" showFirstLastButtons class="bg-light">
+                </mat-paginator>
+            </div>
+        </div>
+    </div>
+
+</form>

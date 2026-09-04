@@ -1,0 +1,144 @@
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+      USUARIOS
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon style="color:white">close</mat-icon>
+      </button>
+    </h1>
+
+    <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-3 px-0 pt-0">
+
+        <div class="divider-with-text">
+          <mat-divider></mat-divider>
+          <span class="divider-text">DATOS PERSONA</span>
+          <mat-divider></mat-divider>
+        </div>
+
+        <mat-form-field class="col">
+            <mat-label>Nro Documento</mat-label>
+            <input matInput placeholder="" [(ngModel)]="usuario.nro_documento" name="nro_documento" (keydown.enter)="cboTipoDocId.focus()" (blur)="verificarNroDocumento(usuario.nro_documento)" cdkFocusInitial required>
+            <mat-icon matSuffix>receipt</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Tipo Documento</mat-label>
+            <mat-select placeholder="" [(ngModel)]="usuario.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtNombre.focus()" appPreventEnterSelect required>
+                @for (x of tipo_documentos;track $index) {
+                    <mat-option [value]="x.id">{{x.tipo_documento}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>nombre</mat-label>
+            <input matInput placeholder="" [(ngModel)]="usuario.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>
+            <mat-icon matSuffix>face</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Primer Apellido</mat-label>
+            <input matInput placeholder="" [(ngModel)]="usuario.primer_apellido" name="primer_apellido" #txtPrimerApellido #txtNombre (keydown.enter)="txtSegundoApellido.focus()" required>
+            <mat-icon matSuffix>face</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Segundo Apellido</mat-label>
+            <input matInput placeholder="" [(ngModel)]="usuario.segundo_apellido" name="segundo_apellido" #txtSegundoApellido (keydown.enter)="txtEmail.focus()">
+            <mat-icon matSuffix>face</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Email</mat-label>
+            <input matInput placeholder="" [(ngModel)]="usuario.email" name="email" #txtEmail (keydown.enter)="txtTelefono.focus()">
+            <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Telefono</mat-label>
+            <input matInput placeholder="" [(ngModel)]="usuario.telefono" name="telefono" #txtTelefono (keydown.enter)="txtDireccion.focus()">
+            <mat-icon matSuffix>phone</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Direccion</mat-label>
+            <input matInput placeholder="" [(ngModel)]="usuario.direccion" name="direccion" #txtDireccion (keydown.enter)="txtFechaNacimiento.focus()">
+            <mat-icon matSuffix>home</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+          <mat-label>Fecha Nacimiento</mat-label>
+          <input matInput type="date"  [(ngModel)]="usuario.fecha_nacimiento" name="fecha_nacimiento" #txtFechaNacimiento (keydown.enter)="cboGeneroId.focus()">
+          <mat-icon matSuffix>event</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Genero</mat-label>
+            <mat-select placeholder="" [(ngModel)]="usuario.genero_id" name="genero_id" #cboGeneroId (keydown.enter)="EstadoCivilId.focus()" appPreventEnterSelect required>
+                @for (x of generos;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Estado Civil</mat-label>
+            <mat-select placeholder="" [(ngModel)]="usuario.estado_civil_id" name="estado_civil_id" #EstadoCivilId (keydown.enter)="txtUsuario.focus()" appPreventEnterSelect required>
+                @for (x of estado_civil;track $index) {
+                    <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <div class="divider-with-text">
+          <mat-divider></mat-divider>
+          <span class="divider-text">USUARIO SISTEMA</span>
+          <mat-divider></mat-divider>
+        </div>
+
+        <mat-form-field class="col">
+          <mat-label>Usuario</mat-label>
+          <input matInput placeholder="" [(ngModel)]="usuario.usuario" name="usuario" #txtUsuario (keydown.enter)="txtUsuarioEmail.focus()" required>
+          <mat-icon matSuffix>person</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Email Institucional</mat-label>
+            <input matInput placeholder="" [(ngModel)]="usuario.usuario_email" name="usuario_mail" #txtUsuarioEmail (keydown.enter)="cboRegionalId.focus()">
+            <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Regional</mat-label>
+            <mat-select placeholder="" [(ngModel)]="usuario.regional_id" name="regional_id" #cboRegionalId (keydown.enter)="cboAgenciaId.focus()" (selectionChange)="cargarComboAgenciaPorIdRegional($event.value)" appPreventEnterSelect required>
+                @for (v_regional of regionales;track $index) {
+                    <mat-option [value]="v_regional.id">{{v_regional.nombre}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Agencia</mat-label>
+            <mat-select placeholder="" [(ngModel)]="usuario.agencia_id" name="agencia_id" #cboAgenciaId (keydown.enter)="RolId.focus()" appPreventEnterSelect required>
+                @for (v_agencia of agencias;track $index) {
+                    <mat-option [value]="v_agencia.id">{{v_agencia.nombre}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="col">
+            <mat-label>Rol</mat-label>
+            <mat-select placeholder="" [(ngModel)]="usuario.rol_ids" name="rol_ids" #RolId appPreventEnterSelect multiple required>
+                @for (v_rol of roles;track $index) {
+                    <mat-option [value]="v_rol.id">{{v_rol.nombre}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner  diameter="18"></mat-spinner> </mat-icon> Guardar </button>
+    </mat-dialog-actions>
+</form>
+

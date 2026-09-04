@@ -1,0 +1,25 @@
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+    IMAGEN
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon style="color:white">close</mat-icon>
+    </button>
+ </h1>
+
+<mat-dialog-content class="mat-typography p-1">
+    <div class="position-relative">
+        <img [src]="url_imagen_actual_safe" 
+             alt="Imagen de reserva" 
+             class="d-block w-100 shadow-sm rounded">       
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="d-flex justify-content-center gap-2">
+    @if (tiene_varias_imagenes) {
+        <button mat-mini-fab color="primary" (click)="prev()">
+            <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button mat-mini-fab color="primary" (click)="next()">
+            <mat-icon>chevron_right</mat-icon>
+        </button>
+    }
+</mat-dialog-actions>

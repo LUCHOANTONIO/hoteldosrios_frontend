@@ -1,0 +1,41 @@
+import { TransaccionModel } from "./transaccion.model";
+
+export class ReservaModel {
+    id: number;
+    correlativo: number;
+    nro_documento: string = "";
+    tipo_doc_id: number;
+    nacionalidad_id: number | null = null;
+    nombre: string = "";
+    primer_apellido: string = "";
+    segundo_apellido: string = "";
+    estado_civil_id: number | null = null;
+    fecha_nacimiento: string = "";
+    correo: string = "";
+    telefono: string = "";
+    cliente_id: number;
+    cliente: string = "";
+    nombre_corto_cliente: string = "";
+    habitacion_id: number;
+    canal_reserva_id: number;
+    forma_pago_id: number | null = null;
+    forma_pago_servicio_id: number;
+    pais_procedencia_id: number;
+    estado_reserva_id: number;
+    habitacion_precio_id: number;
+    fecha_ini: string = "";
+    fecha_fin: string = "";
+    cantidad_huesped: number = 1;
+    hora_llegada: string = "";
+    detalle: string = "";
+    color: string = "";
+    cantidad: number;
+    precio_unitario: number;
+    descuento_porcentaje: number;
+    descuento: number;
+    tiene_mensaje: boolean = false;
+    is_externo: number = 0;
+    saldo: number;
+    total: number;
+    transacciones: TransaccionModel[] = [];
+}

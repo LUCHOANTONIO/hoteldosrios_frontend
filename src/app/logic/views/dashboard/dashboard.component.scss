@@ -1,0 +1,111 @@
+.dashboard-container {
+    padding: 30px 40px;
+    background-color: #f8f9fc;
+    min-height: 100vh;
+}
+
+.header {
+    margin-bottom: 30px;
+
+    h1 {
+        font-size: 36px;
+        font-weight: 700;
+        color: #1a1f36; // Dark text
+        margin: 0;
+    }
+}
+
+.charts-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    margin-top: 24px;
+
+    .chart-container {
+        background: white;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+
+        &.revenue {
+            flex: 2;
+            min-width: 0; // Fix for echarts overflow
+        }
+
+        &.analytics {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+}
+
+.bottom-row {
+    display: flex;
+    gap: 24px;
+
+    .action-calendar-col {
+        flex: 0 0 350px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+
+        .new-register-btn {
+            background-color: #00C853; // Green color from image
+            color: white;
+            height: 60px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 500;
+            width: 100%;
+        }
+    }
+
+    .reminders-col {
+        flex: 1;
+        background: white;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        min-width: 0;
+    }
+}
+
+// Responsiveness
+@media (max-width: 1200px) {
+    .charts-row {
+        flex-direction: column;
+    }
+
+    .bottom-row {
+        flex-direction: column;
+
+        .action-calendar-col {
+            flex: auto;
+            width: 100%;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 16px; // Reduce padding on mobile
+    }
+
+    .header {
+        margin-bottom: 20px;
+
+        h1 {
+            font-size: 28px; // Smaller title
+        }
+    }
+
+    .charts-row {
+        gap: 16px;
+        margin-bottom: 16px;
+        margin-top: 16px;
+    }
+
+    .bottom-row {
+        gap: 16px;
+    }
+}

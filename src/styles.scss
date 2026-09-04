@@ -1,0 +1,121 @@
+// Custom.scss PERSONALIZACION BOOTSTRAP 5.
+$dark: #0a426092;
+$light: #f0f1f5fa;
+$success: #05df79ad;
+$primary: #0b7dd4;
+$secondary: #5e5b5ee2;
+$danger: #bd1818;
+$warning: #d6af10;
+$info: #39c8c8;
+
+@import "bootstrap/scss/bootstrap"; //Aunque se recomienda usar @use esperar la version 6 de bootstrap
+
+
+html,
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    height: 100%;
+}
+
+/*BEGIN: Configura el tamaño del dialog y el boton close*/
+.dialog-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 1 16px !important;
+    /* Ajusta el padding según sea necesario */
+    font-size: 1.5em !important;
+    text-align: left !important;
+}
+
+.dialog-header button {
+    margin-left: auto !important;
+}
+
+/*END: Configura el tamaño del dialog y el boton close*/
+
+/*BEGIN: Configura el border radius de los botones*/
+.rounded-button {
+    border-radius: 0.5rem !important;
+}
+
+/*END: Configura el border radius de los botones*/
+
+
+/*START TIMELINE*/
+/* ESTABLECIENDO COLOR DE FONDO PARA LOS DIAS SABADOS Y DOMINGOS */
+.vis-time-axis .vis-grid.vis-saturday,
+.vis-time-axis .vis-grid.vis-sunday {
+    background: #f2f8fa;
+}
+
+/* ESTABLECIENDO COLOR DE TEXTO PARA LOS DIAS SABADOS Y DOMINGOS */
+.vis-time-axis .vis-text.vis-saturday,
+.vis-time-axis .vis-text.vis-sunday {
+    color: blue;
+}
+
+/* poniendo color a grupos o encabezado de fila*/
+.vis-panel.vis-left,
+.vis-panel.vis-top,
+.vis-panel.vis-bottom {
+    text-align: center;
+    background-color: rgb(230, 230, 230);
+}
+
+/* barra superior e indweioe mayor de meses */
+div.vis-text.vis-major {
+    font-weight: bold;
+    padding: 0;
+    align-content: center;
+}
+
+/* barra superior menor de dias */
+.vis-panel.vis-top div.vis-text.vis-minor {
+    /* font-weight: bold; */
+    padding: 0;
+    background-color: rgb(240, 240, 240);
+    border-left: 1px solid gray;
+    border-top: 1px solid gray
+}
+
+/* barra inferior menor de dias */
+.vis-panel.vis-bottom div.vis-text.vis-minor {
+    /* font-weight: bold; */
+    padding: 0;
+    background-color: rgb(240, 240, 240);
+    border-left: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
+
+.vis-drag-left,
+.vis-drag-right {
+    background-color: cyan;
+    opacity: 0.3;
+}
+
+/*END TIMELINE*/
+
+/* BEGIN NEW RESERVATION HIGHLIGHT */
+.new-reservation-highlight {
+    border: 3px solid #ff9800 !important;
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.8) !important;
+    animation: new-item-pulse 2s infinite;
+}
+
+@keyframes new-item-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+    }
+}
+
+/* END NEW RESERVATION HIGHLIGHT */

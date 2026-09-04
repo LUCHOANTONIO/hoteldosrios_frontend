@@ -1,0 +1,38 @@
+@if(nodo){
+      @if(nodo.id==null){
+        @for (x of nodo.subMenus; track $index) {
+            <app-hmenu #menu [nodo]="x"></app-hmenu>
+          
+            @if (menu?.menuRef) {
+              <button mat-button [matMenuTriggerFor]="menu.menuRef" class="text-white fs-6">
+                @if(x.icono){<mat-icon>{{x.icono}}</mat-icon>}
+                {{x.nombre}}
+                 @if(x.subMenus && x.subMenus.length >0){▾}
+              </button>
+            }
+          
+          }
+    }
+    @else{
+        <mat-menu #menuRef="matMenu" >
+            @for (x of nodo.subMenus; track $index) {
+                @if (x.subMenus && x.subMenus.length > 0) {
+                    <app-hmenu #menu [nodo]="x"></app-hmenu>
+                    @if (menu?.menuRef) {
+                        <button mat-menu-item [matMenuTriggerFor]="menu.menuRef" >
+                            @if(x.icono){<mat-icon>{{x.icono}}</mat-icon>} 
+                            {{ x.nombre }}
+                        </button>
+                    }
+                }
+                @else{
+                    <a mat-menu-item [routerLink]="x.url" >
+                        @if(x.icono){<mat-icon>{{x.icono}}</mat-icon>} 
+                        {{x.nombre}}
+                    </a>
+                }
+            }
+        </mat-menu>
+    }
+  
+  }

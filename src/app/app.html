@@ -1,0 +1,22 @@
+@if(loaderService.isLoading | async){
+<div class="position-absolute w-100 h-100 bg-black bg-opacity-50 z-3">
+  <mat-spinner class="top-50 start-50 translate-middle"></mat-spinner>
+</div>
+}
+<div class="contenedor bg-success">
+  @if(authService.isAuth()){
+  <app-header (toogleClickEvent)="toogleSideNav()" [hidden]="!authService.isAuth()"></app-header>
+  }@else{
+  <!-- este div vacio porque en el ccs espera una seccion de encabezado. -->
+  <div></div>
+  }
+  <mat-sidenav-container autosize class="bg-light w-100 ">
+    <mat-sidenav [(opened)]="appService.mostrarSideNav" [mode]="appService.tamPantalla=='xs'?'over':'side'"
+      [hidden]="!(authService.isAuth() && appService.session.Configuraciones.MOSTRAR_MENU_VERTICAL || appService.tamPantalla=='xs')">
+      <app-menu></app-menu>
+    </mat-sidenav>
+    <mat-sidenav-content [ngClass]="appService.tamPantalla=='xs'?'':'p-3'">
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

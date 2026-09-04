@@ -1,0 +1,19 @@
+table {
+    width: 100%;
+}
+
+/*BEGIN: Footer para total general*/
+.fila-resumen {
+    background-color: #f8f9fa !important;
+}
+
+.fila-resumen td {
+    font-weight: bold !important;
+    color: #2c3e50;
+    border-top: 2px solid #dee2e6;
+}
+
+.fila-resumen td:first-child {
+    color: #0d6efd; /* Azul primario solo al título de la fila */
+} /*END: Footer para total general*/
+

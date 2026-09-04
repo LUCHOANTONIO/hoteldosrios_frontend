@@ -1,0 +1,88 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$my-theme: mat.define-theme((
+ color: (
+    theme-type: light,
+    primary: mat.$blue-palette,
+  ),
+  typography: (
+  brand-family: 'Comic Sans',
+  bold-weight: 900,
+
+),
+density: (
+  scale: -1 //0 (mas espacio) a -5 (mas compacto)
+),
+
+));
+
+html {
+  // Emit theme-dependent styles for common features used across multiple components.
+  @include mat.core-theme($my-theme);
+
+  // Emit styles for MatButton based on `$my-theme`. Because the configuration
+  // passed to `define-theme` omits typography, `button-theme` will not
+  // emit any typography styles.
+  //@include mat.button-theme($my-theme);
+  @include mat.all-component-themes($my-theme);
+  // @include mat.sidenav-theme($my-theme);
+  // @include mat.toolbar-theme($my-theme);
+  // Include the theme mixins for other components you use here.
+  --mat-form-field-filled-container-color:transparent;
+  --mat-form-field-outlined-input-text-placeholder-color: rgba(139, 143, 141, 0.6);
+  //--mdc-outlined-text-field-focus-label-text-color: rgba(156, 39, 176, .87);
+  --mat-form-field-outlined-label-text-color: rgba(143, 139, 143, 0.6);
+
+  --mat-form-field-container-height: 30px;
+  // --mat-form-field-filled-label-display: block;
+  --mat-form-field-container-vertical-padding: 8px;
+  // --mat-form-field-filled-with-label-container-padding-top: 14px;
+  // --mat-form-field-filled-with-label-container-padding-bottom: 4px
+  /* default/primary color */
+ // --mat-badge-background-color: #9c27b0;
+ // --mat-badge-text-color: white;
+ // --mat-badge-disabled-state-background-color: #6e6e6e;
+ // --mat-badge-disabled-state-text-color: rgba(255, 255, 255, .5);
+
+ /* typography */
+ // --mat-badge-text-font: Roboto, sans-serif;
+ // --mat-badge-text-size: 12px;
+ // --mat-badge-text-weight: 600;
+ // --mat-badge-small-size-text-size: 9px;
+ // --mat-badge-large-size-text-size: 24px
+
+ //dialog
+  --mat-dialog-container-shape: 10px; 
+  --mat-toolbar-standard-height: 30px;
+  --mat-toolbar-mobile-height: 26px;
+
+   /* border-radius card*/
+  --mat-card-elevated-container-shape: 10px;
+  --mat-card-outlined-container-shape: 10px;
+}
+
+.success-snackbar {
+  --mat-snack-bar-container-color: green;//color de fondo del contenedor
+  --mat-snack-bar-supporting-text-color: white;//color del mensaje
+  --mat-snack-bar-button-color: green;//color de texto en el boton
+  --mat-snack-bar-container-shape:20px; //border-raduis del contenedor
+  button{background-color:rgb(166, 248, 176)};
+}
+
+.info-snackbar {
+  --mat-snack-bar-container-color: rgb(72, 171, 237);
+  --mat-snack-bar-supporting-text-color: white ;
+  --mat-snack-bar-button-color: rgb(72, 171, 237);//color de texto en el boton
+  --mat-snack-bar-container-shape:20px; //border-raduis del contenedor
+  button{background-color: rgb(192, 239, 255)};
+}
+
+.danger-snackbar {
+  --mat-snack-bar-container-color: rgb(242, 5, 76);
+  --mat-snack-bar-supporting-text-color: rgb(248, 253, 248);
+  --mat-snack-bar-button-color: rgba(239, 25, 25, 0.87);
+  --mat-snack-bar-container-shape:20px; //border-raduis del contenedor
+   button{background-color: pink};
+}
