@@ -16,23 +16,30 @@
             </div>
             <div class="row g-2">
                 <!-- 1. N° Documento -->
-                <mat-form-field class="col-12 col-md-6" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Nro Documento</mat-label>
                     <input matInput placeholder="" [(ngModel)]="cotizacion.dni" name="dni" #txtDni (keydown.enter)="cboTipoDocId.focus()">
                     <mat-icon matSuffix>receipt</mat-icon>
                 </mat-form-field>
 
                 <!-- 2. Tipo Documento -->
-                <mat-form-field class="col-12 col-md-6" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Tipo Documento</mat-label>
-                    <mat-select placeholder="" [(ngModel)]="cotizacion.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtNombre.focus()" appPreventEnterSelect>
+                    <mat-select placeholder="" [(ngModel)]="cotizacion.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtTelefono.focus()" appPreventEnterSelect>
                         @for (item of tiposDocumento; track item.id) {
                             <mat-option [value]="item.id">{{ item.tipo_documento }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
 
-                <!-- 3. Nombre -->
+                <!-- 3. Teléfono -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Teléfono</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.telefono" name="telefono" #txtTelefono (keydown.enter)="txtNombre.focus()">
+                    <mat-icon matSuffix>phone</mat-icon>
+                </mat-form-field>
+
+                <!-- 4. Nombre -->
                 <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>nombre*</mat-label>
                     <input matInput placeholder="" [(ngModel)]="cotizacion.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>

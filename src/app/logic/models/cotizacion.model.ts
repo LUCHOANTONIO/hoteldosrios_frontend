@@ -9,6 +9,7 @@ export class CotizacionModel {
     nombre: string = '';
     primer_apellido: string = '';
     segundo_apellido: string = '';
+    telefono?: string = '';
     cliente?: string = '';
     fecha_ini: string = '';
     fecha_fin: string = '';
