@@ -1,6 +1,15 @@
 .tarifa-selector-modal {
-    min-width: 320px;
+    min-width: 280px;
     max-width: 100%;
+}
+
+.search-form-field {
+    width: 100%;
+    max-width: 320px;
+
+    @media (max-width: 576px) {
+        max-width: 100%;
+    }
 }
 
 .dialog-header {
@@ -15,6 +24,8 @@
 }
 
 .tabla-catalogo {
+    min-width: 600px;
+
     .fila-catalogo {
         cursor: pointer;
         transition: background-color 0.15s ease;

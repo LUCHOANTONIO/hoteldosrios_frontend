@@ -16,6 +16,8 @@
 }
 
 .tabla-detalle {
+    min-width: 780px;
+
     th {
         font-size: 13px;
         padding: 8px;
@@ -25,4 +27,13 @@
     td {
         padding: 4px 6px;
     }
+}
+
+.tarifa-select-panel {
+    max-width: 480px !important;
+}
+
+.tarifa-option-item {
+    font-size: 13.5px;
+    border-bottom: 1px dashed #e2e8f0;
 }

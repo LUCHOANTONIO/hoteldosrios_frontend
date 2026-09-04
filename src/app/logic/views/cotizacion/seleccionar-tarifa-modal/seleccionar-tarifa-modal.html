@@ -13,8 +13,8 @@
     </h1>
 
     <!-- BARRA DE BÚSQUEDA / FILTRO -->
-    <div class="px-3 py-2 bg-light border-bottom d-flex justify-content-between align-items-center">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 280px;">
+    <div class="px-3 py-2 bg-light border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-form-field">
             <mat-label>Buscar tarifa...</mat-label>
             <input matInput (keyup)="buscar(txtBusqueda.value)" #txtBusqueda
                 placeholder="Servicio, paquete, hospedaje...">

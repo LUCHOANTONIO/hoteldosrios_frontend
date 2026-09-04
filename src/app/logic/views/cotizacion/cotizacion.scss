@@ -1,5 +1,15 @@
+.search-form-field {
+    width: 100%;
+    max-width: 320px;
+
+    @media (max-width: 576px) {
+        max-width: 100%;
+    }
+}
+
 .mat-column-actions {
     width: 110px;
+    min-width: 110px;
     text-align: center;
 }
 
@@ -10,6 +20,21 @@
     text-align: left;
 }
 
-.mat-column-detalles_btn {
-    width: 120px;
+.mat-column-documento_btn {
+    width: 90px;
+    min-width: 90px;
+}
+
+.mat-column-fecha_ini,
+.mat-column-fecha_fin {
+    white-space: nowrap;
+    min-width: 110px;
+}
+
+.mat-column-cliente {
+    min-width: 160px;
+}
+
+.mat-column-detalle {
+    min-width: 180px;
 }

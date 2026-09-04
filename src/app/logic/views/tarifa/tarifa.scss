@@ -1,13 +1,41 @@
+.search-form-field {
+    width: 100%;
+    max-width: 320px;
+
+    @media (max-width: 576px) {
+        max-width: 100%;
+    }
+}
+
 .mat-column-actions {
     width: 110px;
+    min-width: 110px;
     text-align: center;
+}
+
+.mat-column-servicio {
+    min-width: 140px;
+}
+
+.mat-column-tipo_hospedaje {
+    min-width: 130px;
+}
+
+.mat-column-paquete {
+    min-width: 110px;
 }
 
 .mat-column-tarifa_adulto,
 .mat-column-tarifa_ninio {
+    white-space: nowrap;
     width: 130px;
+    min-width: 120px;
 }
 
 .mat-column-comida_incluida {
-    width: 130px;
+    min-width: 130px;
+}
+
+.mat-column-detalle {
+    min-width: 150px;
 }
