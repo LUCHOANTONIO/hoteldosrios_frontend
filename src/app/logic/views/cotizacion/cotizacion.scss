@@ -4,7 +4,10 @@
 }
 
 .mat-column-correlativo {
-    width: 100px;
+    white-space: nowrap;
+    width: 140px;
+    min-width: 130px;
+    text-align: left;
 }
 
 .mat-column-detalles_btn {

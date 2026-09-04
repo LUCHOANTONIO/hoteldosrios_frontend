@@ -102,8 +102,38 @@ export class CotizacionFormComponent {
   ) {
     this.cotizacion = data.cotizacion;
     this.cotizaciones = data.cotizaciones;
+    this.normalizarFechasParaFormulario();
     this.cargarDatosIniciales();
     this.dialogRef.backdropClick().subscribe(x => { });
+  }
+
+  private parsearFecha(fecha: any): Date | null {
+    if (!fecha) return null;
+    if (fecha instanceof Date) return isNaN(fecha.getTime()) ? null : fecha;
+    if (typeof fecha === 'string') {
+      const fechaLimpia = fecha.trim();
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(fechaLimpia)) {
+        const [dia, mes, anio] = fechaLimpia.split('/').map(Number);
+        return new Date(anio, mes - 1, dia);
+      }
+      if (/^\d{4}-\d{2}-\d{2}/.test(fechaLimpia)) {
+        const [anio, mes, dia] = fechaLimpia.substring(0, 10).split('-').map(Number);
+        return new Date(anio, mes - 1, dia);
+      }
+    }
+    const m = moment(fecha, ['DD/MM/YYYY', 'YYYY-MM-DD', moment.ISO_8601]);
+    return m.isValid() ? m.toDate() : null;
+  }
+
+  private normalizarFechasParaFormulario() {
+    if (this.cotizacion) {
+      if (this.cotizacion.fecha_ini) {
+        this.cotizacion.fecha_ini = this.parsearFecha(this.cotizacion.fecha_ini) as any;
+      }
+      if (this.cotizacion.fecha_fin) {
+        this.cotizacion.fecha_fin = this.parsearFecha(this.cotizacion.fecha_fin) as any;
+      }
+    }
   }
 
   cargarDatosIniciales() {
@@ -255,9 +285,9 @@ export class CotizacionFormComponent {
 
   validarFechas() {
     if (this.cotizacion.fecha_ini && this.cotizacion.fecha_fin) {
-      const fIni = moment(this.cotizacion.fecha_ini);
-      const fFin = moment(this.cotizacion.fecha_fin);
-      if (fIni.isAfter(fFin)) {
+      const fIni = moment(this.cotizacion.fecha_ini, ['DD/MM/YYYY', 'YYYY-MM-DD', moment.ISO_8601]);
+      const fFin = moment(this.cotizacion.fecha_fin, ['DD/MM/YYYY', 'YYYY-MM-DD', moment.ISO_8601]);
+      if (fIni.isValid() && fFin.isValid() && fIni.isAfter(fFin)) {
         this.alertService.show("La Fecha Ingreso no puede ser mayor a la Fecha Salida", { duration: 3000, type: 'warning' });
       }
     }
@@ -271,9 +301,9 @@ export class CotizacionFormComponent {
         return;
       }
 
-      const fIni = moment(this.cotizacion.fecha_ini);
-      const fFin = moment(this.cotizacion.fecha_fin);
-      if (fIni.isAfter(fFin)) {
+      const fIni = moment(this.cotizacion.fecha_ini, ['DD/MM/YYYY', 'YYYY-MM-DD', moment.ISO_8601]);
+      const fFin = moment(this.cotizacion.fecha_fin, ['DD/MM/YYYY', 'YYYY-MM-DD', moment.ISO_8601]);
+      if (fIni.isValid() && fFin.isValid() && fIni.isAfter(fFin)) {
         this.alertService.show("La Fecha Ingreso no puede ser mayor a la Fecha Salida", { duration: 4000, type: 'warning' });
         return;
       }
@@ -308,13 +338,15 @@ export class CotizacionFormComponent {
       this.cotizacion.detalles = this.detalles;
 
       if (this.cotizacion.fecha_ini) {
-        this.cotizacion.fecha_ini = moment(this.cotizacion.fecha_ini).format('YYYY-MM-DD');
+        const fIniMoment = moment(this.cotizacion.fecha_ini, ['DD/MM/YYYY', 'YYYY-MM-DD', moment.ISO_8601]);
+        this.cotizacion.fecha_ini = fIniMoment.isValid() ? fIniMoment.format('YYYY-MM-DD') : this.cotizacion.fecha_ini;
       } else {
         this.cotizacion.fecha_ini = null as any;
       }
 
       if (this.cotizacion.fecha_fin) {
-        this.cotizacion.fecha_fin = moment(this.cotizacion.fecha_fin).format('YYYY-MM-DD');
+        const fFinMoment = moment(this.cotizacion.fecha_fin, ['DD/MM/YYYY', 'YYYY-MM-DD', moment.ISO_8601]);
+        this.cotizacion.fecha_fin = fFinMoment.isValid() ? fFinMoment.format('YYYY-MM-DD') : this.cotizacion.fecha_fin;
       } else {
         this.cotizacion.fecha_fin = null as any;
       }
