@@ -1,0 +1,28 @@
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    padding: 10px 18px;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background-color: #1e293b;
+    color: #ffffff;
+}
+
+.section-detalle-header {
+    padding-top: 4px;
+}
+
+.tabla-detalle {
+    th {
+        font-size: 13px;
+        padding: 8px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+    td {
+        padding: 4px 6px;
+    }
+}

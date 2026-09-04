@@ -28,6 +28,8 @@ import { ReporteEgresoCuentaComponent } from './views/reporte/egreso_cuenta/egre
 import { ReporteSiatComponent } from './views/reporte/siat/siat';
 import { InventarioComponent } from './views/inventario/inventario';
 import { ReporteCuentasCobrarComponent } from './views/reporte/cuenta_cobrar/cuenta_cobrar';
+import { CotizacionComponent } from './views/cotizacion/cotizacion';
+import { TarifaComponent } from './views/tarifa/tarifa';
 
 export const LOGIC_ROUTES: Routes = [
     { path: 'timeline', component: TimelineComponent, canActivate: [authGuard] },
@@ -57,5 +59,7 @@ export const LOGIC_ROUTES: Routes = [
     { path: 'reporte_egreso_cuenta', component: ReporteEgresoCuentaComponent, canActivate: [authGuard] },
     { path: 'reporte_siat', component: ReporteSiatComponent, canActivate: [authGuard] },
     { path: 'reporte_cuentas_cobrar', component: ReporteCuentasCobrarComponent, canActivate: [authGuard] },
-    { path: 'inventarios', component: InventarioComponent, canActivate: [authGuard] }
+    { path: 'inventarios', component: InventarioComponent, canActivate: [authGuard] },
+     { path: 'cotizaciones', component: CotizacionComponent, canActivate: [authGuard] },
+    { path: 'tarifas', component: TarifaComponent, canActivate: [authGuard] }
 ];

@@ -24,5 +24,9 @@ export class DocumentoService{
     obtenerVoucherArqueo(id:number): Observable<string> {        
         return this.http.get<string>(`${this.URL_API_BASE}/voucher_arqueo/${id}`);
     }
+
+    obtenerVoucherCotizacion(id:number): Observable<string> {        
+        return this.http.get<string>(`${this.URL_API_BASE}/voucher_cotizacion/${id}`);
+    }
     
 }

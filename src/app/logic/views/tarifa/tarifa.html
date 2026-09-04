@@ -1,0 +1,128 @@
+<mat-card class="my-1" appearance="outlined">
+    <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center;">
+        <div style="display: flex; align-items: center; flex: 1;">
+            <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
+                <mat-icon style="vertical-align: middle; margin-right: 6px;" class="text-primary">price_change</mat-icon>
+                TARIFAS
+            </mat-card-title>
+        </div>
+
+        <!-- Campo de búsqueda -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto;">
+            <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
+            <input matInput type="search" class="text-bg-light" placeholder="Buscar tarifa..." (keydown.enter)="busqueda(txtBusqueda.value)" #txtBusqueda>
+            <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusqueda.value)" style="padding: 0;">
+                <mat-icon>search</mat-icon>
+            </button>
+        </mat-form-field>
+    </mat-card-header>
+
+    <mat-card-content class="bg-white p-0">
+        <div class="mat-elevation-z8">
+            <div class="table-responsive">
+                <table mat-table [dataSource]="dataSource">
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: left; vertical-align: middle; width: 110px;">
+                            <div style="display: flex; align-items: center;">
+                                <button mat-icon-button
+                                        (click)="mostrarFormularioNuevo()"
+                                        [class.bg-success]="buttonEnabled"
+                                        [class.text-black]="buttonEnabled"
+                                        [disabled]="!buttonEnabled"
+                                        matTooltip="Nueva Tarifa">
+                                    <mat-icon>add</mat-icon>
+                                </button>
+                                <span style="margin-left: 8px;">Acciones</span>
+                            </div>
+                        </th>
+
+                        <td mat-cell *matCellDef="let x; let row;">
+                            <button mat-icon-button (click)="mostrarEditar(x)" class="text-primary" matTooltip="Editar">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button (click)="mostrarConfirmarEliminar('0ms', '0ms', x)" class="text-danger" matTooltip="Eliminar">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Servicio -->
+                    <ng-container matColumnDef="servicio">
+                        <th mat-header-cell *matHeaderCellDef>Servicio</th>
+                        <td mat-cell *matCellDef="let x" class="fw-bold text-primary">
+                            {{ x.servicio || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Tipo Hospedaje -->
+                    <ng-container matColumnDef="tipo_hospedaje">
+                        <th mat-header-cell *matHeaderCellDef>Tipo Hospedaje</th>
+                        <td mat-cell *matCellDef="let x">
+                            {{ x.tipo_hospedaje || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Paquete -->
+                    <ng-container matColumnDef="paquete">
+                        <th mat-header-cell *matHeaderCellDef>Paquete</th>
+                        <td mat-cell *matCellDef="let x">
+                            {{ x.paquete || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Comida Incluida -->
+                    <ng-container matColumnDef="comida_incluida">
+                        <th mat-header-cell *matHeaderCellDef>Comida Incluida</th>
+                        <td mat-cell *matCellDef="let x">
+                            {{ x.comida_incluida || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Detalle -->
+                    <ng-container matColumnDef="detalle">
+                        <th mat-header-cell *matHeaderCellDef>Detalle</th>
+                        <td mat-cell *matCellDef="let x">
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;">{{ x.detalle || '-' }}</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Tarifa Adulto -->
+                    <ng-container matColumnDef="tarifa_adulto">
+                        <th mat-header-cell *matHeaderCellDef class="text-end">Tarifa Adulto</th>
+                        <td mat-cell *matCellDef="let x" class="text-end">
+                            <span class="fw-bold" style="color: #1b5e20;">
+                                <mat-icon style="font-size: 15px; width: 15px; height: 15px; vertical-align: middle; color: #1b5e20;" class="me-1">payments</mat-icon>
+                                {{ x.tarifa_adulto | number:'1.2-2' }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Tarifa Niño -->
+                    <ng-container matColumnDef="tarifa_ninio">
+                        <th mat-header-cell *matHeaderCellDef class="text-end">Tarifa Niño</th>
+                        <td mat-cell *matCellDef="let x" class="text-end">
+                            <span class="fw-semibold" style="color: #e65100;">
+                                <mat-icon style="font-size: 15px; width: 15px; height: 15px; vertical-align: middle; color: #e65100;" class="me-1">payments</mat-icon>
+                                {{ x.tarifa_ninio | number:'1.2-2' }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Fila para mostrar "No hay datos disponibles" -->
+                    <tr *matNoDataRow>
+                        <td [attr.colspan]="displayedColumns.length" class="text-center py-4" style="font-size: 16px;">
+                            <mat-icon style="font-size: 32px; height: 32px; width: 32px;" class="text-muted">info</mat-icon>
+                            <div>No hay tarifas registradas</div>
+                        </td>
+                    </tr>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" id="fila{{row.id}}"></tr>
+                </table>
+            </div>
+
+            <mat-divider></mat-divider>
+            <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" [pageSize]="20" showFirstLastButtons class="bg-light"></mat-paginator>
+        </div>
+    </mat-card-content>
+</mat-card>
