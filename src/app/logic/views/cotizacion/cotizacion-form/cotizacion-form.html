@@ -6,117 +6,120 @@
       </button>
     </h1>
 
-    <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-3 px-0 pt-0">
+    <mat-dialog-content class="mat-typography px-3 pt-2 pb-1">
 
-        <!-- SECCIÓN 1: DATOS PERSONA -->
-        <div class="divider-with-text">
-          <mat-divider></mat-divider>
-          <span class="divider-text">DATOS PERSONA</span>
-          <mat-divider></mat-divider>
+        <!-- CARD 1: DATOS DEL CLIENTE -->
+        <div class="form-section-card">
+            <div class="section-header">
+                <mat-icon class="section-icon">person</mat-icon>
+                <span class="section-title">Datos del Cliente</span>
+            </div>
+            <div class="row g-2">
+                <!-- 1. N° Documento -->
+                <mat-form-field class="col-12 col-md-6" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Nro Documento</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.dni" name="dni" #txtDni (keydown.enter)="cboTipoDocId.focus()">
+                    <mat-icon matSuffix>receipt</mat-icon>
+                </mat-form-field>
+
+                <!-- 2. Tipo Documento -->
+                <mat-form-field class="col-12 col-md-6" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Tipo Documento</mat-label>
+                    <mat-select placeholder="" [(ngModel)]="cotizacion.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtNombre.focus()" appPreventEnterSelect>
+                        @for (item of tiposDocumento; track item.id) {
+                            <mat-option [value]="item.id">{{ item.tipo_documento }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- 3. Nombre -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>nombre*</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>
+                    <mat-icon matSuffix>face</mat-icon>
+                </mat-form-field>
+
+                <!-- 4. Primer Apellido -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Primer Apellido</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()">
+                    <mat-icon matSuffix>face</mat-icon>
+                </mat-form-field>
+
+                <!-- 5. Segundo Apellido -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Segundo Apellido</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.segundo_apellido" name="segundo_apellido" #txtSegundoApellido (keydown.enter)="txtFechaIni.focus()">
+                    <mat-icon matSuffix>face</mat-icon>
+                </mat-form-field>
+            </div>
         </div>
 
-        <!-- 1. N° Documento -->
-        <mat-form-field class="col">
-            <mat-label>Nro Documento</mat-label>
-            <input matInput placeholder="" [(ngModel)]="cotizacion.dni" name="dni" #txtDni (keydown.enter)="cboTipoDocId.focus()">
-            <mat-icon matSuffix>receipt</mat-icon>
-        </mat-form-field>
+        <!-- CARD 2: DETALLES DE LA COTIZACIÓN -->
+        <div class="form-section-card">
+            <div class="section-header">
+                <mat-icon class="section-icon">receipt_long</mat-icon>
+                <span class="section-title">Detalles de la Cotización</span>
+            </div>
+            <div class="row g-2">
+                <!-- 6. Fecha Ingreso -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Fecha Ingreso*</mat-label>
+                    <input matInput [matDatepicker]="picker_fecha_ini" [max]="cotizacion.fecha_fin"
+                        [(ngModel)]="cotizacion.fecha_ini" name="fecha_ini" (dateChange)="validarFechas()" required
+                        #txtFechaIni (click)="picker_fecha_ini.open()" (keydown.enter)="txtFechaFin.focus()">
+                    <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"></mat-datepicker-toggle>
+                    <mat-datepicker #picker_fecha_ini></mat-datepicker>
+                </mat-form-field>
 
-        <!-- 2. Tipo Documento -->
-        <mat-form-field class="col">
-            <mat-label>Tipo Documento</mat-label>
-            <mat-select placeholder="" [(ngModel)]="cotizacion.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtNombre.focus()" appPreventEnterSelect>
-                @for (item of tiposDocumento; track item.id) {
-                    <mat-option [value]="item.id">{{ item.tipo_documento }}</mat-option>
-                }
-            </mat-select>
-        </mat-form-field>
+                <!-- 7. Fecha Salida -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Fecha Salida*</mat-label>
+                    <input matInput [matDatepicker]="picker_fecha_fin" [min]="cotizacion.fecha_ini"
+                        [(ngModel)]="cotizacion.fecha_fin" name="fecha_fin" (dateChange)="validarFechas()" required
+                        #txtFechaFin (click)="picker_fecha_fin.open()" (keydown.enter)="txtDetalle.focus()">
+                    <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin"></mat-datepicker-toggle>
+                    <mat-datepicker #picker_fecha_fin></mat-datepicker>
+                </mat-form-field>
 
-        <!-- 3. Nombre -->
-        <mat-form-field class="col">
-            <mat-label>nombre</mat-label>
-            <input matInput placeholder="" [(ngModel)]="cotizacion.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>
-            <mat-icon matSuffix>face</mat-icon>
-        </mat-form-field>
-
-        <!-- 4. Primer Apellido -->
-        <mat-form-field class="col">
-            <mat-label>Primer Apellido</mat-label>
-            <input matInput placeholder="" [(ngModel)]="cotizacion.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()">
-            <mat-icon matSuffix>face</mat-icon>
-        </mat-form-field>
-
-        <!-- 5. Segundo Apellido -->
-        <mat-form-field class="col">
-            <mat-label>Segundo Apellido</mat-label>
-            <input matInput placeholder="" [(ngModel)]="cotizacion.segundo_apellido" name="segundo_apellido" #txtSegundoApellido (keydown.enter)="txtFechaIni.focus()">
-            <mat-icon matSuffix>face</mat-icon>
-        </mat-form-field>
-
-        <!-- SECCIÓN 2: DATOS COTIZACIÓN -->
-        <div class="divider-with-text">
-          <mat-divider></mat-divider>
-          <span class="divider-text">DATOS COTIZACIÓN</span>
-          <mat-divider></mat-divider>
+                <!-- 8. Detalle / Observaciones -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Observaciones</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.detalle" name="detalle" #txtDetalle>
+                    <mat-icon matSuffix>description</mat-icon>
+                </mat-form-field>
+            </div>
         </div>
 
-        <!-- 6. Fecha Ingreso -->
-        <mat-form-field class="col">
-            <mat-label>Fecha Ingreso</mat-label>
-            <input matInput [matDatepicker]="picker_fecha_ini" [max]="cotizacion.fecha_fin"
-                [(ngModel)]="cotizacion.fecha_ini" name="fecha_ini" (dateChange)="validarFechas()" required
-                #txtFechaIni (click)="picker_fecha_ini.open()" (keydown.enter)="txtFechaFin.focus()">
-            <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"></mat-datepicker-toggle>
-            <mat-datepicker #picker_fecha_ini></mat-datepicker>
-        </mat-form-field>
+        <!-- CARD 3: DETALLE DE TARIFAS Y SERVICIOS -->
+        <div class="form-section-card">
+            <div class="section-header">
+                <mat-icon class="section-icon">table_view</mat-icon>
+                <span class="section-title">Detalle de Tarifas y Servicios</span>
+            </div>
 
-        <!-- 7. Fecha Salida -->
-        <mat-form-field class="col">
-            <mat-label>Fecha Salida</mat-label>
-            <input matInput [matDatepicker]="picker_fecha_fin" [min]="cotizacion.fecha_ini"
-                [(ngModel)]="cotizacion.fecha_fin" name="fecha_fin" (dateChange)="validarFechas()" required
-                #txtFechaFin (click)="picker_fecha_fin.open()" (keydown.enter)="txtDetalle.focus()">
-            <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin"></mat-datepicker-toggle>
-            <mat-datepicker #picker_fecha_fin></mat-datepicker>
-        </mat-form-field>
-
-        <!-- 8. Detalle / Observaciones -->
-        <mat-form-field class="col">
-            <mat-label>Observaciones</mat-label>
-            <input matInput placeholder="" [(ngModel)]="cotizacion.detalle" name="detalle" #txtDetalle>
-            <mat-icon matSuffix>description</mat-icon>
-        </mat-form-field>
-
-        <!-- SECCIÓN 3: DETALLE DE TARIFAS Y SERVICIOS -->
-        <div class="divider-with-text">
-          <mat-divider></mat-divider>
-          <span class="divider-text">DETALLE DE TARIFAS Y SERVICIOS</span>
-          <mat-divider></mat-divider>
-        </div>
-
-        <div class="col-12 w-100 px-2">
             <div class="table-responsive border rounded bg-white shadow-sm mb-2">
                 <table mat-table [dataSource]="dataSource" class="w-100 tabla-detalle">
 
                     <!-- Columna Acciones -->
                     <ng-container matColumnDef="acciones">
-                        <th mat-header-cell *matHeaderCellDef style="width: 50px;" class="text-center">
+                        <th mat-header-cell *matHeaderCellDef style="width: 48px;" class="text-center">
                             <button mat-icon-button type="button" (click)="agregarFilaDetalle()"
-                                class="bg-success text-black" matTooltip="Agregar Fila">
+                                class="bg-success text-black btn-add-header" matTooltip="Agregar Fila">
                                 <mat-icon>add</mat-icon>
                             </button>
                         </th>
                         <td mat-cell *matCellDef="let row; let i = index;" class="text-center">
                             <button mat-icon-button type="button" class="text-danger" (click)="eliminarFilaDetalle(i)"
                                 matTooltip="Eliminar fila" [disabled]="detalles.length <= 1 && !row.tarifa_id">
-                                <mat-icon class="text-danger">delete</mat-icon>
+                                <mat-icon class="text-danger" style="font-size: 20px; width: 20px; height: 20px;">delete</mat-icon>
                             </button>
                         </td>
                     </ng-container>
 
                     <!-- Columna Tarifa -->
                     <ng-container matColumnDef="tarifa">
-                        <th mat-header-cell *matHeaderCellDef style="min-width: 270px;">Tarifa / Servicio</th>
+                        <th mat-header-cell *matHeaderCellDef style="min-width: 240px;">Tarifa / Servicio</th>
                         <td mat-cell *matCellDef="let row; let i = index;">
                             <div class="d-flex align-items-center gap-1 my-1">
                                 <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-grow-1">
@@ -128,7 +131,7 @@
                                         </mat-option>
                                         @for (t of tarifas; track t.id) {
                                         <mat-option [value]="t.id" class="py-2 tarifa-option-item"
-                                            style="height: auto; min-height: 54px;">
+                                            style="height: auto; min-height: 52px;">
                                             <div class="d-flex flex-column py-1 w-100" style="line-height: 1.35;">
                                                 <div class="text-truncate">
                                                     <strong class="text-primary">{{ t.servicio }}</strong>
@@ -137,16 +140,16 @@
                                                 </div>
                                                 <div
                                                     class="d-flex justify-content-between align-items-center mt-1 text-nowrap gap-3">
-                                                    <small class="text-muted text-truncate" style="max-width: 240px;">{{
+                                                    <small class="text-muted text-truncate" style="max-width: 200px;">{{
                                                         t.tipo_hospedaje }}</small>
                                                     <div class="d-flex align-items-center gap-2 text-nowrap flex-shrink-0">
                                                         <span class="badge bg-light text-dark border px-2 py-1">
-                                                            <span style="color: #1b5e20; font-weight: 600;">Adulto: Bs. {{
+                                                            <span style="color: #1b5e20; font-weight: 600;">Ad: Bs. {{
                                                                 t.tarifa_adulto | number:'1.2-2' }}</span>
                                                         </span>
                                                         <span class="badge bg-light text-dark border px-2 py-1"
                                                             *ngIf="t.tarifa_ninio">
-                                                            <span style="color: #e65100; font-weight: 600;">Niño: Bs. {{
+                                                            <span style="color: #e65100; font-weight: 600;">Niñ: Bs. {{
                                                                 t.tarifa_ninio | number:'1.2-2' }}</span>
                                                         </span>
                                                     </div>
@@ -158,7 +161,7 @@
                                 </mat-form-field>
                                 <button mat-icon-button type="button" (click)="abrirModalSeleccionarTarifa(row)"
                                     class="text-primary flex-shrink-0"
-                                    matTooltip="Buscar y seleccionar del catálogo de tarifas">
+                                    matTooltip="Buscar en catálogo">
                                     <mat-icon>search</mat-icon>
                                 </button>
                             </div>
@@ -167,9 +170,9 @@
 
                     <!-- Columna Cantidad Adulto -->
                     <ng-container matColumnDef="cantidad_adulto">
-                        <th mat-header-cell *matHeaderCellDef style="width: 90px;" class="text-center">Cant. Ad.</th>
+                        <th mat-header-cell *matHeaderCellDef style="width: 80px;" class="text-center">Cant. Ad.</th>
                         <td mat-cell *matCellDef="let row; let i = index;" class="text-center">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1">
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1 cell-input">
                                 <input type="number" matInput min="0" [(ngModel)]="row.cantidad_adulto"
                                     [name]="'cant_ad_' + i" (input)="calcularSubtotal(row)" required class="text-center">
                             </mat-form-field>
@@ -178,9 +181,9 @@
 
                     <!-- Columna Precio Adulto -->
                     <ng-container matColumnDef="precio_unit_adulto">
-                        <th mat-header-cell *matHeaderCellDef style="width: 110px;" class="text-end">P.U. Adulto</th>
+                        <th mat-header-cell *matHeaderCellDef style="width: 100px;" class="text-end">P.U. Adulto</th>
                         <td mat-cell *matCellDef="let row; let i = index;" class="text-end">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1">
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1 cell-input">
                                 <input type="number" step="0.01" min="0" matInput [(ngModel)]="row.precio_unit_adulto"
                                     [name]="'pu_ad_' + i" (input)="calcularSubtotal(row)" required class="text-end">
                             </mat-form-field>
@@ -189,9 +192,9 @@
 
                     <!-- Columna Cantidad Niño -->
                     <ng-container matColumnDef="cantidad_ninio">
-                        <th mat-header-cell *matHeaderCellDef style="width: 90px;" class="text-center">Cant. Niñ.</th>
+                        <th mat-header-cell *matHeaderCellDef style="width: 80px;" class="text-center">Cant. Niñ.</th>
                         <td mat-cell *matCellDef="let row; let i = index;" class="text-center">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1">
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1 cell-input">
                                 <input type="number" min="0" matInput [(ngModel)]="row.cantidad_ninio"
                                     [name]="'cant_ni_' + i" (input)="calcularSubtotal(row)" class="text-center">
                             </mat-form-field>
@@ -200,9 +203,9 @@
 
                     <!-- Columna Precio Niño -->
                     <ng-container matColumnDef="precio_unit_ninio">
-                        <th mat-header-cell *matHeaderCellDef style="width: 110px;" class="text-end">P.U. Niño</th>
+                        <th mat-header-cell *matHeaderCellDef style="width: 100px;" class="text-end">P.U. Niño</th>
                         <td mat-cell *matCellDef="let row; let i = index;" class="text-end">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1">
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 my-1 cell-input">
                                 <input type="number" step="0.01" min="0" matInput [(ngModel)]="row.precio_unit_ninio"
                                     [name]="'pu_ni_' + i" (input)="calcularSubtotal(row)" class="text-end">
                             </mat-form-field>
@@ -211,9 +214,9 @@
 
                     <!-- Columna Subtotal -->
                     <ng-container matColumnDef="subtotal">
-                        <th mat-header-cell *matHeaderCellDef style="width: 110px;" class="text-end">Subtotal</th>
-                        <td mat-cell *matCellDef="let row;" class="text-end fw-bold pe-3 text-primary"
-                            style="font-size: 14.5px;">
+                        <th mat-header-cell *matHeaderCellDef style="width: 105px;" class="text-end">Subtotal</th>
+                        <td mat-cell *matCellDef="let row;" class="text-end fw-bold pe-2 text-primary"
+                            style="font-size: 14px;">
                             {{ row.subtotal | number:'1.2-2' }}
                         </td>
                     </ng-container>
@@ -231,7 +234,7 @@
             </div>
 
             <!-- RESUMEN / TOTAL GENERAL -->
-            <div class="d-flex justify-content-end align-items-center px-3 py-2 bg-light border rounded mb-2">
+            <div class="d-flex justify-content-end align-items-center px-3 py-2 bg-light border rounded mb-1 total-container">
                 <span class="fs-6 me-2 fw-bold text-dark">TOTAL COTIZACIÓN:</span>
                 <span class="fs-5 fw-bold text-primary">Bs. {{ totalGeneral | number:'1.2-2' }}</span>
             </div>
@@ -239,9 +242,9 @@
 
     </mat-dialog-content>
 
-    <mat-dialog-actions class="d-flex justify-content-around bg-light">
-        <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white">Cancelar</button>
-        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f">
+    <mat-dialog-actions class="d-flex justify-content-around bg-light py-2">
+        <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white rounded-button" style="min-width: 120px;">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black rounded-button" style="min-width: 120px;" appBotonGuardar [form]="f">
             <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon> Guardar
         </button>
     </mat-dialog-actions>
