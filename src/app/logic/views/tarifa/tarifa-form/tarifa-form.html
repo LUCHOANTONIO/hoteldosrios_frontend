@@ -1,6 +1,8 @@
-<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco
+    [dialogRef]="dialogRef">
 
-    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle
+        class="text-bg-dark dialog-header">
         <div class="d-flex align-items-center gap-2">
             <mat-icon>price_change</mat-icon>
             <span>{{ tarifa.id > 0 ? 'MODIFICAR TARIFA' : 'NUEVA TARIFA' }}</span>
@@ -25,7 +27,8 @@
         <!-- Selector Tipo de Hospedaje -->
         <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
             <mat-label>Tipo de Hospedaje</mat-label>
-            <mat-select placeholder="Seleccione Tipo Hospedaje" [(ngModel)]="tarifa.tipo_hospedaje_id" name="tipo_hospedaje_id" required>
+            <mat-select placeholder="Seleccione Tipo Hospedaje" [(ngModel)]="tarifa.tipo_hospedaje_id"
+                name="tipo_hospedaje_id" required>
                 @for (item of tiposHospedaje; track item.id) {
                 <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
                 }
@@ -45,27 +48,24 @@
         <!-- Comida Incluida -->
         <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
             <mat-label>Comida Incluida</mat-label>
-            <input matInput placeholder="Ej: 4 Comidas, Desayuno Buffet, etc." [(ngModel)]="tarifa.comida_incluida" name="comida_incluida">
-        </mat-form-field>
-
-        <!-- Detalle / Observación -->
-        <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Detalle / Descripción</mat-label>
-            <input matInput placeholder="Detalles de la tarifa..." [(ngModel)]="tarifa.detalle" name="detalle">
+            <input matInput placeholder="Ej: 4 Comidas, Desayuno Buffet, etc." [(ngModel)]="tarifa.comida_incluida"
+                name="comida_incluida">
         </mat-form-field>
 
         <!-- Tarifa Adulto -->
         <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
             <mat-label>Tarifa Adulto (Bs.)</mat-label>
             <mat-icon matIconPrefix style="color: #1b5e20;" class="me-1">payments</mat-icon>
-            <input type="number" step="0.01" min="0" matInput placeholder="0.00" [(ngModel)]="tarifa.tarifa_adulto" name="tarifa_adulto" required>
+            <input type="number" step="0.01" min="0" matInput placeholder="0.00" [(ngModel)]="tarifa.tarifa_adulto"
+                name="tarifa_adulto" required>
         </mat-form-field>
 
         <!-- Tarifa Niño -->
         <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
             <mat-label>Tarifa Niño (Bs.)</mat-label>
             <mat-icon matIconPrefix style="color: #e65100;" class="me-1">payments</mat-icon>
-            <input type="number" step="0.01" min="0" matInput placeholder="0.00" [(ngModel)]="tarifa.tarifa_ninio" name="tarifa_ninio">
+            <input type="number" step="0.01" min="0" matInput placeholder="0.00" [(ngModel)]="tarifa.tarifa_ninio"
+                name="tarifa_ninio">
         </mat-form-field>
 
     </mat-dialog-content>

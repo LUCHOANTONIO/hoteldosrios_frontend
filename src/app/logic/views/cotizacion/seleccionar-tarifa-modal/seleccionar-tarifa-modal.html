@@ -1,10 +1,11 @@
 <div class="tarifa-selector-modal">
 
     <!-- CABECERA MODAL -->
-    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle
+        class="text-bg-dark dialog-header">
         <div class="d-flex align-items-center gap-2">
             <mat-icon style="color: white;">table_view</mat-icon>
-            <span>CATÁLOGO DE TARIFAS - SELECCIONAR TARIFA</span>
+            <span>CATÁLOGO DE TARIFAS</span>
         </div>
         <button mat-icon-button mat-dialog-close type="button">
             <mat-icon style="color: white;">close</mat-icon>
@@ -13,13 +14,10 @@
 
     <!-- BARRA DE BÚSQUEDA / FILTRO -->
     <div class="px-3 py-2 bg-light border-bottom d-flex justify-content-between align-items-center">
-        <div class="text-muted small d-flex align-items-center gap-1">
-            <mat-icon style="font-size: 18px; width: 18px; height: 18px; vertical-align: middle;" class="text-info">info</mat-icon>
-            <span>Haga clic en <strong>Elegir</strong> o doble clic en la fila para aplicar la tarifa.</span>
-        </div>
         <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 280px;">
             <mat-label>Buscar tarifa...</mat-label>
-            <input matInput (keyup)="buscar(txtBusqueda.value)" #txtBusqueda placeholder="Servicio, paquete, hospedaje...">
+            <input matInput (keyup)="buscar(txtBusqueda.value)" #txtBusqueda
+                placeholder="Servicio, paquete, hospedaje...">
             <mat-icon matSuffix class="text-primary">search</mat-icon>
         </mat-form-field>
     </div>
@@ -34,10 +32,11 @@
                     <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 100px;">Acción</th>
                     <td mat-cell *matCellDef="let row" class="text-center">
                         <button mat-raised-button type="button" (click)="seleccionarTarifa(row)"
-                                [class.bg-success]="row.id === tarifaSeleccionadaId"
-                                [class.bg-primary]="row.id !== tarifaSeleccionadaId"
-                                class="text-white rounded-button btn-sm">
-                            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">{{ row.id === tarifaSeleccionadaId ? 'check_circle' : 'check' }}</mat-icon>
+                            [class.bg-success]="row.id === tarifaSeleccionadaId"
+                            [class.bg-primary]="row.id !== tarifaSeleccionadaId"
+                            class="text-white rounded-button btn-sm">
+                            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">{{ row.id ===
+                                tarifaSeleccionadaId ? 'check_circle' : 'check' }}</mat-icon>
                             <span>{{ row.id === tarifaSeleccionadaId ? 'Actual' : 'Elegir' }}</span>
                         </button>
                     </td>
@@ -80,7 +79,9 @@
                     <th mat-header-cell *matHeaderCellDef class="text-end">Tarifa Adulto</th>
                     <td mat-cell *matCellDef="let row" class="text-end">
                         <span class="fw-bold" style="color: #1b5e20;">
-                            <mat-icon style="font-size: 15px; width: 15px; height: 15px; vertical-align: middle; color: #1b5e20;" class="me-1">payments</mat-icon>
+                            <mat-icon
+                                style="font-size: 15px; width: 15px; height: 15px; vertical-align: middle; color: #1b5e20;"
+                                class="me-1">payments</mat-icon>
                             {{ row.tarifa_adulto | number:'1.2-2' }}
                         </span>
                     </td>
@@ -91,7 +92,9 @@
                     <th mat-header-cell *matHeaderCellDef class="text-end">Tarifa Niño</th>
                     <td mat-cell *matCellDef="let row" class="text-end">
                         <span class="fw-semibold" style="color: #e65100;">
-                            <mat-icon style="font-size: 15px; width: 15px; height: 15px; vertical-align: middle; color: #e65100;" class="me-1">payments</mat-icon>
+                            <mat-icon
+                                style="font-size: 15px; width: 15px; height: 15px; vertical-align: middle; color: #e65100;"
+                                class="me-1">payments</mat-icon>
                             {{ row.tarifa_ninio | number:'1.2-2' }}
                         </span>
                     </td>
@@ -106,11 +109,13 @@
                 </tr>
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="fila-catalogo" (dblclick)="seleccionarTarifa(row)"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="fila-catalogo"
+                    (dblclick)="seleccionarTarifa(row)"></tr>
             </table>
         </div>
 
-        <mat-paginator [pageSizeOptions]="[5, 10, 20]" [pageSize]="5" showFirstLastButtons class="bg-light"></mat-paginator>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" [pageSize]="5" showFirstLastButtons
+            class="bg-light"></mat-paginator>
     </mat-dialog-content>
 
     <!-- PIE DEL MODAL -->
