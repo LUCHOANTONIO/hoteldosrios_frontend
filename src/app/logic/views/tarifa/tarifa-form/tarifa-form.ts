@@ -25,6 +25,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 // DIRECTIVAS
 import { PreventEnterSubmitDirective } from '../../../../base/shared/directives/prevent-enter-submit.directive';
+import { PreventEnterSelectDirective } from '../../../../base/shared/directives/prevent-enter-select.directive';
 import { AnimarPerderFocoDirective } from '../../../../base/shared/directives/animar-perder-foco.directive';
 import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-guardar.directive';
 
@@ -54,6 +55,7 @@ import { forkJoin } from 'rxjs';
     CdkDrag,
     CdkDragHandle,
     PreventEnterSubmitDirective,
+    PreventEnterSelectDirective,
     AnimarPerderFocoDirective,
     BotonGuardarDirective
   ],

@@ -1,19 +1,22 @@
-.dialog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: move;
-    padding: 10px 18px;
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    background-color: #1e293b;
-    color: #ffffff;
+/*BEGIN: Linea mat-divider */
+.divider-with-text {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 10px 0;
 }
 
-.section-detalle-header {
-    padding-top: 4px;
+.divider-with-text mat-divider {
+  flex: 1;
 }
+
+.divider-with-text .divider-text {
+  padding: 0 16px;
+  white-space: nowrap;
+  color: #3f51b5;
+  font-weight: bold;
+}
+/*END: Linea mat-divider */
 
 .tabla-detalle {
     min-width: 780px;

@@ -1,80 +1,76 @@
-<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco
-    [dialogRef]="dialogRef">
-
-    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle
-        class="text-bg-dark dialog-header">
-        <div class="d-flex align-items-center gap-2">
-            <mat-icon>price_change</mat-icon>
-            <span>{{ tarifa.id > 0 ? 'MODIFICAR TARIFA' : 'NUEVA TARIFA' }}</span>
-        </div>
-        <button mat-icon-button mat-dialog-close type="button">
-            <mat-icon style="color:white">close</mat-icon>
-        </button>
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+    <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+      TARIFAS
+      <button mat-icon-button mat-dialog-close type="button">
+        <mat-icon style="color:white">close</mat-icon>
+      </button>
     </h1>
 
-    <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-2 g-2 px-3 pt-2">
+    <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-2 px-0 pt-0">
 
-        <!-- Selector Servicio -->
-        <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
+        <div class="divider-with-text">
+          <mat-divider></mat-divider>
+          <span class="divider-text">DATOS DE LA TARIFA</span>
+          <mat-divider></mat-divider>
+        </div>
+
+        <mat-form-field class="col">
             <mat-label>Servicio</mat-label>
-            <mat-select placeholder="Seleccione Servicio" [(ngModel)]="tarifa.servicio_id" name="servicio_id" required>
+            <mat-select placeholder="" [(ngModel)]="tarifa.servicio_id" name="servicio_id" #cboServicioId (keydown.enter)="cboTipoHospedajeId.focus()" appPreventEnterSelect required>
                 @for (item of servicios; track item.id) {
-                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
+                    <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
                 }
             </mat-select>
         </mat-form-field>
 
-        <!-- Selector Tipo de Hospedaje -->
-        <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Tipo de Hospedaje</mat-label>
-            <mat-select placeholder="Seleccione Tipo Hospedaje" [(ngModel)]="tarifa.tipo_hospedaje_id"
-                name="tipo_hospedaje_id" required>
+        <mat-form-field class="col">
+            <mat-label>Tipo Hospedaje</mat-label>
+            <mat-select placeholder="" [(ngModel)]="tarifa.tipo_hospedaje_id" name="tipo_hospedaje_id" #cboTipoHospedajeId (keydown.enter)="cboPaqueteId.focus()" appPreventEnterSelect required>
                 @for (item of tiposHospedaje; track item.id) {
-                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
+                    <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
                 }
             </mat-select>
         </mat-form-field>
 
-        <!-- Selector Paquete -->
-        <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field class="col">
             <mat-label>Paquete</mat-label>
-            <mat-select placeholder="Seleccione Paquete" [(ngModel)]="tarifa.paquete_id" name="paquete_id" required>
+            <mat-select placeholder="" [(ngModel)]="tarifa.paquete_id" name="paquete_id" #cboPaqueteId (keydown.enter)="txtComida.focus()" appPreventEnterSelect required>
                 @for (item of paquetes; track item.id) {
-                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
+                    <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
                 }
             </mat-select>
         </mat-form-field>
 
-        <!-- Comida Incluida -->
-        <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field class="col">
             <mat-label>Comida Incluida</mat-label>
-            <input matInput placeholder="Ej: 4 Comidas, Desayuno Buffet, etc." [(ngModel)]="tarifa.comida_incluida"
-                name="comida_incluida">
+            <input matInput placeholder="Ej: 4 Comidas, Desayuno Buffet, etc." [(ngModel)]="tarifa.comida_incluida" name="comida_incluida" #txtComida (keydown.enter)="txtTarifaAdulto.focus()">
+            <mat-icon matSuffix>restaurant</mat-icon>
         </mat-form-field>
 
-        <!-- Tarifa Adulto -->
-        <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
+        <div class="divider-with-text">
+          <mat-divider></mat-divider>
+          <span class="divider-text">PRECIOS</span>
+          <mat-divider></mat-divider>
+        </div>
+
+        <mat-form-field class="col">
             <mat-label>Tarifa Adulto (Bs.)</mat-label>
-            <mat-icon matIconPrefix style="color: #1b5e20;" class="me-1">payments</mat-icon>
-            <input type="number" step="0.01" min="0" matInput placeholder="0.00" [(ngModel)]="tarifa.tarifa_adulto"
-                name="tarifa_adulto" required>
+            <input type="number" step="0.01" min="0" matInput placeholder="0.00" [(ngModel)]="tarifa.tarifa_adulto" name="tarifa_adulto" #txtTarifaAdulto (keydown.enter)="txtTarifaNinio.focus()" required>
+            <mat-icon matSuffix style="color: #1b5e20;">payments</mat-icon>
         </mat-form-field>
 
-        <!-- Tarifa Niño -->
-        <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field class="col">
             <mat-label>Tarifa Niño (Bs.)</mat-label>
-            <mat-icon matIconPrefix style="color: #e65100;" class="me-1">payments</mat-icon>
-            <input type="number" step="0.01" min="0" matInput placeholder="0.00" [(ngModel)]="tarifa.tarifa_ninio"
-                name="tarifa_ninio">
+            <input type="number" step="0.01" min="0" matInput placeholder="0.00" [(ngModel)]="tarifa.tarifa_ninio" name="tarifa_ninio" #txtTarifaNinio>
+            <mat-icon matSuffix style="color: #e65100;">payments</mat-icon>
         </mat-form-field>
 
     </mat-dialog-content>
 
-    <mat-dialog-actions class="d-flex justify-content-around bg-light py-2">
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
         <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white">Cancelar</button>
         <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f">
-            <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon> Guardar Tarifa
+            <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon> Guardar
         </button>
     </mat-dialog-actions>
-
 </form>
