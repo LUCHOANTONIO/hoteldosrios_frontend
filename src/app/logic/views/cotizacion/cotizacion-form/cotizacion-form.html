@@ -15,14 +15,35 @@
                 <span class="section-title">Datos del Cliente</span>
             </div>
             <div class="row g-2">
-                <!-- 1. N° Documento -->
+                <!-- 1. Nombre -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Nombre*</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required cdkFocusInitial>
+                    <mat-icon matSuffix>face</mat-icon>
+                </mat-form-field>
+
+                <!-- 2. Primer Apellido -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Primer Apellido</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()">
+                    <mat-icon matSuffix>face</mat-icon>
+                </mat-form-field>
+
+                <!-- 3. Segundo Apellido -->
+                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Segundo Apellido</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.segundo_apellido" name="segundo_apellido" #txtSegundoApellido (keydown.enter)="txtDni.focus()">
+                    <mat-icon matSuffix>face</mat-icon>
+                </mat-form-field>
+
+                <!-- 4. N° Documento -->
                 <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Nro Documento</mat-label>
                     <input matInput placeholder="" [(ngModel)]="cotizacion.dni" name="dni" #txtDni (keydown.enter)="cboTipoDocId.focus()">
                     <mat-icon matSuffix>receipt</mat-icon>
                 </mat-form-field>
 
-                <!-- 2. Tipo Documento -->
+                <!-- 5. Tipo Documento -->
                 <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Tipo Documento</mat-label>
                     <mat-select placeholder="" [(ngModel)]="cotizacion.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtTelefono.focus()" appPreventEnterSelect>
@@ -32,32 +53,11 @@
                     </mat-select>
                 </mat-form-field>
 
-                <!-- 3. Teléfono -->
+                <!-- 6. Teléfono -->
                 <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Teléfono</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.telefono" name="telefono" #txtTelefono (keydown.enter)="txtNombre.focus()">
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.telefono" name="telefono" #txtTelefono (keydown.enter)="txtFechaIni.focus()">
                     <mat-icon matSuffix>phone</mat-icon>
-                </mat-form-field>
-
-                <!-- 4. Nombre -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>nombre*</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>
-                    <mat-icon matSuffix>face</mat-icon>
-                </mat-form-field>
-
-                <!-- 4. Primer Apellido -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Primer Apellido</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()">
-                    <mat-icon matSuffix>face</mat-icon>
-                </mat-form-field>
-
-                <!-- 5. Segundo Apellido -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Segundo Apellido</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.segundo_apellido" name="segundo_apellido" #txtSegundoApellido (keydown.enter)="txtFechaIni.focus()">
-                    <mat-icon matSuffix>face</mat-icon>
                 </mat-form-field>
             </div>
         </div>
