@@ -126,38 +126,36 @@
                 <div class="row g-2 align-items-center">
                     <!-- Selector de Tarifa -->
                     <div class="col-12 col-lg-4">
-                        <div class="d-flex align-items-center gap-1">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
-                                <mat-label>Tarifa / Servicio</mat-label>
-                                <mat-select placeholder="Seleccione Tarifa (opcional)" [(ngModel)]="itemNuevo.tarifa_id"
-                                    name="item_tarifa_id" (selectionChange)="onTarifaChange(itemNuevo)"
-                                    panelClass="tarifa-select-panel">
-                                    <mat-option [value]="null">
-                                        <div class="py-1 text-muted fst-italic">-- Sin Tarifa / Personalizado --</div>
-                                    </mat-option>
-                                    @for (t of tarifas; track t.id) {
-                                    <mat-option [value]="t.id" class="py-2 tarifa-option-item" style="height: auto; min-height: 48px;">
-                                        <div class="d-flex flex-column py-1 w-100" style="line-height: 1.3;">
-                                            <div class="text-truncate">
-                                                <strong class="text-primary">{{ t.servicio }}</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center mt-1 text-nowrap gap-2">
-                                                <small class="text-muted text-truncate">{{ t.tipo_hospedaje }}</small>
-                                                <span class="badge bg-light text-dark border px-1">
-                                                    <span style="color: #1b5e20; font-weight: 600;">Ad: Bs. {{ t.tarifa_adulto | number:'1.2-2' }}</span>
-                                                    <span *ngIf="t.tarifa_ninio" style="color: #e65100; font-weight: 600; margin-left: 4px;">| Niñ: Bs. {{ t.tarifa_ninio | number:'1.2-2' }}</span>
-                                                </span>
-                                            </div>
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                            <mat-label>Tarifa / Servicio</mat-label>
+                            <mat-select placeholder="Seleccione Tarifa (opcional)" [(ngModel)]="itemNuevo.tarifa_id"
+                                name="item_tarifa_id" (selectionChange)="onTarifaChange(itemNuevo)"
+                                panelClass="tarifa-select-panel">
+                                <mat-option [value]="null">
+                                    <div class="py-1 text-muted fst-italic">-- Sin Tarifa / Personalizado --</div>
+                                </mat-option>
+                                @for (t of tarifas; track t.id) {
+                                <mat-option [value]="t.id" class="py-2 tarifa-option-item" style="height: auto; min-height: 48px;">
+                                    <div class="d-flex flex-column py-1 w-100" style="line-height: 1.3;">
+                                        <div class="text-truncate">
+                                            <strong class="text-primary">{{ t.servicio }}</strong>
                                         </div>
-                                    </mat-option>
-                                    }
-                                </mat-select>
-                            </mat-form-field>
-                            <button mat-icon-button type="button" (click)="abrirModalSeleccionarTarifa(true)"
-                                class="text-primary flex-shrink-0" matTooltip="Abrir catálogo">
-                                <mat-icon>search</mat-icon>
+                                        <div class="d-flex justify-content-between align-items-center mt-1 text-nowrap gap-2">
+                                            <small class="text-muted text-truncate">{{ t.tipo_hospedaje }}</small>
+                                            <span class="badge bg-light text-dark border px-1">
+                                                <span style="color: #1b5e20; font-weight: 600;">Ad: Bs. {{ t.tarifa_adulto | number:'1.2-2' }}</span>
+                                                <span *ngIf="t.tarifa_ninio" style="color: #e65100; font-weight: 600; margin-left: 4px;">| Niñ: Bs. {{ t.tarifa_ninio | number:'1.2-2' }}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </mat-option>
+                                }
+                            </mat-select>
+                            <button mat-icon-button matIconSuffix type="button" (click)="$event.stopPropagation(); abrirModalSeleccionarTarifa(true)"
+                                class="text-primary" matTooltip="Abrir catálogo de tarifas">
+                                <mat-icon>list_alt</mat-icon>
                             </button>
-                        </div>
+                        </mat-form-field>
                     </div>
 
                     <!-- Cantidad Adulto -->
