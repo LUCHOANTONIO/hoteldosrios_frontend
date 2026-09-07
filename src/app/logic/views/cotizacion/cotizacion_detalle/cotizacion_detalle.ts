@@ -65,6 +65,8 @@ export class CotizacionDetalleComponent implements AfterViewInit {
     'precio_unit_adulto',
     'cantidad_ninio',
     'precio_unit_ninio',
+    'precio_mascota',
+    'precio_extra',
     'subtotal'
   ];
   dataSource: MatTableDataSource<CotizacionDetalleModel>;
@@ -107,9 +109,12 @@ export class CotizacionDetalleComponent implements AfterViewInit {
 
   calcularTotalGeneral() {
     this.totalGeneral = this.detalles.reduce((acc, item) => {
+      const pMascota = Math.max(0, Number(item.precio_mascota) || 0);
+      const pExtra = Math.max(0, Number(item.precio_extra) || 0);
       const sub = Number(item.subtotal) || 
         ((Number(item.cantidad_adulto) || 0) * (Number(item.precio_unit_adulto) || 0) +
-         (Number(item.cantidad_ninio) || 0) * (Number(item.precio_unit_ninio) || 0));
+         (Number(item.cantidad_ninio) || 0) * (Number(item.precio_unit_ninio) || 0) +
+         pMascota + pExtra);
       return acc + sub;
     }, 0);
   }
@@ -119,7 +124,9 @@ export class CotizacionDetalleComponent implements AfterViewInit {
     const preAd = Number(this.detalle_actual.precio_unit_adulto) || 0;
     const cantNi = Number(this.detalle_actual.cantidad_ninio) || 0;
     const preNi = Number(this.detalle_actual.precio_unit_ninio) || 0;
-    return (cantAd * preAd) + (cantNi * preNi);
+    const pMascota = Number(this.detalle_actual.precio_mascota) || 0;
+    const pExtra = Number(this.detalle_actual.precio_extra) || 0;
+    return (cantAd * preAd) + (cantNi * preNi) + pMascota + pExtra;
   }
 
   nuevoDetalle() {
@@ -130,6 +137,8 @@ export class CotizacionDetalleComponent implements AfterViewInit {
     this.detalle_actual.precio_unit_adulto = 0;
     this.detalle_actual.cantidad_ninio = 0;
     this.detalle_actual.precio_unit_ninio = 0;
+    this.detalle_actual.precio_mascota = 0;
+    this.detalle_actual.precio_extra = 0;
     this.editandoIndex = -1;
     this.mostrarFormItem = true;
   }

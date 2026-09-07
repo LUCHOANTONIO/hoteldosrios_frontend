@@ -3,6 +3,7 @@ import { CotizacionDetalleModel } from './cotizacion_detalle.model';
 export class CotizacionModel {
     id: number;
     correlativo: number;
+    fecha?: string = '';
     dni: string = '';
     tipo_doc_id?: number | null = null;
     tipo_doc?: string = '';

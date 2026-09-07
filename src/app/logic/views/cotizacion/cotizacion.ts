@@ -61,6 +61,7 @@ export class CotizacionComponent implements AfterViewInit {
     'actions',
     'documento_btn',
     'correlativo',
+    'fecha',
     'cliente',
     'telefono',
     'tipo_doc',

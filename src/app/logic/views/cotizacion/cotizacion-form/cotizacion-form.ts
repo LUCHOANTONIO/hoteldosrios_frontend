@@ -90,6 +90,8 @@ export class CotizacionFormComponent {
     'precio_unit_adulto',
     'cantidad_ninio',
     'precio_unit_ninio',
+    'precio_mascota',
+    'precio_extra',
     'subtotal'
   ];
   dataSource: MatTableDataSource<CotizacionDetalleModel>;
@@ -122,6 +124,8 @@ export class CotizacionFormComponent {
     this.itemNuevo.precio_unit_adulto = null as any;
     this.itemNuevo.cantidad_ninio = null as any;
     this.itemNuevo.precio_unit_ninio = null as any;
+    this.itemNuevo.precio_mascota = null as any;
+    this.itemNuevo.precio_extra = null as any;
     this.itemNuevo.subtotal = 0;
     this.editandoIndex = null;
   }
@@ -192,16 +196,18 @@ export class CotizacionFormComponent {
   agregarOActualizarItem() {
     const puAd = Number(this.itemNuevo.precio_unit_adulto) || 0;
     const puNi = Number(this.itemNuevo.precio_unit_ninio) || 0;
+    const pMascota = Number(this.itemNuevo.precio_mascota) || 0;
+    const pExtra = Number(this.itemNuevo.precio_extra) || 0;
 
-    if (puAd <= 0 && puNi <= 0) {
-      this.alertService.show("Debe ingresar al menos un precio (P.U. Adulto o P.U. Niño)", { duration: 4000, type: 'warning' });
+    if (puAd <= 0 && puNi <= 0 && pMascota <= 0 && pExtra <= 0) {
+      this.alertService.show("Debe ingresar al menos un precio (P.U. Adulto, P.U. Niño, P. Mascota o P. Extra)", { duration: 4000, type: 'warning' });
       return;
     }
 
     this.calcularSubtotal(this.itemNuevo);
 
     if (!this.itemNuevo.subtotal || this.itemNuevo.subtotal <= 0) {
-      this.alertService.show("El subtotal del ítem debe ser mayor a 0 (verifique que la cantidad sea mayor a 0)", { duration: 4000, type: 'warning' });
+      this.alertService.show("El subtotal del ítem debe ser mayor a 0 (verifique que la cantidad o precio sea mayor a 0)", { duration: 4000, type: 'warning' });
       return;
     }
 
@@ -326,12 +332,20 @@ export class CotizacionFormComponent {
     if (item.precio_unit_ninio !== null && item.precio_unit_ninio !== undefined && item.precio_unit_ninio < 0) {
       item.precio_unit_ninio = 0;
     }
+    if (item.precio_mascota !== null && item.precio_mascota !== undefined && item.precio_mascota < 0) {
+      item.precio_mascota = 0;
+    }
+    if (item.precio_extra !== null && item.precio_extra !== undefined && item.precio_extra < 0) {
+      item.precio_extra = 0;
+    }
 
     const cantAd = Math.max(0, Number(item.cantidad_adulto) || 0);
     const puAd = Math.max(0, Number(item.precio_unit_adulto) || 0);
     const cantNi = Math.max(0, Number(item.cantidad_ninio) || 0);
     const puNi = Math.max(0, Number(item.precio_unit_ninio) || 0);
-    item.subtotal = (cantAd * puAd) + (cantNi * puNi);
+    const pMascota = Math.max(0, Number(item.precio_mascota) || 0);
+    const pExtra = Math.max(0, Number(item.precio_extra) || 0);
+    item.subtotal = (cantAd * puAd) + (cantNi * puNi) + pMascota + pExtra;
     this.calcularTotalGeneral();
   }
 
@@ -342,9 +356,12 @@ export class CotizacionFormComponent {
 
   calcularTotalGeneral() {
     this.totalGeneral = this.detalles.reduce((acc, item) => {
+      const pMascota = Math.max(0, Number(item.precio_mascota) || 0);
+      const pExtra = Math.max(0, Number(item.precio_extra) || 0);
       const sub = Number(item.subtotal) ||
         ((Math.max(0, Number(item.cantidad_adulto) || 0) * Math.max(0, Number(item.precio_unit_adulto) || 0)) +
-          (Math.max(0, Number(item.cantidad_ninio) || 0) * Math.max(0, Number(item.precio_unit_ninio) || 0)));
+          (Math.max(0, Number(item.cantidad_ninio) || 0) * Math.max(0, Number(item.precio_unit_ninio) || 0)) +
+          pMascota + pExtra);
       return acc + sub;
     }, 0);
   }
@@ -383,7 +400,7 @@ export class CotizacionFormComponent {
       // Validar cantidades, precios y subtotales por item
       for (let i = 0; i < this.detalles.length; i++) {
         const d = this.detalles[i];
-        if (d.cantidad_adulto < 0 || d.precio_unit_adulto < 0 || d.cantidad_ninio < 0 || d.precio_unit_ninio < 0) {
+        if (d.cantidad_adulto < 0 || d.precio_unit_adulto < 0 || d.cantidad_ninio < 0 || d.precio_unit_ninio < 0 || (d.precio_mascota !== undefined && d.precio_mascota < 0) || (d.precio_extra !== undefined && d.precio_extra < 0)) {
           this.alertService.show(`Las cantidades y precios en el item #${i + 1} no pueden ser negativos`, { duration: 4000, type: 'warning' });
           return;
         }
@@ -417,7 +434,9 @@ export class CotizacionFormComponent {
         const puAd = Number(d.precio_unit_adulto) || 0;
         const cantNi = Number(d.cantidad_ninio) || 0;
         const puNi = Number(d.precio_unit_ninio) || 0;
-        const sub = Number(d.subtotal) || ((cantAd * puAd) + (cantNi * puNi));
+        const pMascota = Number(d.precio_mascota) || 0;
+        const pExtra = Number(d.precio_extra) || 0;
+        const sub = Number(d.subtotal) || ((cantAd * puAd) + (cantNi * puNi) + pMascota + pExtra);
         const nomServicio = d.servicio && d.servicio.trim() !== '' ? d.servicio.trim() : 'Cotización de Servicio';
         const txtDetalle = d.detalle && d.detalle.trim() !== '' ? d.detalle.trim() : nomServicio;
 
@@ -429,6 +448,8 @@ export class CotizacionFormComponent {
           precio_unit_adulto: puAd,
           cantidad_ninio: cantNi,
           precio_unit_ninio: puNi,
+          precio_mascota: pMascota,
+          precio_extra: pExtra,
           subtotal: sub,
           servicio: nomServicio,
           detalle: txtDetalle,
