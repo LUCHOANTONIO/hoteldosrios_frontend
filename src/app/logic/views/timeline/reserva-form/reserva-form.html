@@ -106,9 +106,9 @@
                         }
                     }
 
-                    <div class="row row-cols-1 row-cols-md-2 g-2">
+                    <div class="row g-2">
                         @if (tipo_reserva === 'individual') {
-                            <mat-form-field appearance="outline" class="col">
+                            <mat-form-field appearance="outline" class="col-12">
                                 <mat-label>Habitacion</mat-label>
                                 <mat-select placeholder="" [(ngModel)]="reserva.habitacion_id" name="habitacion_id"
                                     [disabled]="isDisabled" #cboHabitacion (selectionChange)="changeHabitacion($event)"
@@ -119,14 +119,14 @@
                                 </mat-select>
                             </mat-form-field>
                         } @else {
-                            <mat-form-field appearance="outline" class="col">
+                            <mat-form-field appearance="outline" class="col-12 col-md-6">
                                 <mat-label>Nombre del Grupo</mat-label>
                                 <input matInput placeholder="Ej: Familia Gómez / Delegación" [(ngModel)]="reserva.grupo_nombre"
                                     name="grupo_nombre" [readonly]="isDisabled">
                                 <mat-icon matSuffix class="text-secondary">groups</mat-icon>
                             </mat-form-field>
 
-                            <mat-form-field appearance="outline" class="col">
+                            <mat-form-field appearance="outline" class="col-12 col-md-6">
                                 <mat-label>Habitaciones (Selección Múltiple)</mat-label>
                                 <mat-select placeholder="" multiple [(ngModel)]="selectedHabitaciones" name="selectedHabitaciones"
                                     [disabled]="isDisabled" (selectionChange)="changeHabitacionesMulti($event)" required>
@@ -142,7 +142,7 @@
                             </mat-form-field>
                         }
 
-                        <mat-form-field appearance="outline" class="col">
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Canal Reserva</mat-label>
                             <mat-select placeholder="" [(ngModel)]="reserva.canal_reserva_id" name="canal_reserva_id"
                                 [disabled]="isDisabled" #cboCanalReserva (keydown.enter)="cboPaisProcedencia.focus()"
@@ -153,13 +153,13 @@
                             </mat-select>
                         </mat-form-field>
 
-                        <app-select-search class="col" #cboPaisProcedencia (keyupEnter)="txtFechaIni.focus()"
+                        <app-select-search class="col-12 col-md-6" #cboPaisProcedencia (keyupEnter)="txtFechaIni.focus()"
                             label="País Procedencia" [(ngModel)]="reserva.pais_procedencia_id" [dataSource]="paises"
                             (selectionChange)="{}" text="descripcion" value="id" name="pais_procedencia_id"
                             showCleanButton="false" required [searchFields]="['descripcion']" [disabled]="isDisabled">
                         </app-select-search>
 
-                        <mat-form-field appearance="outline" class="col">
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Fecha Inicial</mat-label>
                             <input matInput [matDatepicker]="picker_fecha_ini" [(ngModel)]="reserva.fecha_ini"
                                 name="fecha_ini" [readonly]="isDisabled" #txtFechaIni required
@@ -168,7 +168,7 @@
                             <mat-datepicker #picker_fecha_ini [disabled]="isDisabled"></mat-datepicker>
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col">
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Fecha Final</mat-label>
                             <input matInput [matDatepicker]="picker_fecha_fin" [(ngModel)]="reserva.fecha_fin"
                                 name="fecha_fin" [readonly]="isDisabled" #txtFechaFin required
