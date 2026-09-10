@@ -432,10 +432,11 @@ export class TimelineComponent implements AfterViewInit {
     this.reserva.fecha_ini = fecha_ini;
     this.reserva.fecha_fin = fecha_fin;
     this.reserva.habitacion_id = habitacion_id;
-    const selectedHabitacion = this.habitaciones.find(h => h.id === habitacion_id);
-    if (selectedHabitacion) {
-      this.reserva.precio_unitario = selectedHabitacion.precio;
-    }
+    this.reserva.cantidad_adulto = 1;
+    this.reserva.precio_unit_adulto = 0;
+    this.reserva.cantidad_ninio = 0;
+    this.reserva.precio_unit_ninio = 0;
+    this.reserva.total = 0;
 
     const dialogRef = this.dialog.open(ReservaFormComponent, {
       data: {

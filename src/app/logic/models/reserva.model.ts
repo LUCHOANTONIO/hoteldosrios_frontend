@@ -4,7 +4,7 @@ export class ReservaModel {
     id: number = 0;
     correlativo: number;
     nro_documento: string = "";
-    tipo_doc_id: number;
+    tipo_doc_id: number | null = null;
     nacionalidad_id: number | null = null;
     nombre: string = "";
     primer_apellido: string = "";
@@ -26,20 +26,17 @@ export class ReservaModel {
     forma_pago_servicio_id: number;
     pais_procedencia_id: number;
     estado_reserva_id: number;
-    habitacion_precio_id: number;
     fecha_ini: string = "";
     fecha_fin: string = "";
-    cantidad_huesped: number = 1;
-    hora_llegada: string = "";
     detalle: string = "";
     color: string = "";
-    cantidad: number;
-    precio_unitario: number;
-    descuento_porcentaje: number;
-    descuento: number;
+    cantidad_adulto: number = 1;
+    precio_unit_adulto: number = 0;
+    cantidad_ninio: number = 0;
+    precio_unit_ninio: number = 0;
     tiene_mensaje: boolean = false;
     is_externo: number = 0;
-    saldo: number;
-    total: number;
+    saldo: number = 0;
+    total: number = 0;
     transacciones: TransaccionModel[] = [];
 }

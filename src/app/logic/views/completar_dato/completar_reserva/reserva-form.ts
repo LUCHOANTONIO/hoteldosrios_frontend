@@ -104,8 +104,8 @@ export class CompletarReservaFormComponent {
       tipo_documentos: TipoDocumentoModel[] = [];  
       paises: PaisModel[] = [];         
       canal_reservas: CanalReservaModel[] = [];
-      reserva:ReservaModel=new ReservaModel(); 
-      reserva_id:number; 
+      reserva: any = new ReservaModel(); 
+      reserva_id: number; 
       habitacion_id:number; 
       balance:any; //Variable signal cargado desde constructor  
       
@@ -176,7 +176,7 @@ export class CompletarReservaFormComponent {
               this.calcularCantidad();             
               const selectedHabitacion = this.habitaciones.find(h => h.id === this.habitacion_id);
               if (selectedHabitacion) {
-                this.reserva.precio_unitario = selectedHabitacion.precio;
+                this.reserva.precio_unitario = 0;
                 this.calcularTotal();
               }
             }
@@ -334,7 +334,7 @@ export class CompletarReservaFormComponent {
         const selectedId = event.value;
         const selectedHabitacion = this.habitaciones.find(h => h.id === selectedId);
         if (selectedHabitacion) {
-          this.reserva.precio_unitario = selectedHabitacion.precio;
+          this.reserva.precio_unitario = 0;
           this.calcularTotal();
         }
     } 

@@ -30,7 +30,8 @@
                             <mat-label>Tipo Documento</mat-label>
                             <mat-select placeholder="" [(ngModel)]="reserva.tipo_doc_id" name="tipo_doc_id"
                                 [disabled]="isDisabled" #cboTipoDocId (keydown.enter)="txtNombre.focus()"
-                                appPreventEnterSelect required>
+                                appPreventEnterSelect>
+                                <mat-option [value]="null">-- Ninguno --</mat-option>
                                 @for (x of tipo_documentos;track $index) {
                                 <mat-option [value]="x.id">{{x.tipo_documento}}</mat-option>
                                 }
@@ -172,7 +173,7 @@
                             <mat-label>Fecha Final</mat-label>
                             <input matInput [matDatepicker]="picker_fecha_fin" [(ngModel)]="reserva.fecha_fin"
                                 name="fecha_fin" [readonly]="isDisabled" #txtFechaFin required
-                                (dateChange)="calcularCantidad()" (keydown.enter)="txtCantidad.focus()">
+                                (dateChange)="calcularCantidad()" (keydown.enter)="txtCantidadAdulto.focus()">
                             <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin" [disabled]="isDisabled"></mat-datepicker-toggle>
                             <mat-datepicker #picker_fecha_fin [disabled]="isDisabled"></mat-datepicker>
                         </mat-form-field>
@@ -185,35 +186,39 @@
                         <mat-icon class="section-icon">payments</mat-icon>
                         <span class="section-title">Precios</span>
                     </div>
-                    <div class="row row-cols-1 row-cols-md-2 g-2">
-                        <mat-form-field appearance="outline" class="col">
-                            <mat-label>Cantidad (Noches)</mat-label>
-                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.cantidad" name="cantidad"
-                                #txtCantidad (ngModelChange)="calcularFechaFin()" min="1" step="1"
-                                (keydown)="bloquearNegativos($event)" required
-                                (keydown.enter)="txtPrecioUnitario.focus()">
+                    <div class="row g-2">
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Cantidad Adulto</mat-label>
+                            <input type="number" matInput placeholder="1" [(ngModel)]="reserva.cantidad_adulto" name="cantidad_adulto"
+                                [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="1"
+                                (keydown)="bloquearNegativos($event)" required #txtCantidadAdulto
+                                (keydown.enter)="txtPrecioUnitAdulto.focus()">
+                            <mat-icon matSuffix class="text-secondary">person</mat-icon>
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col">
-                            <mat-label>Precio Unitario</mat-label>
-                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unitario"
-                                name="precio_unitario" readonly (input)="calcularTotal()" #txtPrecioUnitario required
-                                (keydown.enter)="txtDescuento.focus()">
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Precio Unit. Adulto</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unit_adulto"
+                                name="precio_unit_adulto" [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="any"
+                                (keydown)="bloquearSignosNegativos($event)" required #txtPrecioUnitAdulto
+                                (keydown.enter)="txtCantidadNinio.focus()">
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col">
-                            <mat-label>Descuento</mat-label>
-                            <input type="number" matInput [(ngModel)]="reserva.descuento" name="descuento"
-                                [readonly]="isDisabled" (input)="calcularTotal()" #txtDescuento
-                                (keydown)="bloquearSignosNegativos($event)" min="0" step="any"
-                                (keydown.enter)="txtDetalle.focus()" placeholder="0">
-                            <mat-icon matSuffix class="text-primary">sell</mat-icon>
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Cantidad Niño</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.cantidad_ninio" name="cantidad_ninio"
+                                [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="1"
+                                (keydown)="bloquearNegativos($event)" #txtCantidadNinio
+                                (keydown.enter)="txtPrecioUnitNinio.focus()">
+                            <mat-icon matSuffix class="text-secondary">child_care</mat-icon>
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col">
-                            <mat-label>Justificacion</mat-label>
-                            <input matInput [(ngModel)]="reserva.detalle" name="detalle" [readonly]="isDisabled" #txtDetalle
-                                (keydown.enter)="txtPrecioTotal.focus()" placeholder="">
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Precio Unit. Niño</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unit_ninio"
+                                name="precio_unit_ninio" [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="any"
+                                (keydown)="bloquearSignosNegativos($event)" #txtPrecioUnitNinio
+                                (keydown.enter)="txtPrecioTotal.focus()">
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-12">

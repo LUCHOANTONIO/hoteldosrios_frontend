@@ -223,8 +223,24 @@ export class ReservaFormComponent {
 
   ngOnInit(): void {
     if (this.reserva) {
+      if (!this.reserva.id || this.reserva.id <= 0) {
+        if (!this.reserva.cantidad_adulto || this.reserva.cantidad_adulto <= 0) {
+          this.reserva.cantidad_adulto = 1;
+        }
+        this.reserva.precio_unit_adulto = 0;
+        if (this.reserva.cantidad_ninio === undefined || this.reserva.cantidad_ninio === null) {
+          this.reserva.cantidad_ninio = 0;
+        }
+        this.reserva.precio_unit_ninio = 0;
+        this.reserva.total = 0;
+      } else {
+        this.reserva.precio_unit_adulto = Number(this.reserva.precio_unit_adulto) || 0;
+        this.reserva.precio_unit_ninio = Number(this.reserva.precio_unit_ninio) || 0;
+      }
+
       this.calcularCantidad();
       this.calcularTotal();
+
       if (this.reserva.id > 0) {
         if (this.reserva.grupo_id) {
           this.tipo_reserva = 'grupal';
@@ -267,7 +283,18 @@ export class ReservaFormComponent {
     const selectedId = event.value;
     const selectedHabitacion = this.habitaciones.find(h => h.id === selectedId);
     if (selectedHabitacion) {
-      this.reserva.precio_unitario = selectedHabitacion.precio;
+      if (!this.reserva.cantidad_adulto || this.reserva.cantidad_adulto <= 0) {
+        this.reserva.cantidad_adulto = 1;
+      }
+      if (this.reserva.precio_unit_adulto === undefined || this.reserva.precio_unit_adulto === null) {
+        this.reserva.precio_unit_adulto = 0;
+      }
+      if (this.reserva.cantidad_ninio === undefined || this.reserva.cantidad_ninio === null) {
+        this.reserva.cantidad_ninio = 0;
+      }
+      if (this.reserva.precio_unit_ninio === undefined || this.reserva.precio_unit_ninio === null) {
+        this.reserva.precio_unit_ninio = 0;
+      }
       this.calcularTotal();
     }
   }
@@ -284,9 +311,6 @@ export class ReservaFormComponent {
         this.reserva.habitacion_id = this.selectedHabitaciones[0];
       }
       const selectedHabitacion = this.habitaciones.find(h => h.id === this.reserva.habitacion_id);
-      if (selectedHabitacion) {
-        this.reserva.precio_unitario = selectedHabitacion.precio;
-      }
       this.calcularTotal();
     } else {
       this.reserva.is_grupal = true;
@@ -312,14 +336,12 @@ export class ReservaFormComponent {
   }
 
   calcularPrecioGrupal(): void {
-    let sumPrecio = 0;
-    for (const habId of this.selectedHabitaciones) {
-      const hab = this.habitaciones.find(h => h.id === habId);
-      if (hab && hab.precio) {
-        sumPrecio += Number(hab.precio);
-      }
+    if (!this.reserva.cantidad_adulto || this.reserva.cantidad_adulto <= 0) {
+      this.reserva.cantidad_adulto = 1;
     }
-    this.reserva.precio_unitario = sumPrecio;
+    if (this.reserva.precio_unit_adulto === undefined || this.reserva.precio_unit_adulto === null) {
+      this.reserva.precio_unit_adulto = 0;
+    }
     this.calcularTotal();
   }
 
@@ -357,13 +379,9 @@ export class ReservaFormComponent {
 
   submitReserva(f: NgForm) {
     if (f.valid) {
-      if (!this.reserva.cantidad || Number(this.reserva.cantidad) <= 0) {
+      const noches = this.getNoches();
+      if (!noches || noches <= 0) {
         this.alertService.show("La cantidad de noches debe ser mayor a 0", { duration: 5000, type: 'info' });
-        return;
-      }
-      this.reserva.cantidad_huesped = this.reserva.cantidad_huesped || 1;
-      if (this.reserva.descuento !== undefined && this.reserva.descuento !== null && Number(this.reserva.descuento) < 0) {
-        this.alertService.show("El descuento no puede ser un número negativo", { duration: 5000, type: 'info' });
         return;
       }
       if (this.tipo_reserva === 'grupal') {
@@ -390,7 +408,20 @@ export class ReservaFormComponent {
   }
 
   crearReserva() {
-    this.reservaService.crear(this.reserva).subscribe({
+    const cantAdulto = Number(this.reserva.cantidad_adulto) || 0;
+    const precioAdulto = Number(this.reserva.precio_unit_adulto) || 0;
+    const cantNinio = Number(this.reserva.cantidad_ninio) || 0;
+    const precioNinio = Number(this.reserva.precio_unit_ninio) || 0;
+    const totalPorNoche = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
+
+    const payload: any = {
+      ...this.reserva,
+      cantidad: this.getNoches(),
+      precio_unitario: totalPorNoche,
+      cantidad_huesped: (this.reserva as any).cantidad_huesped || 1
+    };
+
+    this.reservaService.crear(payload).subscribe({
       next: (res) => {
         if (res.correcto) {
           const data = JSON.parse(res.dato);
@@ -480,7 +511,20 @@ export class ReservaFormComponent {
   }
 
   modificarReserva() {
-    this.reservaService.modificar(this.reserva).subscribe({
+    const cantAdulto = Number(this.reserva.cantidad_adulto) || 0;
+    const precioAdulto = Number(this.reserva.precio_unit_adulto) || 0;
+    const cantNinio = Number(this.reserva.cantidad_ninio) || 0;
+    const precioNinio = Number(this.reserva.precio_unit_ninio) || 0;
+    const totalPorNoche = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
+
+    const payload: any = {
+      ...this.reserva,
+      cantidad: this.getNoches(),
+      precio_unitario: totalPorNoche,
+      cantidad_huesped: (this.reserva as any).cantidad_huesped || 1
+    };
+
+    this.reservaService.modificar(payload).subscribe({
       next: (res) => {
         if (res.correcto) {
           const data = JSON.parse(res.dato);
@@ -667,72 +711,35 @@ export class ReservaFormComponent {
     }
   }
 
-  calcularCantidad() {
+  getNoches(): number {
+    if (!this.reserva.fecha_ini || !this.reserva.fecha_fin) return 1;
     const fecha_inicio = moment(this.reserva.fecha_ini);
     const fecha_fin = moment(this.reserva.fecha_fin);
-    let cantidad = Math.round(fecha_fin.diff(fecha_inicio, 'days', true));
-    cantidad = cantidad <= 0 ? 1 : cantidad; //Controlamos que no sea negativo
-    this.reserva.cantidad = cantidad;
+    let diff = Math.round(fecha_fin.diff(fecha_inicio, 'days', true));
+    return diff <= 0 ? 1 : diff;
+  }
+
+  calcularCantidad() {
     this.calcularTotal();
   }
 
-  // calcularDescuentoPorcentaje(): void {      
-  //   const cantidad = Number(this.reserva.cantidad) > 0 ? Number(this.reserva.cantidad) : 1;
-  //   const precioUnitario = Number(this.reserva.precio_unitario) > 0 ? Number(this.reserva.precio_unitario) : 0;
-  //   const descuento = Number(this.reserva.descuento) > 0 ? Number(this.reserva.descuento) : 0;     
-  //   const total = cantidad * precioUnitario;
-  //   let porcentaje = 0;
-
-  //   if (total > 0 && descuento > 0) {      
-  //     porcentaje = (descuento / total) * 100;       
-  //     porcentaje = Math.round(porcentaje * 100) / 100;      
-  //     if (porcentaje > 100) {
-  //       porcentaje = 100;
-  //     }
-  //   }
-
-  //   this.reserva.descuento_porcentaje = porcentaje;     
-  //   this.calcularTotal();
-  // }
-
-  // calcularDescuento(): void {
-  //   const cantidad = Number(this.reserva.cantidad) > 0 ? Number(this.reserva.cantidad) : 1;
-  //   const precioUnitario = Number(this.reserva.precio_unitario) > 0 ? Number(this.reserva.precio_unitario) : 0;
-  //   const descuentoPorcentaje = Number(this.reserva.descuento_porcentaje) > 0 ? Number(this.reserva.descuento_porcentaje) : 0;
-
-  //   const total = cantidad * precioUnitario;
-  //   let descuento = 0;
-
-  //   if (total > 0 && descuentoPorcentaje > 0) {
-  //     descuento = (descuentoPorcentaje / 100) * total;       
-  //     descuento = Math.round(descuento * 100) / 100;      
-  //     if (descuento > total) {
-  //       descuento = total;
-  //     }
-  //   }
-
-  //   this.reserva.descuento = descuento;    ;
-  //   this.calcularTotal();
-  // }
-
   calcularFechaFin() {
     if (this.reserva.fecha_ini) {
-      const diasASumar = Math.max(1, Math.floor(Number(this.reserva.cantidad) || 1));
+      const diasASumar = this.getNoches();
       this.reserva.fecha_fin = moment(this.reserva.fecha_ini).add(diasASumar, 'days').format('YYYY-MM-DD');
       this.calcularTotal();
     }
   }
 
   calcularTotal() {
-    const precio = Number(this.reserva.precio_unitario) || 0;
-    const cantidad = Number(this.reserva.cantidad) || 0;
-    let descuento = Number(this.reserva.descuento) || 0;
-    if (descuento < 0) {
-      descuento = 0;
-      this.reserva.descuento = 0;
-    }
-    let totalCalculado = (precio * cantidad) - descuento;
-    this.reserva.total = Math.max(0, Math.round(totalCalculado * 100) / 100);
+    const cantAdulto = Number(this.reserva.cantidad_adulto) || 0;
+    const precioAdulto = Number(this.reserva.precio_unit_adulto) || 0;
+    const cantNinio = Number(this.reserva.cantidad_ninio) || 0;
+    const precioNinio = Number(this.reserva.precio_unit_ninio) || 0;
+
+    const totalPorNoche = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
+    const noches = this.getNoches();
+    this.reserva.total = Math.max(0, Math.round((totalPorNoche * noches) * 100) / 100);
   }
 
   onProductoChange(fila: TransaccionModel) {
