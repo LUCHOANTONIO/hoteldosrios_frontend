@@ -32,7 +32,6 @@ import { AfterViewInit,Component, ViewChild, inject } from '@angular/core';
 
 import { forkJoin } from 'rxjs';
 import { SpanishPaginatorIntl } from '../../../base/utils/spanish-paginator-intl';
-import { HabitacionPrecioComponent } from '../habitacion_precio/habitacion_precio';
 
 
 @Component({
@@ -53,10 +52,7 @@ export class HabitacionComponent implements AfterViewInit{
     estado_habitaciones:EstadoHabitacionModel[]=[];
     tipo_habitaciones:TipoHabitacionModel[]=[];
     buttonEnabled = false; // Deshabilita el botón Add
-
-    dialogHabitacionPrecio: any; 
-
-    displayedColumns: string[] = ['actions', 'agencia' ,'descripcion', 'nro_habitacion', 'precio', 'piso','tipo_habitacion','opcion'];
+    displayedColumns: string[] = ['actions', 'agencia' ,'descripcion', 'nro_habitacion', 'precio', 'piso','tipo_habitacion'];
     dataSource : MatTableDataSource<HabitacionModel>;
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -159,18 +155,6 @@ export class HabitacionComponent implements AfterViewInit{
           this.cambiarfondoFila("");//cancelar
         }
       });
-    }
-
-    habitacionPrecio(habitacion_id:number): void {                         
-        this.dialogHabitacionPrecio = this.dialog.open(HabitacionPrecioComponent, {
-          width: '40vw',
-          maxWidth: '95vw',                        
-          data: {
-            habitacion_id: habitacion_id,
-            tipo_habitaciones:this.tipo_habitaciones
-          },
-          disableClose: true,
-        });
     }
 
     //------------------------------------------------------------------------

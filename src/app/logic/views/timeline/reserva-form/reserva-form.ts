@@ -9,7 +9,6 @@ import { CanalReservaModel } from '../../../models/canal_reserva.model';
 import { HabitacionModel } from '../../../models/habitacion.model';
 import { ProductoModel } from '../../../models/producto.model';
 import { TransaccionModel } from '../../../models/transaccion.model';
-import { HabitacionPrecioModel } from '../../../models/habitacion_precio.model';
 import { EstadoCivilModel } from '../../../../base/models/estadocivil.model';
 
 //COMPONENT
@@ -36,7 +35,6 @@ import { DocumentoService } from '../../../services/documento.service';
 import { BalanceService } from '../../../services/balance.service';
 import { ComunicacionService } from '../../../services/local/comunicacion.service';
 import { TransaccionService } from '../../../services/transaccion.service';
-import { HabitacionPrecioService } from '../../../services/habitacion_precio.service';
 import { PermisoService } from '../../../../base/services/permiso.service';
 
 //ANGULAR MATERIAL
@@ -122,12 +120,12 @@ export class ReservaFormComponent {
   @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;
   @ViewChild(PagoFormComponent) pagoFormComponent: PagoFormComponent;
   @ViewChild(BitacoraFormComponent) bitacoraFormComponent: BitacoraFormComponent;
+  @ViewChild('cboHabitacion') cboHabitacion: any;
+  @ViewChild('cboCanalReserva') cboCanalReserva: any;
 
   items: any;
   groups: any;
   habitaciones: HabitacionModel[] = [];
-  habitacion_precios: HabitacionPrecioModel[] = [];
-  habitacion_precios_filtrado: HabitacionPrecioModel[] = [];
   forma_pagos: FormaPagoModel[] = [];
   forma_pagos_servicio: FormaPagoModel[] = [];
   productos: ProductoModel[] = [];
@@ -153,6 +151,10 @@ export class ReservaFormComponent {
   isVisibleTabs: boolean = false;
   isVisibleServiciosExtra: boolean = false;
 
+  // Tipo de Reserva: individual o grupal
+  tipo_reserva: 'individual' | 'grupal' = 'individual';
+  selectedHabitaciones: number[] = [];
+
   //Comprobante              
   dialogVoucherRef: any;
 
@@ -177,7 +179,6 @@ export class ReservaFormComponent {
     private balanceService: BalanceService,
     private transaccionService: TransaccionService,
     private comunicacionService: ComunicacionService,
-    private habitacionPrecioService: HabitacionPrecioService,
     private permisoService: PermisoService,
     private cdr: ChangeDetectorRef
   ) {
@@ -199,8 +200,6 @@ export class ReservaFormComponent {
     // Configuración de suscripciones y servicios
     this.dialogRef.backdropClick().subscribe(x => { });
     this.balance = this.balanceService.balance;      
-
-    this.cargarDatos();
 
     // Lógica condicional de inicialización
     if (this.reserva.id > 0) {
@@ -227,6 +226,15 @@ export class ReservaFormComponent {
       this.calcularCantidad();
       this.calcularTotal();
       if (this.reserva.id > 0) {
+        if (this.reserva.grupo_id) {
+          this.tipo_reserva = 'grupal';
+          this.reserva.is_grupal = true;
+          this.selectedHabitaciones = [this.reserva.habitacion_id];
+        } else {
+          this.tipo_reserva = 'individual';
+          this.reserva.is_grupal = false;
+          this.selectedHabitaciones = [this.reserva.habitacion_id];
+        }
         setTimeout(() => {
           this.isDisabled = true;
           this.mnuVisibleOpciones = true;
@@ -235,6 +243,10 @@ export class ReservaFormComponent {
           this.isVisibleTabs = true;
           this.cdr.detectChanges(); //Con esto se corrigio el error ExpressionChangedAfterItHasBeenCheckedError
         });
+      } else {
+        this.tipo_reserva = 'individual';
+        this.reserva.is_grupal = false;
+        this.selectedHabitaciones = this.reserva.habitacion_id ? [this.reserva.habitacion_id] : [];
       }
 
       // En tu ngOnInit o donde cargues los datos de la reserva
@@ -250,18 +262,7 @@ export class ReservaFormComponent {
     this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>([]);
   }
 
-  cargarDatos() {
-    forkJoin({
-      habitacion_precios: this.habitacionPrecioService.listar(null),
-    }).subscribe({
-      next: (res) => {
-        this.habitacion_precios = res.habitacion_precios;
-        this.filterHabitacionPrecios(); // Filtrar precios de habitación según la habitación seleccionada
-      }
-    });
-  }
-
-  //Begin: Filtrar habitacion y habitaciones alternas
+  //Begin: Filtrar habitacion
   changeHabitacion(event: any): void {
     const selectedId = event.value;
     const selectedHabitacion = this.habitaciones.find(h => h.id === selectedId);
@@ -269,33 +270,67 @@ export class ReservaFormComponent {
       this.reserva.precio_unitario = selectedHabitacion.precio;
       this.calcularTotal();
     }
-
-    this.filterHabitacionPrecios();
   }
+  //End: Filtrar habitacion   
 
-  changeHabitacionPrecio(event: any): void {
-    const selectedId = event ? event.value : null;
-    const selectedHabitacionPrecio = this.habitacion_precios.find(h => h.id === selectedId);
-    if (selectedHabitacionPrecio) {
-      this.reserva.precio_unitario = selectedHabitacionPrecio.precio;
-    } else {
-      this.reserva.habitacion_precio_id = null;
+  //Begin: Metodos para Reserva Grupal
+  onTipoReservaChange(tipo: 'individual' | 'grupal'): void {
+    if (this.isDisabled) return;
+    this.tipo_reserva = tipo;
+    if (tipo === 'individual') {
+      this.reserva.is_grupal = false;
+      this.reserva.habitacion_ids = [];
+      if (this.selectedHabitaciones.length > 0) {
+        this.reserva.habitacion_id = this.selectedHabitaciones[0];
+      }
       const selectedHabitacion = this.habitaciones.find(h => h.id === this.reserva.habitacion_id);
       if (selectedHabitacion) {
         this.reserva.precio_unitario = selectedHabitacion.precio;
       }
+      this.calcularTotal();
+    } else {
+      this.reserva.is_grupal = true;
+      if (this.selectedHabitaciones.length === 0 && this.reserva.habitacion_id) {
+        this.selectedHabitaciones = [this.reserva.habitacion_id];
+      }
+      this.reserva.habitacion_ids = [...this.selectedHabitaciones];
+      if (!this.reserva.grupo_nombre) {
+        const apellido = this.reserva.primer_apellido || this.reserva.nombre || '';
+        this.reserva.grupo_nombre = apellido ? `Grupo ${apellido}` : 'Grupo';
+      }
+      this.calcularPrecioGrupal();
     }
+  }
 
+  changeHabitacionesMulti(event: any): void {
+    this.selectedHabitaciones = event.value || [];
+    this.reserva.habitacion_ids = [...this.selectedHabitaciones];
+    if (this.selectedHabitaciones.length > 0) {
+      this.reserva.habitacion_id = this.selectedHabitaciones[0];
+    }
+    this.calcularPrecioGrupal();
+  }
+
+  calcularPrecioGrupal(): void {
+    let sumPrecio = 0;
+    for (const habId of this.selectedHabitaciones) {
+      const hab = this.habitaciones.find(h => h.id === habId);
+      if (hab && hab.precio) {
+        sumPrecio += Number(hab.precio);
+      }
+    }
+    this.reserva.precio_unitario = sumPrecio;
     this.calcularTotal();
   }
 
-  filterHabitacionPrecios(): void {
-    this.habitacion_precios_filtrado = this.habitacion_precios.filter(h => h.habitacion_id === this.reserva.habitacion_id);
-    if (this.habitacion_precios_filtrado.length === 0) {
-      this.reserva.habitacion_precio_id = null;
+  focusHabitacion(): void {
+    if (this.cboHabitacion?.focus) {
+      this.cboHabitacion.focus();
+    } else if (this.cboCanalReserva?.focus) {
+      this.cboCanalReserva.focus();
     }
   }
-  //End: Filtrar habitacion y habitaciones alternas   
+  //End: Metodos para Reserva Grupal   
 
   // Este método se llama desde el botón de cerrar
   onClose(): void {
@@ -326,13 +361,22 @@ export class ReservaFormComponent {
         this.alertService.show("La cantidad de noches debe ser mayor a 0", { duration: 5000, type: 'info' });
         return;
       }
-      if (!this.reserva.cantidad_huesped || Number(this.reserva.cantidad_huesped) <= 0) {
-        this.alertService.show("La cantidad de huéspedes debe ser mayor a 0", { duration: 5000, type: 'info' });
-        return;
-      }
+      this.reserva.cantidad_huesped = this.reserva.cantidad_huesped || 1;
       if (this.reserva.descuento !== undefined && this.reserva.descuento !== null && Number(this.reserva.descuento) < 0) {
         this.alertService.show("El descuento no puede ser un número negativo", { duration: 5000, type: 'info' });
         return;
+      }
+      if (this.tipo_reserva === 'grupal') {
+        if (!this.selectedHabitaciones || this.selectedHabitaciones.length === 0) {
+          this.alertService.show("Debe seleccionar al menos una habitación para la reserva grupal", { duration: 5000, type: 'info' });
+          return;
+        }
+        this.reserva.is_grupal = true;
+        this.reserva.habitacion_ids = this.selectedHabitaciones;
+        this.reserva.habitacion_id = this.selectedHabitaciones[0];
+      } else {
+        this.reserva.is_grupal = false;
+        this.reserva.habitacion_ids = [this.reserva.habitacion_id];
       }
       this.botonGuardarDirectiva.deshabilitarFormBoton();
       if (this.reserva.id > 0) {
@@ -374,8 +418,28 @@ export class ReservaFormComponent {
             }
           }
 
-          const newClassName = this.reserva.color ? this.reserva.color + ' new-reservation-highlight' : 'new-reservation-highlight';
-          this.items.update({ id: this.reserva.id, correlativo: this.reserva.correlativo, cliente: this.reserva.cliente, start: fecha_hora_ini, end: fecha_hora_fin, group: this.reserva.habitacion_id, className: newClassName, saldo: this.reserva.saldo });
+          // Si es grupal y se crearon múltiples reservas, actualizarlas todas en el timeline
+          if (data.reservas && Array.isArray(data.reservas) && data.reservas.length > 0) {
+            data.reservas.forEach((r: any) => {
+              const r_ini = moment(r.fecha_ini).format("YYYY-MM-DD HH:mm");
+              const r_fin = moment(r.fecha_fin).format("YYYY-MM-DD HH:mm");
+              const newCls = r.color ? r.color + ' new-reservation-highlight' : 'new-reservation-highlight';
+              this.items.update({
+                id: r.id,
+                correlativo: r.correlativo,
+                cliente: r.cliente,
+                start: r_ini,
+                end: r_fin,
+                group: r.habitacion_id,
+                className: newCls,
+                saldo: r.saldo
+              });
+            });
+            this.alertService.show(`Reserva grupal creada con éxito (${data.reservas.length} habitaciones)`, { duration: 5000, type: 'success' });
+          } else {
+            const newClassName = this.reserva.color ? this.reserva.color + ' new-reservation-highlight' : 'new-reservation-highlight';
+            this.items.update({ id: this.reserva.id, correlativo: this.reserva.correlativo, cliente: this.reserva.cliente, start: fecha_hora_ini, end: fecha_hora_fin, group: this.reserva.habitacion_id, className: newClassName, saldo: this.reserva.saldo });
+          }
           this.isDisabled = true;
           this.btnVisibleCheckIn = true;
           this.btnVisibleCheckOut = true;

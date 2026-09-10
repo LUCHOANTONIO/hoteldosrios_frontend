@@ -1,7 +1,7 @@
 import { TransaccionModel } from "./transaccion.model";
 
 export class ReservaModel {
-    id: number;
+    id: number = 0;
     correlativo: number;
     nro_documento: string = "";
     tipo_doc_id: number;
@@ -17,6 +17,10 @@ export class ReservaModel {
     cliente: string = "";
     nombre_corto_cliente: string = "";
     habitacion_id: number;
+    grupo_id: number | null = null;
+    grupo_nombre: string = "";
+    is_grupal: boolean = false;
+    habitacion_ids: number[] = [];
     canal_reserva_id: number;
     forma_pago_id: number | null = null;
     forma_pago_servicio_id: number;

@@ -40,6 +40,101 @@
   }
 }
 
+/* MODALIDAD DE RESERVA (INDIVIDUAL / GRUPAL) */
+.tipo-reserva-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.tipo-reserva-label-group {
+  display: flex;
+  flex-direction: column;
+
+  .tipo-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e3a8a;
+  }
+
+  .tipo-subtitle {
+    font-size: 12px;
+    color: #64748b;
+  }
+}
+
+.tipo-reserva-pill-group {
+  display: inline-flex;
+  background: #e2e8f0;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.tipo-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover:not(:disabled) {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  &.active {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.35);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.grupo-badge-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  width: 100%;
+
+  mat-icon {
+    color: #2563eb;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
 /* TOTAL DESTACADO */
 .precio-total-input {
   color: #16a34a !important;
