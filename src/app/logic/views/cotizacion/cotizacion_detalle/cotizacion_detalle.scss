@@ -16,3 +16,25 @@
 .tabla-detalle {
     min-width: 650px;
 }
+
+.btn-agregar-item {
+    background-color: #05df79ad !important;
+    color: #000000 !important;
+    font-weight: 600 !important;
+    border-radius: 0.5rem !important;
+
+    &:hover {
+        background-color: #05df79d0 !important;
+    }
+}
+
+.btn-actualizar-item {
+    background-color: #d6af10 !important;
+    color: #000000 !important;
+    font-weight: 600 !important;
+    border-radius: 0.5rem !important;
+
+    &:hover {
+        background-color: #c49f0d !important;
+    }
+}

@@ -233,7 +233,8 @@
                             <mat-icon class="me-1">close</mat-icon> Cancelar
                         </button>
                         <button mat-raised-button type="button" (click)="agregarOActualizarItem()"
-                            class="bg-success text-dark fw-bold px-3">
+                            class="rounded-button px-3"
+                            [ngClass]="editandoIndex !== null ? 'btn-actualizar-item' : 'btn-agregar-item'">
                             <mat-icon class="me-1">{{ editandoIndex !== null ? 'check' : 'add' }}</mat-icon>
                             {{ editandoIndex !== null ? 'Actualizar Ítem' : 'Agregar Ítem' }}
                         </button>

@@ -46,17 +46,40 @@
   border: 1px solid #cbd5e1 !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
 
-  input[type=number]::-webkit-inner-spin-button, 
-  input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none; 
-    margin: 0; 
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
+
   input[type=number] {
     -moz-appearance: textfield;
   }
 }
 
-/* BOTONES DE ACCIÓN COMPACTOS */
+/* BOTONES DE ACCIÓN COMPACTOS Y PERSONALIZADOS */
+.btn-agregar-item {
+  background-color: #05df79ad !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  border-radius: 0.5rem !important;
+
+  &:hover {
+    background-color: #05df79d0 !important;
+  }
+}
+
+.btn-actualizar-item {
+  background-color: #d6af10 !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  border-radius: 0.5rem !important;
+
+  &:hover {
+    background-color: #c49f0d !important;
+  }
+}
+
 .btn-sm-action {
   width: 32px !important;
   height: 32px !important;
@@ -107,6 +130,7 @@
 
   tr.mat-mdc-row {
     transition: background-color 0.15s ease;
+
     &:hover {
       background-color: #f8fafc;
     }
@@ -131,4 +155,3 @@
   font-size: 13.5px;
   border-bottom: 1px dashed #e2e8f0;
 }
-

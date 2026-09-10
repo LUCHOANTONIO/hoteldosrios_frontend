@@ -22,7 +22,7 @@
                 <strong>Periodo:</strong> {{ cotizacion.fecha_ini || '-' }} al {{ cotizacion.fecha_fin || '-' }}
             </div>
             <div class="col-md-3 text-end">
-                <button mat-raised-button color="primary" (click)="nuevoDetalle()" *ngIf="!mostrarFormItem">
+                <button mat-raised-button class="btn-agregar-item rounded-button" (click)="nuevoDetalle()" *ngIf="!mostrarFormItem">
                     <mat-icon>add</mat-icon> Agregar Item
                 </button>
             </div>
@@ -82,7 +82,9 @@
 
                 <div class="col-md-2 d-flex gap-1 justify-content-end">
                     <button mat-flat-button color="warn" type="button" (click)="cancelarEdicion()">Cancelar</button>
-                    <button mat-flat-button class="bg-success text-white" type="submit">Guardar</button>
+                    <button mat-flat-button class="rounded-button" [ngClass]="editandoIndex >= 0 ? 'btn-actualizar-item' : 'btn-agregar-item'" type="submit">
+                        {{ editandoIndex >= 0 ? 'Actualizar' : 'Guardar' }}
+                    </button>
                 </div>
             </form>
         </div>
