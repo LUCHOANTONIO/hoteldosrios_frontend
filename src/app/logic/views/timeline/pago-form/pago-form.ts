@@ -127,6 +127,10 @@ export class PagoFormComponent implements OnInit {
 
   submitPago(f: NgForm) {               
       if (f.valid) {
+          if (!this.transaccion_pago.monto || Number(this.transaccion_pago.monto) <= 0) {
+              this.alertService.show("El monto no puede ser vacío o cero", { duration: 3000, type: 'info' });
+              return;
+          }
           this.isProcessing = true;             
           this.botonGuardarDirectiva.deshabilitarFormBoton();
           this.procesarPago(); 

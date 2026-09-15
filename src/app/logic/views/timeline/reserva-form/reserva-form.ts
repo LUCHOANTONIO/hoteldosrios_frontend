@@ -384,6 +384,10 @@ export class ReservaFormComponent {
         this.alertService.show("La cantidad de noches debe ser mayor a 0", { duration: 5000, type: 'info' });
         return;
       }
+      if (!this.reserva.total || Number(this.reserva.total) <= 0) {
+        this.alertService.show("El monto no puede ser vacío o cero", { duration: 5000, type: 'info' });
+        return;
+      }
       if (this.tipo_reserva === 'grupal') {
         if (!this.selectedHabitaciones || this.selectedHabitaciones.length === 0) {
           this.alertService.show("Debe seleccionar al menos una habitación para la reserva grupal", { duration: 5000, type: 'info' });

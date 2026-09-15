@@ -116,6 +116,10 @@ export class TransaccionFormComponent implements OnInit {
 
   submitTransaccion(f: NgForm) {
     if (f.valid) {
+      if (!this.transaccion.total || Number(this.transaccion.total) <= 0) {
+        this.alertService.show("El monto no puede ser vacío o cero", { duration: 3000, type: 'info' });
+        return;
+      }
       this.guardarTransaccion();
       this.botonGuardarDirectiva.deshabilitarFormBoton();
     } else {
