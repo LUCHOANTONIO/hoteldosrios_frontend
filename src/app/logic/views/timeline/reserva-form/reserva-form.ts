@@ -118,7 +118,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     SelectSearchComponent,
     ShowErrorDirective,
   ],
-  
+
   templateUrl: './reserva-form.html',
   styleUrls: ['./reserva-form.scss']
 })
@@ -165,8 +165,8 @@ export class ReservaFormComponent {
   dialogVoucherRef: any;
 
   //Variable Signals
-  updateGroupsSignal = signal<number | null>(null);   
-  private triggerEstadoReserva = signal<number>(Date.now());    
+  updateGroupsSignal = signal<number | null>(null);
+  private triggerEstadoReserva = signal<number>(Date.now());
 
   //Vaariables para Transaccion    
   displayedColumnsTransaccion: string[] = ['accion', 'descripcion', 'cantidad', 'precio_unitario', 'total'];
@@ -176,6 +176,7 @@ export class ReservaFormComponent {
   nuevoServicio: TransaccionModel = new TransaccionModel();
   categorias: CategoriaModel[] = [];
   productos_filtrados: ProductoModel[] = [];
+  isProcessingServicio: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<ReservaFormComponent>,
@@ -209,24 +210,24 @@ export class ReservaFormComponent {
 
     // Configuración de suscripciones y servicios
     this.dialogRef.backdropClick().subscribe(x => { });
-    this.balance = this.balanceService.balance;      
+    this.balance = this.balanceService.balance;
 
     // Lógica condicional de inicialización
     if (this.reserva.id > 0) {
       this.cargarDatosTransaccion(this.reserva.id)
       this.btnVisibleCheckIn = true;
       this.btnVisibleCheckOut = true;
-    }    
+    }
 
     effect(() => {
       this.triggerEstadoReserva(); // Disparador reactivo para cuando hay cambio de estado_reserva_id   
-      let permisos = this.permisoService.permisos();     
+      let permisos = this.permisoService.permisos();
       if (this.reserva.estado_reserva_id != 1) {
         if (permisos.length > 0) {
-           this.btnDeleteReserva = permisos.find(p => p.nombre == 'Eliminar Reserva') ? true : false;
+          this.btnDeleteReserva = permisos.find(p => p.nombre == 'Eliminar Reserva') ? true : false;
         }
       } else {
-        this.btnDeleteReserva=true;
+        this.btnDeleteReserva = true;
       }
     });
   }
@@ -691,7 +692,7 @@ export class ReservaFormComponent {
               if (estado_reserva_id == 3) { // Estado Check Out
                 this.updateGroupsSignal.set(this.reserva.habitacion_id);
               }
-              
+
               this.triggerEstadoReserva.set(Date.now());
 
             } else {
@@ -855,9 +856,11 @@ export class ReservaFormComponent {
 
     // Si la reserva ya fue guardada en BD
     if (this.reserva && this.reserva.id > 0) {
+      this.isProcessingServicio = true;
       const itemAGuardar = { ...this.nuevoServicio, reserva_id: this.reserva.id };
       this.transaccionService.crear(itemAGuardar).subscribe({
         next: (res) => {
+          this.isProcessingServicio = false;
           if (res.correcto) {
             const data = JSON.parse(res.dato);
             this.reserva.transacciones = data.transacciones as TransaccionModel[];
@@ -876,12 +879,14 @@ export class ReservaFormComponent {
           }
         },
         error: (err) => {
+          this.isProcessingServicio = false;
           console.error(err);
           this.alertService.show("Error al guardar el servicio adicional", { duration: 5000, type: 'info' });
         }
       });
     } else {
       // Para reserva nueva (aún no guardada)
+      this.isProcessingServicio = true;
       if (!this.reserva.transacciones) {
         this.reserva.transacciones = [];
       }
@@ -889,6 +894,9 @@ export class ReservaFormComponent {
       this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
       this.inicializarNuevoServicio();
       this.alertService.show("Servicio adicional agregado", { duration: 2500, type: 'success' });
+      setTimeout(() => {
+        this.isProcessingServicio = false;
+      }, 300);
     }
   }
 
@@ -938,7 +946,7 @@ export class ReservaFormComponent {
 
   //END TRANSACCIONES     
 
-  bloquearNegativos(event: KeyboardEvent): void {    
+  bloquearNegativos(event: KeyboardEvent): void {
     if (event.key === '-' || event.key === '+' || event.key === '.' || event.key === ',' || event.key === 'e' || event.key === 'E') {
       event.preventDefault();
     }

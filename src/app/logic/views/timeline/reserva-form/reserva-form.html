@@ -251,7 +251,7 @@
                             label="Categoria" [(ngModel)]="nuevoServicio.categoria_id"
                             [dataSource]="categorias" (selectionChange)="filtrarProductos()"
                             text="descripcion" value="id" name="nuevo_categoria_id"
-                            showCleanButton="true" [searchFields]="['descripcion']">
+                            showCleanButton="true" [searchFields]="['descripcion']" [disabled]="isDisabled">
                         </app-select-search>
 
                         <!-- Col 2: Productos -->
@@ -259,7 +259,7 @@
                             label="Productos" [(ngModel)]="nuevoServicio.producto_id"
                             [dataSource]="productos_filtrados" (selectionChange)="onProductoServicioChange($event)"
                             text="descripcion" value="id" name="nuevo_producto_id"
-                            showCleanButton="true" [searchFields]="['descripcion']">
+                            showCleanButton="true" [searchFields]="['descripcion']" [disabled]="isDisabled">
                         </app-select-search>
 
                         <!-- Col 3: Cantidad -->
@@ -267,7 +267,7 @@
                             <mat-label>Cantidad</mat-label>
                             <input type="number" matInput [(ngModel)]="nuevoServicio.cantidad" name="nuevo_cantidad"
                                 (input)="calcularTotalNuevoServicio()" min="1" step="1"
-                                (keydown)="bloquearNegativos($event)" placeholder="1">
+                                (keydown)="bloquearNegativos($event)" placeholder="1" [readonly]="isDisabled">
                         </mat-form-field>
 
                         <!-- Col 4: Precio Unidad -->
@@ -275,7 +275,7 @@
                             <mat-label>Precio Unidad</mat-label>
                             <input type="number" matInput [(ngModel)]="nuevoServicio.precio_unitario" name="nuevo_monto"
                                 (input)="calcularTotalNuevoServicio()" min="0" step="any"
-                                (keydown)="bloquearSignosNegativos($event)" placeholder="0.00">
+                                (keydown)="bloquearSignosNegativos($event)" placeholder="0.00" [readonly]="isDisabled">
                         </mat-form-field>
 
                         <!-- Col 5: Total -->
@@ -285,12 +285,17 @@
                                 class="fw-bold text-success" placeholder="0.00">
                         </mat-form-field>
 
-                        <!-- Col 6: Botón Procesar -->
-                        <div class="col-12 col-md-6 btn-procesar-wrapper">
-                            <button mat-raised-button type="button" class="btn-procesar-servicio w-100"
+                        <!-- Col 6: Botón Agregar (+) Elegante con Spinner -->
+                        <div class="col-12 col-md-6 btn-add-wrapper">
+                            <button mat-mini-fab type="button" class="btn-add-servicio"
                                 (click)="agregarServicioAdicional()"
-                                [disabled]="!nuevoServicio.producto_id">
-                                Procesar
+                                [disabled]="isDisabled || !nuevoServicio.producto_id || isProcessingServicio"
+                                [matTooltip]="isProcessingServicio ? 'Procesando...' : 'Agregar servicio adicional'">
+                                @if (isProcessingServicio) {
+                                    <mat-spinner diameter="22" class="spinner-btn-add"></mat-spinner>
+                                } @else {
+                                    <mat-icon>add</mat-icon>
+                                }
                             </button>
                         </div>
                     </div>
@@ -304,7 +309,7 @@
                                 <th mat-header-cell *matHeaderCellDef style="width: 50px;" class="text-center">#</th>
                                 <td mat-cell *matCellDef="let item; let i = index;" class="text-center">
                                     <button type="button" mat-icon-button class="text-danger" (click)="eliminarServicioAdicional(i, item)"
-                                        matTooltip="Eliminar servicio">
+                                        [disabled]="isDisabled" matTooltip="Eliminar servicio">
                                         <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
                                     </button>
                                 </td>
