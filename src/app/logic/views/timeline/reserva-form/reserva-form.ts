@@ -300,6 +300,11 @@ export class ReservaFormComponent {
       this.reserva.transacciones = [];
     }
     this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+    this.isVisibleServiciosExtra = (this.reserva.transacciones && this.reserva.transacciones.length > 0) ? true : false;
+  }
+
+  toggleServiciosExtra(): void {
+    this.isVisibleServiciosExtra = !this.isVisibleServiciosExtra;
   }
 
   //Begin: Filtrar habitacion
@@ -985,6 +990,9 @@ export class ReservaFormComponent {
         this.reserva.transacciones = res.transacciones;
         this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
         this.dataSourceTransaccion.paginator = this.paginator;
+        if (this.reserva.transacciones && this.reserva.transacciones.length > 0) {
+          this.isVisibleServiciosExtra = true;
+        }
       }
     });
   }

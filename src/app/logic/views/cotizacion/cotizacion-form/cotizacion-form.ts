@@ -3,12 +3,16 @@ import { CotizacionModel } from '../../../models/cotizacion.model';
 import { CotizacionDetalleModel } from '../../../models/cotizacion_detalle.model';
 import { TarifaModel } from '../../../models/tarifa.model';
 import { TipoDocumentoModel } from '../../../../base/models/tipodocumento.model';
+import { CategoriaModel } from '../../../models/categoria.model';
+import { ProductoModel } from '../../../models/producto.model';
 
 // SERVICES
 import { CotizacionService } from '../../../services/cotizacion.service';
 import { CotizacionDetalleService } from '../../../services/cotizacion_detalle.service';
 import { TarifaService } from '../../../services/tarifa.service';
 import { TipoDocumentoService } from '../../../../base/services/tipodocumento.service';
+import { CategoriaService } from '../../../services/categoria.service';
+import { ProductoService } from '../../../services/producto.service';
 import { AlertService } from '../../../../base/services/local/alert.service';
 
 // ANGULAR MATERIAL
@@ -23,12 +27,14 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
-// DIRECTIVAS
+// DIRECTIVAS Y COMPONENTES
 import { PreventEnterSubmitDirective } from '../../../../base/shared/directives/prevent-enter-submit.directive';
 import { PreventEnterSelectDirective } from '../../../../base/shared/directives/prevent-enter-select.directive';
 import { AnimarPerderFocoDirective } from '../../../../base/shared/directives/animar-perder-foco.directive';
 import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-guardar.directive';
+import { SelectSearchComponent } from '../../../../base/shared/views/select-search/select-search';
 
 // VARIOS
 import { Component, Inject, ViewChild } from '@angular/core';
@@ -37,11 +43,9 @@ import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import moment from 'moment';
-// DATA PICKER
-import { MatDatepickerModule } from '@angular/material/datepicker';
+
 // MODAL SELECTOR TARIFA
 import { SeleccionarTarifaModalComponent } from '../seleccionar-tarifa-modal/seleccionar-tarifa-modal';
-import { ConfirmarEliminarComponent } from '../../../../base/shared/views/confirmar-eliminar/confirmar-eliminar';
 
 @Component({
   selector: 'app-cotizacion-form',
@@ -66,7 +70,8 @@ import { ConfirmarEliminarComponent } from '../../../../base/shared/views/confir
     PreventEnterSubmitDirective,
     PreventEnterSelectDirective,
     AnimarPerderFocoDirective,
-    BotonGuardarDirective
+    BotonGuardarDirective,
+    SelectSearchComponent
   ],
   templateUrl: './cotizacion-form.html',
   styleUrls: ['./cotizacion-form.scss']
@@ -78,25 +83,25 @@ export class CotizacionFormComponent {
 
   tiposDocumento: TipoDocumentoModel[] = [];
   tarifas: TarifaModel[] = [];
+  tarifasSelect: any[] = [];
+  categorias: CategoriaModel[] = [];
+  productos: ProductoModel[] = [];
+  productos_filtrados: ProductoModel[] = [];
 
-  itemNuevo: CotizacionDetalleModel = new CotizacionDetalleModel();
-  editandoIndex: number | null = null;
+  // CARD 3: PRECIOS (is_base = 1)
+  precioBase: CotizacionDetalleModel = new CotizacionDetalleModel();
 
-  detalles: CotizacionDetalleModel[] = [];
-  displayedColumns: string[] = [
-    'acciones',
-    'tarifa',
-    'cantidad_adulto',
-    'precio_unit_adulto',
-    'cantidad_ninio',
-    'precio_unit_ninio',
-    'precio_mascota',
-    'precio_extra',
-    'subtotal'
-  ];
-  dataSource: MatTableDataSource<CotizacionDetalleModel>;
+  // CARD 4: SERVICIOS ADICIONALES (is_base = 0)
+  nuevoServicio: CotizacionDetalleModel = new CotizacionDetalleModel();
+  serviciosAdicionales: CotizacionDetalleModel[] = [];
+  dataSourceServicios: MatTableDataSource<CotizacionDetalleModel> = new MatTableDataSource<CotizacionDetalleModel>([]);
+  displayedColumnsServicios: string[] = ['accion', 'descripcion', 'cantidad', 'precio_unitario', 'total'];
+  isProcessingServicio: boolean = false;
+  isVisibleServiciosExtra: boolean = false;
 
-  totalGeneral: number = 0;
+  toggleServiciosExtra(): void {
+    this.isVisibleServiciosExtra = !this.isVisibleServiciosExtra;
+  }
 
   constructor(
     public dialogRef: MatDialogRef<CotizacionFormComponent>,
@@ -106,28 +111,43 @@ export class CotizacionFormComponent {
     private cotizacionDetalleService: CotizacionDetalleService,
     private tarifaService: TarifaService,
     private tipoDocumentoService: TipoDocumentoService,
+    private categoriaService: CategoriaService,
+    private productoService: ProductoService,
     private alertService: AlertService
   ) {
     this.cotizacion = data.cotizacion;
     this.cotizaciones = data.cotizaciones;
-    this.inicializarItemNuevo();
+    this.inicializarPrecioBase();
+    this.inicializarNuevoServicio();
     this.normalizarFechasParaFormulario();
     this.cargarDatosIniciales();
     this.dialogRef.backdropClick().subscribe(x => { });
   }
 
-  inicializarItemNuevo() {
-    this.itemNuevo = new CotizacionDetalleModel();
-    this.itemNuevo.cotizacion_id = this.cotizacion?.id || 0;
-    this.itemNuevo.tarifa_id = null;
-    this.itemNuevo.cantidad_adulto = 1;
-    this.itemNuevo.precio_unit_adulto = null as any;
-    this.itemNuevo.cantidad_ninio = null as any;
-    this.itemNuevo.precio_unit_ninio = null as any;
-    this.itemNuevo.precio_mascota = null as any;
-    this.itemNuevo.precio_extra = null as any;
-    this.itemNuevo.subtotal = 0;
-    this.editandoIndex = null;
+  inicializarPrecioBase() {
+    this.precioBase = new CotizacionDetalleModel();
+    this.precioBase.cotizacion_id = this.cotizacion?.id || 0;
+    this.precioBase.is_base = 1;
+    this.precioBase.tarifa_id = null;
+    this.precioBase.cantidad_adulto = 1;
+    this.precioBase.precio_unit_adulto = 0;
+    this.precioBase.cantidad_ninio = 0;
+    this.precioBase.precio_unit_ninio = 0;
+    this.precioBase.total = 0;
+    this.precioBase.subtotal = 0;
+  }
+
+  inicializarNuevoServicio() {
+    this.nuevoServicio = new CotizacionDetalleModel();
+    this.nuevoServicio.cotizacion_id = this.cotizacion?.id || 0;
+    this.nuevoServicio.is_base = 0;
+    this.nuevoServicio.cantidad = 1;
+    this.nuevoServicio.precio_unitario = 0;
+    this.nuevoServicio.total = 0;
+    this.nuevoServicio.subtotal = 0;
+    this.nuevoServicio.producto_id = null;
+    this.nuevoServicio.categoria_id = null;
+    this.filtrarProductos();
   }
 
   private parsearFecha(fecha: any): Date | null {
@@ -162,115 +182,121 @@ export class CotizacionFormComponent {
   cargarDatosIniciales() {
     forkJoin({
       tiposDoc: this.tipoDocumentoService.listar(),
-      tarifas: this.tarifaService.listar()
+      tarifas: this.tarifaService.listar(),
+      categorias: this.categoriaService.listar(),
+      productos: this.productoService.listar()
     }).subscribe({
       next: (res) => {
-        this.tiposDocumento = res.tiposDoc;
-        this.tarifas = res.tarifas;
+        this.tiposDocumento = res.tiposDoc || [];
+        this.tarifas = res.tarifas || [];
+        this.categorias = res.categorias || [];
+        this.productos = res.productos || [];
+        this.prepararTarifasParaSelect();
+        this.filtrarProductos();
 
         if (this.cotizacion.id > 0) {
           this.cargarDetallesExistentes();
         } else {
-          this.detalles = [];
-          this.actualizarTabla();
+          this.inicializarPrecioBase();
+          this.serviciosAdicionales = [];
+          this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
         }
       },
       error: (err) => console.error("Error al cargar datos iniciales:", err)
     });
   }
 
+  prepararTarifasParaSelect() {
+    this.tarifasSelect = this.tarifas.map(t => ({
+      ...t,
+      descripcion_completa: `${t.servicio} - ${t.tipo_hospedaje || ''} (Ad: Bs. ${Number(t.tarifa_adulto || 0).toFixed(2)}${t.tarifa_ninio ? ' | Niñ: Bs. ' + Number(t.tarifa_ninio).toFixed(2) : ''})`
+    }));
+  }
+
   cargarDetallesExistentes() {
     this.cotizacionDetalleService.listar(this.cotizacion.id).subscribe({
       next: (res: any) => {
-        this.detalles = Array.isArray(res) ? res : [];
-        this.actualizarTabla();
+        const lista: CotizacionDetalleModel[] = Array.isArray(res) ? res : [];
+
+        // Buscar el ítem base: el que tenga is_base == 1, o el que tenga tarifa_id sin producto_id
+        let baseIndex = lista.findIndex(d => Number(d.is_base) === 1);
+        if (baseIndex === -1 && lista.length > 0) {
+          baseIndex = lista.findIndex(d => d.tarifa_id && (!d.producto_id || d.producto_id === 0));
+          if (baseIndex === -1) baseIndex = 0;
+        }
+
+        if (baseIndex >= 0 && baseIndex < lista.length) {
+          const itemBase = lista[baseIndex];
+          this.precioBase = {
+            ...itemBase,
+            is_base: 1,
+            cantidad_adulto: Number(itemBase.cantidad_adulto) || 1,
+            precio_unit_adulto: Number(itemBase.precio_unit_adulto) || 0,
+            cantidad_ninio: Number(itemBase.cantidad_ninio) || 0,
+            precio_unit_ninio: Number(itemBase.precio_unit_ninio) || 0
+          };
+          this.calcularTotalPrecios();
+
+          // El resto son servicios adicionales
+          this.serviciosAdicionales = lista.filter((_, idx) => idx !== baseIndex).map(s => {
+            const cant = Number(s.cantidad) || 1;
+            const pu = Number(s.precio_unitario) || 0;
+            const tot = Number(s.subtotal) || (cant * pu);
+            return {
+              ...s,
+              is_base: 0,
+              cantidad: cant,
+              precio_unitario: pu,
+              total: tot,
+              subtotal: tot,
+              producto: s.producto || s.servicio || s.detalle || ''
+            };
+          });
+          this.isVisibleServiciosExtra = this.serviciosAdicionales.length > 0;
+        } else {
+          this.inicializarPrecioBase();
+          this.serviciosAdicionales = [];
+          this.isVisibleServiciosExtra = false;
+        }
+
+        this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
       },
       error: (err) => {
         console.error("Error al cargar detalles existentes:", err);
-        this.detalles = [];
-        this.actualizarTabla();
+        this.inicializarPrecioBase();
+        this.serviciosAdicionales = [];
+        this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
       }
     });
   }
 
-  agregarOActualizarItem() {
-    const puAd = Number(this.itemNuevo.precio_unit_adulto) || 0;
-    const puNi = Number(this.itemNuevo.precio_unit_ninio) || 0;
-    const pMascota = Number(this.itemNuevo.precio_mascota) || 0;
-    const pExtra = Number(this.itemNuevo.precio_extra) || 0;
-
-    if (puAd <= 0 && puNi <= 0 && pMascota <= 0 && pExtra <= 0) {
-      this.alertService.show("Debe ingresar al menos un precio (P.U. Adulto, P.U. Niño, P. Mascota o P. Extra)", { duration: 4000, type: 'warning' });
-      return;
-    }
-
-    this.calcularSubtotal(this.itemNuevo);
-
-    if (!this.itemNuevo.subtotal || this.itemNuevo.subtotal <= 0) {
-      this.alertService.show("El subtotal del ítem debe ser mayor a 0 (verifique que la cantidad o precio sea mayor a 0)", { duration: 4000, type: 'warning' });
-      return;
-    }
-
-    if (!this.itemNuevo.tarifa_id && (!this.itemNuevo.servicio || this.itemNuevo.servicio.trim() === '')) {
-      this.itemNuevo.servicio = 'Cotización de Servicio';
-      this.itemNuevo.detalle = 'Cotización de Servicio';
-    }
-
-    if (this.editandoIndex !== null && this.editandoIndex >= 0) {
-      // Actualizar ítem existente
-      this.detalles[this.editandoIndex] = { ...this.itemNuevo };
-      this.alertService.show("Ítem actualizado", { duration: 2000, type: 'success' });
+  // MÉTODOS PARA SECCIÓN PRECIOS
+  onTarifaChange(event: any) {
+    const selectedId = event?.value !== undefined ? event.value : event;
+    const tarifa = event?.object || this.tarifas.find(t => t.id === selectedId);
+    if (tarifa) {
+      this.precioBase.tarifa_id = tarifa.id;
+      this.precioBase.servicio = tarifa.servicio;
+      this.precioBase.tipo_hospedaje = tarifa.tipo_hospedaje;
+      this.precioBase.paquete = tarifa.paquete;
+      this.precioBase.precio_unit_adulto = Number(tarifa.tarifa_adulto) || 0;
+      this.precioBase.precio_unit_ninio = Number(tarifa.tarifa_ninio) || 0;
     } else {
-      // Agregar nuevo ítem
-      const nuevoItem = { ...this.itemNuevo };
-      this.detalles.push(nuevoItem);
+      this.precioBase.tarifa_id = null;
+      this.precioBase.servicio = '';
+      this.precioBase.tipo_hospedaje = '';
+      this.precioBase.paquete = '';
+      this.precioBase.precio_unit_adulto = 0;
+      this.precioBase.precio_unit_ninio = 0;
     }
-
-    this.detalles = [...this.detalles];
-    this.inicializarItemNuevo();
-    this.actualizarTabla();
+    this.calcularTotalPrecios();
   }
 
-  editarItem(index: number) {
-    if (index >= 0 && index < this.detalles.length) {
-      this.editandoIndex = index;
-      this.itemNuevo = { ...this.detalles[index] };
-      this.calcularSubtotal(this.itemNuevo);
-    }
-  }
-
-  cancelarEdicion() {
-    this.inicializarItemNuevo();
-  }
-
-  eliminarItem(index: number) {
-    const dialogRef = this.dialog.open(ConfirmarEliminarComponent, {
-      width: '260px',
-      enterAnimationDuration: '0ms',
-      exitAnimationDuration: '0ms',
-      data: '¿Está seguro de eliminar este ítem?'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        if (this.editandoIndex === index) {
-          this.inicializarItemNuevo();
-        } else if (this.editandoIndex !== null && this.editandoIndex > index) {
-          this.editandoIndex--;
-        }
-        this.detalles.splice(index, 1);
-        this.detalles = [...this.detalles];
-        this.actualizarTabla();
-      }
-    });
-  }
-
-  abrirModalSeleccionarTarifa(paraItemNuevo: boolean = true, item?: CotizacionDetalleModel) {
-    const tarifaActual = paraItemNuevo ? this.itemNuevo.tarifa_id : (item ? item.tarifa_id : null);
+  abrirModalSeleccionarTarifa() {
     const dialogRef = this.dialog.open(SeleccionarTarifaModalComponent, {
       data: {
         tarifas: this.tarifas,
-        tarifaActualId: tarifaActual
+        tarifaActualId: this.precioBase.tarifa_id
       },
       width: '95vw',
       maxWidth: '900px',
@@ -279,91 +305,138 @@ export class CotizacionFormComponent {
 
     dialogRef.afterClosed().subscribe((tarifaSeleccionada: TarifaModel) => {
       if (tarifaSeleccionada) {
-        if (paraItemNuevo) {
-          this.itemNuevo.tarifa_id = tarifaSeleccionada.id;
-          this.itemNuevo.precio_unit_adulto = Number(tarifaSeleccionada.tarifa_adulto) || 0;
-          this.itemNuevo.precio_unit_ninio = Number(tarifaSeleccionada.tarifa_ninio) || 0;
-          this.itemNuevo.servicio = tarifaSeleccionada.servicio;
-          this.itemNuevo.tipo_hospedaje = tarifaSeleccionada.tipo_hospedaje;
-          this.itemNuevo.paquete = tarifaSeleccionada.paquete;
-          this.calcularSubtotal(this.itemNuevo);
-        } else if (item) {
-          item.tarifa_id = tarifaSeleccionada.id;
-          item.precio_unit_adulto = Number(tarifaSeleccionada.tarifa_adulto) || 0;
-          item.precio_unit_ninio = Number(tarifaSeleccionada.tarifa_ninio) || 0;
-          item.servicio = tarifaSeleccionada.servicio;
-          item.tipo_hospedaje = tarifaSeleccionada.tipo_hospedaje;
-          item.paquete = tarifaSeleccionada.paquete;
-          this.calcularSubtotal(item);
-        }
+        this.precioBase.tarifa_id = tarifaSeleccionada.id;
+        this.precioBase.servicio = tarifaSeleccionada.servicio;
+        this.precioBase.tipo_hospedaje = tarifaSeleccionada.tipo_hospedaje;
+        this.precioBase.paquete = tarifaSeleccionada.paquete;
+        this.precioBase.precio_unit_adulto = Number(tarifaSeleccionada.tarifa_adulto) || 0;
+        this.precioBase.precio_unit_ninio = Number(tarifaSeleccionada.tarifa_ninio) || 0;
+        this.calcularTotalPrecios();
       }
     });
   }
 
-  onTarifaChange(item: CotizacionDetalleModel) {
-    if (item.tarifa_id) {
-      const tarifaSel = this.tarifas.find(t => t.id === item.tarifa_id);
-      if (tarifaSel) {
-        item.precio_unit_adulto = Number(tarifaSel.tarifa_adulto) || 0;
-        item.precio_unit_ninio = Number(tarifaSel.tarifa_ninio) || 0;
-        item.servicio = tarifaSel.servicio;
-        item.tipo_hospedaje = tarifaSel.tipo_hospedaje;
-        item.paquete = tarifaSel.paquete;
-      }
+  calcularTotalPrecios() {
+    const cantAd = Math.max(0, Number(this.precioBase.cantidad_adulto) || 0);
+    const puAd = Math.max(0, Number(this.precioBase.precio_unit_adulto) || 0);
+    const cantNi = Math.max(0, Number(this.precioBase.cantidad_ninio) || 0);
+    const puNi = Math.max(0, Number(this.precioBase.precio_unit_ninio) || 0);
+
+    this.precioBase.total = Math.round(((cantAd * puAd) + (cantNi * puNi)) * 100) / 100;
+    this.precioBase.subtotal = this.precioBase.total;
+  }
+
+  // MÉTODOS PARA SERVICIOS ADICIONALES
+  filtrarProductos() {
+    if (this.nuevoServicio.categoria_id) {
+      this.productos_filtrados = this.productos.filter(p => p.categoria_id === this.nuevoServicio.categoria_id);
     } else {
-      item.servicio = 'Cotización de Servicio';
-      item.tipo_hospedaje = '';
-      item.paquete = '';
+      this.productos_filtrados = [...this.productos];
     }
-    this.calcularSubtotal(item);
+    if (this.nuevoServicio.producto_id && !this.productos_filtrados.some(p => p.id === this.nuevoServicio.producto_id)) {
+      this.nuevoServicio.producto_id = null;
+      this.nuevoServicio.precio_unitario = 0;
+      this.nuevoServicio.total = 0;
+    }
   }
 
-  calcularSubtotal(item: CotizacionDetalleModel) {
-    if (!item) return;
-    if (item.cantidad_adulto !== null && item.cantidad_adulto !== undefined && item.cantidad_adulto < 0) {
-      item.cantidad_adulto = 0;
+  onProductoServicioChange(event: any) {
+    const selectedId = event?.value !== undefined ? event.value : event;
+    const selectedProducto = event?.object || this.productos.find(p => p.id === selectedId);
+    if (selectedProducto) {
+      this.nuevoServicio.producto_id = selectedProducto.id;
+      this.nuevoServicio.producto = selectedProducto.descripcion;
+      this.nuevoServicio.servicio = selectedProducto.descripcion;
+      this.nuevoServicio.detalle = selectedProducto.descripcion;
+      this.nuevoServicio.categoria_id = selectedProducto.categoria_id;
+      this.nuevoServicio.precio_unitario = Number(selectedProducto.precio) || 0;
+      if (!this.nuevoServicio.cantidad || this.nuevoServicio.cantidad <= 0) {
+        this.nuevoServicio.cantidad = 1;
+      }
+      this.calcularTotalNuevoServicio();
     }
-    if (item.precio_unit_adulto !== null && item.precio_unit_adulto !== undefined && item.precio_unit_adulto < 0) {
-      item.precio_unit_adulto = 0;
-    }
-    if (item.cantidad_ninio !== null && item.cantidad_ninio !== undefined && item.cantidad_ninio < 0) {
-      item.cantidad_ninio = 0;
-    }
-    if (item.precio_unit_ninio !== null && item.precio_unit_ninio !== undefined && item.precio_unit_ninio < 0) {
-      item.precio_unit_ninio = 0;
-    }
-    if (item.precio_mascota !== null && item.precio_mascota !== undefined && item.precio_mascota < 0) {
-      item.precio_mascota = 0;
-    }
-    if (item.precio_extra !== null && item.precio_extra !== undefined && item.precio_extra < 0) {
-      item.precio_extra = 0;
-    }
-
-    const cantAd = Math.max(0, Number(item.cantidad_adulto) || 0);
-    const puAd = Math.max(0, Number(item.precio_unit_adulto) || 0);
-    const cantNi = Math.max(0, Number(item.cantidad_ninio) || 0);
-    const puNi = Math.max(0, Number(item.precio_unit_ninio) || 0);
-    const pMascota = Math.max(0, Number(item.precio_mascota) || 0);
-    const pExtra = Math.max(0, Number(item.precio_extra) || 0);
-    item.subtotal = (cantAd * puAd) + (cantNi * puNi) + pMascota + pExtra;
-    this.calcularTotalGeneral();
   }
 
-  actualizarTabla() {
-    this.dataSource = new MatTableDataSource<CotizacionDetalleModel>(this.detalles);
-    this.calcularTotalGeneral();
+  calcularTotalNuevoServicio() {
+    const cantidad = Number(this.nuevoServicio.cantidad) || 0;
+    const precio = Number(this.nuevoServicio.precio_unitario) || 0;
+    this.nuevoServicio.total = Math.round((cantidad * precio) * 100) / 100;
+    this.nuevoServicio.subtotal = this.nuevoServicio.total;
   }
 
-  calcularTotalGeneral() {
-    this.totalGeneral = this.detalles.reduce((acc, item) => {
-      const pMascota = Math.max(0, Number(item.precio_mascota) || 0);
-      const pExtra = Math.max(0, Number(item.precio_extra) || 0);
-      const sub = Number(item.subtotal) ||
-        ((Math.max(0, Number(item.cantidad_adulto) || 0) * Math.max(0, Number(item.precio_unit_adulto) || 0)) +
-          (Math.max(0, Number(item.cantidad_ninio) || 0) * Math.max(0, Number(item.precio_unit_ninio) || 0)) +
-          pMascota + pExtra);
-      return acc + sub;
-    }, 0);
+  agregarServicioAdicional() {
+    if (!this.nuevoServicio.producto_id) {
+      this.alertService.show("Seleccione un producto", { duration: 3000, type: 'info' });
+      return;
+    }
+    const cantidad = Number(this.nuevoServicio.cantidad) || 0;
+    if (cantidad <= 0) {
+      this.alertService.show("La cantidad debe ser mayor a 0", { duration: 3000, type: 'info' });
+      return;
+    }
+    const precio = Number(this.nuevoServicio.precio_unitario) || 0;
+    if (precio < 0) {
+      this.alertService.show("El monto no puede ser negativo", { duration: 3000, type: 'info' });
+      return;
+    }
+
+    this.calcularTotalNuevoServicio();
+
+    this.serviciosAdicionales.push({
+      ...this.nuevoServicio,
+      is_base: 0,
+      producto: this.nuevoServicio.producto || this.nuevoServicio.detalle || ''
+    });
+    this.serviciosAdicionales = [...this.serviciosAdicionales];
+    this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
+    this.isVisibleServiciosExtra = true;
+    this.inicializarNuevoServicio();
+    this.alertService.show("Servicio adicional agregado", { duration: 2500, type: 'success' });
+  }
+
+  eliminarServicioAdicional(index: number, item: CotizacionDetalleModel) {
+    if (item.id && item.id > 0 && this.cotizacion && this.cotizacion.id > 0) {
+      this.cotizacionDetalleService.eliminar(item.id).subscribe({
+        next: (res) => {
+          if (res.correcto) {
+            this.serviciosAdicionales.splice(index, 1);
+            this.serviciosAdicionales = [...this.serviciosAdicionales];
+            this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
+            this.alertService.show("Servicio adicional eliminado", { duration: 3000, type: 'success' });
+          } else {
+            this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.serviciosAdicionales.splice(index, 1);
+          this.serviciosAdicionales = [...this.serviciosAdicionales];
+          this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
+        }
+      });
+    } else {
+      this.serviciosAdicionales.splice(index, 1);
+      this.serviciosAdicionales = [...this.serviciosAdicionales];
+      this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
+    }
+  }
+
+  // TOTALES
+  getTotalServiciosAdicionales(): number {
+    if (!this.serviciosAdicionales || this.serviciosAdicionales.length === 0) return 0;
+    return this.serviciosAdicionales.reduce((acc, curr) => acc + (Number(curr.total) || (Number(curr.cantidad) * Number(curr.precio_unitario)) || 0), 0);
+  }
+
+  getTotalGeneral(): number {
+    const totalPrecios = Number(this.precioBase?.total) || 0;
+    const totalServicios = this.getTotalServiciosAdicionales();
+    return Math.round((totalPrecios + totalServicios) * 100) / 100;
+  }
+
+  obtenerNombreTarifa(tarifa_id: any): string {
+    if (!tarifa_id) return '';
+    const t = this.tarifas.find(x => x.id === Number(tarifa_id));
+    return t ? t.servicio : '';
   }
 
   validarFechas() {
@@ -376,9 +449,20 @@ export class CotizacionFormComponent {
     }
   }
 
+  bloquearNegativos(event: KeyboardEvent): void {
+    if (event.key === '-' || event.key === '+' || event.key === '.' || event.key === ',' || event.key === 'e' || event.key === 'E') {
+      event.preventDefault();
+    }
+  }
+
+  bloquearSignosNegativos(event: KeyboardEvent): void {
+    if (event.key === '-' || event.key === '+' || event.key === 'e' || event.key === 'E') {
+      event.preventDefault();
+    }
+  }
+
   submit(f: NgForm) {
     if (f.valid) {
-      // Validar que las fechas sean obligatorias
       if (!this.cotizacion.fecha_ini || !this.cotizacion.fecha_fin) {
         this.alertService.show("Debe seleccionar la Fecha de Ingreso y la Fecha de Salida", { duration: 4000, type: 'warning' });
         return;
@@ -391,28 +475,8 @@ export class CotizacionFormComponent {
         return;
       }
 
-      // Validar que exista al menos un item en el detalle
-      if (!this.detalles || this.detalles.length === 0) {
-        this.alertService.show("Debe agregar al menos un item en el detalle de la cotización", { duration: 4000, type: 'warning' });
-        return;
-      }
-
-      // Validar cantidades, precios y subtotales por item
-      for (let i = 0; i < this.detalles.length; i++) {
-        const d = this.detalles[i];
-        if (d.cantidad_adulto < 0 || d.precio_unit_adulto < 0 || d.cantidad_ninio < 0 || d.precio_unit_ninio < 0 || (d.precio_mascota !== undefined && d.precio_mascota < 0) || (d.precio_extra !== undefined && d.precio_extra < 0)) {
-          this.alertService.show(`Las cantidades y precios en el item #${i + 1} no pueden ser negativos`, { duration: 4000, type: 'warning' });
-          return;
-        }
-        const sub = Number(d.subtotal) || 0;
-        if (sub <= 0) {
-          this.alertService.show(`El subtotal en el item #${i + 1} no puede ser 0`, { duration: 4000, type: 'warning' });
-          return;
-        }
-      }
-
-      // Validar que el total general no sea 0
-      if (!this.totalGeneral || this.totalGeneral <= 0) {
+      const totalGeneral = this.getTotalGeneral();
+      if (totalGeneral <= 0) {
         this.alertService.show("El total de la cotización debe ser mayor a 0", { duration: 4000, type: 'warning' });
         return;
       }
@@ -428,35 +492,74 @@ export class CotizacionFormComponent {
       this.cotizacion.tipo_doc_id = this.cotizacion.tipo_doc_id ? Number(this.cotizacion.tipo_doc_id) : null;
       this.cotizacion.detalle = (this.cotizacion.detalle || '').trim();
 
-      // Normalizar detalles asegurando tipos numéricos para BD (evitar nulls en campos no nulos)
-      this.cotizacion.detalles = this.detalles.map(d => {
-        const cantAd = Number(d.cantidad_adulto) || 0;
-        const puAd = Number(d.precio_unit_adulto) || 0;
-        const cantNi = Number(d.cantidad_ninio) || 0;
-        const puNi = Number(d.precio_unit_ninio) || 0;
-        const pMascota = Number(d.precio_mascota) || 0;
-        const pExtra = Number(d.precio_extra) || 0;
-        const sub = Number(d.subtotal) || ((cantAd * puAd) + (cantNi * puNi) + pMascota + pExtra);
-        const nomServicio = d.servicio && d.servicio.trim() !== '' ? d.servicio.trim() : 'Cotización de Servicio';
-        const txtDetalle = d.detalle && d.detalle.trim() !== '' ? d.detalle.trim() : nomServicio;
+      // Construir detalles
+      const detallesAGuardar: CotizacionDetalleModel[] = [];
 
-        return {
-          ...d,
+      // 1. Tarifa base (Precios)
+      const cantAd = Number(this.precioBase.cantidad_adulto) || 0;
+      const puAd = Number(this.precioBase.precio_unit_adulto) || 0;
+      const cantNi = Number(this.precioBase.cantidad_ninio) || 0;
+      const puNi = Number(this.precioBase.precio_unit_ninio) || 0;
+      const subBase = Number(this.precioBase.total) || ((cantAd * puAd) + (cantNi * puNi));
+
+      const nomServicio = this.precioBase.servicio && this.precioBase.servicio.trim() !== ''
+        ? this.precioBase.servicio.trim()
+        : (this.obtenerNombreTarifa(this.precioBase.tarifa_id) || 'Hospedaje');
+
+      detallesAGuardar.push({
+        id: this.precioBase.id || 0,
+        cotizacion_id: this.cotizacion.id || 0,
+        tarifa_id: this.precioBase.tarifa_id ? Number(this.precioBase.tarifa_id) : null,
+        producto_id: null,
+        cantidad: 1,
+        precio_unitario: 0,
+        cantidad_adulto: cantAd,
+        precio_unit_adulto: puAd,
+        cantidad_ninio: cantNi,
+        precio_unit_ninio: puNi,
+        precio_mascota: 0,
+        precio_extra: 0,
+        subtotal: subBase,
+        servicio: nomServicio,
+        detalle: this.precioBase.detalle && this.precioBase.detalle.trim() !== '' ? this.precioBase.detalle.trim() : nomServicio,
+        tipo_hospedaje: this.precioBase.tipo_hospedaje || '',
+        paquete: this.precioBase.paquete || '',
+        is_base: 1,
+        eliminado: 0
+      } as any);
+
+      // 2. Servicios adicionales
+      for (const s of this.serviciosAdicionales) {
+        const cant = Number(s.cantidad) || 1;
+        const pu = Number(s.precio_unitario) || 0;
+        const sub = Number(s.total) || (cant * pu);
+        const desc = (s.producto || s.servicio || s.detalle || 'Servicio adicional').trim();
+
+        detallesAGuardar.push({
+          id: s.id || 0,
           cotizacion_id: this.cotizacion.id || 0,
-          tarifa_id: d.tarifa_id ? Number(d.tarifa_id) : null,
-          cantidad_adulto: cantAd,
-          precio_unit_adulto: puAd,
-          cantidad_ninio: cantNi,
-          precio_unit_ninio: puNi,
-          precio_mascota: pMascota,
-          precio_extra: pExtra,
+          tarifa_id: null,
+          producto_id: s.producto_id ? Number(s.producto_id) : null,
+          cantidad: cant,
+          precio_unitario: pu,
+          cantidad_adulto: 0,
+          precio_unit_adulto: 0,
+          cantidad_ninio: 0,
+          precio_unit_ninio: 0,
+          precio_mascota: 0,
+          precio_extra: 0,
           subtotal: sub,
-          servicio: nomServicio,
-          detalle: txtDetalle,
-          tipo_hospedaje: d.tipo_hospedaje || '',
-          paquete: d.paquete || ''
-        };
-      });
+          servicio: desc,
+          producto: desc,
+          detalle: desc,
+          tipo_hospedaje: '',
+          paquete: '',
+          is_base: 0,
+          eliminado: 0
+        } as any);
+      }
+
+      this.cotizacion.detalles = detallesAGuardar;
 
       if (this.cotizacion.fecha_ini) {
         const fIniMoment = moment(this.cotizacion.fecha_ini, ['DD/MM/YYYY', 'YYYY-MM-DD', moment.ISO_8601]);

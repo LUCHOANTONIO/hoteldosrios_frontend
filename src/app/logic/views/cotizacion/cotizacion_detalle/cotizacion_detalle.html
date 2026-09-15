@@ -110,8 +110,11 @@
                 <ng-container matColumnDef="servicio_paquete">
                     <th mat-header-cell *matHeaderCellDef>Servicio / Tarifa</th>
                     <td mat-cell *matCellDef="let row">
-                        <div class="fw-bold">{{ row.servicio || ('Tarifa #' + row.tarifa_id) }}</div>
-                        <small class="text-muted" *ngIf="row.tipo_hospedaje || row.paquete">
+                        <div class="fw-bold">{{ row.producto || row.servicio || ('Tarifa #' + row.tarifa_id) }}</div>
+                        <small class="text-muted" *ngIf="row.producto_id && row.cantidad">
+                            Cant: {{ row.cantidad }} x Bs. {{ (row.precio_unitario || 0) | number:'1.2-2' }}
+                        </small>
+                        <small class="text-muted" *ngIf="!row.producto_id && (row.tipo_hospedaje || row.paquete)">
                             {{ row.tipo_hospedaje }} <span *ngIf="row.paquete">- {{ row.paquete }}</span>
                         </small>
                     </td>
