@@ -1,3 +1,36 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.cotizacion-modal-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.dialog-header {
+  flex-shrink: 0;
+  margin: 0 !important;
+}
+
+.cotizacion-dialog-content {
+  flex: 1 1 auto;
+  overflow-y: auto !important;
+  max-height: calc(90vh - 120px);
+}
+
+.cotizacion-dialog-footer {
+  flex-shrink: 0;
+  margin: 0 !important;
+  padding: 10px 16px !important;
+  background-color: #f8fafc !important;
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.04);
+}
+
 /* SECCIONES Y TARJETAS DEL FORMULARIO */
 .form-section-card {
   background: #ffffff;
@@ -202,73 +235,63 @@
   }
 }
 
-/* Botón flotante (+) Servicios Adicionales */
+/* Botón Agregar Item Servicios Adicionales */
 .btn-add-wrapper {
   display: flex;
   align-items: center;
   height: 56px;
-  margin-top: 4px;
-  margin-bottom: 22px;
+  margin: 0;
+  padding: 0;
 }
 
-.btn-add-servicio {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-  color: #ffffff !important;
-  width: 48px !important;
-  height: 48px !important;
-  border-radius: 50% !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
-  border: none;
+.btn-agregar-item-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
 
   mat-icon {
-    font-size: 26px !important;
-    width: 26px !important;
-    height: 26px !important;
-    color: #ffffff !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: transform 0.25s ease !important;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #1d4ed8;
   }
 
   &:hover:not(:disabled) {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5) !important;
-    transform: translateY(-2px) scale(1.06);
-
-    mat-icon {
-      transform: rotate(90deg);
-    }
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+    color: #1e40af;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.15);
   }
 
   &:active:not(:disabled) {
-    transform: translateY(0) scale(0.96);
-    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3) !important;
+    transform: scale(0.98);
   }
 
   &:disabled {
-    background: #e2e8f0 !important;
-    box-shadow: none !important;
+    opacity: 0.55;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
     cursor: not-allowed;
-    opacity: 0.6;
+    box-shadow: none;
 
     mat-icon {
-      color: #94a3b8 !important;
-    }
-  }
-
-  .spinner-btn-add {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-
-    ::ng-deep circle {
-      stroke: #ffffff !important;
+      color: #94a3b8;
     }
   }
 }

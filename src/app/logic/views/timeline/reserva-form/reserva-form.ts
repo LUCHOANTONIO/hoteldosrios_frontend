@@ -766,9 +766,6 @@ export class ReservaFormComponent {
           if (id) {
             this.reserva.cliente_id = Number(id);
           }
-
-          const nombreCompleto = `${this.reserva.nombre} ${this.reserva.primer_apellido}`.trim();
-          this.alertService.show(`Cliente encontrado: ${nombreCompleto}`, { duration: 3000, type: 'success' });
         } else {
           // Cliente nuevo: asegurar valores válidos para selectores requeridos
           if (!this.reserva.tipo_doc_id) {
@@ -777,7 +774,6 @@ export class ReservaFormComponent {
           if (!this.reserva.nacionalidad_id) {
             this.reserva.nacionalidad_id = 1;
           }
-          this.alertService.show('DNI no registrado. Complete los datos del nuevo cliente.', { duration: 3500, type: 'info' });
         }
         this.cdr.detectChanges();
       },
@@ -917,7 +913,6 @@ export class ReservaFormComponent {
             this.comunicacionService.executeActionReserva.set(true);
             this.comunicacionService.loadBitacoraSignal.set({ reserva_id: this.reserva.id, trigger: Date.now() });
             this.inicializarNuevoServicio();
-            this.alertService.show("Servicio adicional agregado", { duration: 3000, type: 'success' });
           } else {
             this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
           }
@@ -937,7 +932,6 @@ export class ReservaFormComponent {
       this.reserva.transacciones.push({ ...this.nuevoServicio });
       this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
       this.inicializarNuevoServicio();
-      this.alertService.show("Servicio adicional agregado", { duration: 2500, type: 'success' });
       setTimeout(() => {
         this.isProcessingServicio = false;
       }, 300);

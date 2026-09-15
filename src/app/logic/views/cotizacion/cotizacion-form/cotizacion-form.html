@@ -1,4 +1,4 @@
-<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef">
+<form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm" appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef" class="cotizacion-modal-form">
     <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
       COTIZACIONES
       <button mat-icon-button mat-dialog-close type="button">
@@ -6,7 +6,7 @@
       </button>
     </h1>
 
-    <mat-dialog-content class="mat-typography px-3 pt-2 pb-1">
+    <mat-dialog-content class="mat-typography px-3 pt-2 pb-2 cotizacion-dialog-content">
 
         <!-- CARD 1: DATOS DEL CLIENTE -->
         <div class="form-section-card">
@@ -14,50 +14,61 @@
                 <mat-icon class="section-icon">person</mat-icon>
                 <span class="section-title">Datos del Cliente</span>
             </div>
-            <div class="row g-2">
-                <!-- 1. Nombre -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Nombre*</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required cdkFocusInitial>
-                    <mat-icon matSuffix>face</mat-icon>
-                </mat-form-field>
-
-                <!-- 2. Primer Apellido -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Primer Apellido</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()">
-                    <mat-icon matSuffix>face</mat-icon>
-                </mat-form-field>
-
-                <!-- 3. Segundo Apellido -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Segundo Apellido</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.segundo_apellido" name="segundo_apellido" #txtSegundoApellido (keydown.enter)="txtDni.focus()">
-                    <mat-icon matSuffix>face</mat-icon>
-                </mat-form-field>
-
-                <!-- 4. N° Documento -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+            <div class="row row-cols-1 row-cols-md-2 g-2">
+                <!-- 1. N° Documento -->
+                <mat-form-field class="col" appearance="outline">
                     <mat-label>Nro Documento</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.dni" name="dni" #txtDni (keydown.enter)="cboTipoDocId.focus()">
-                    <mat-icon matSuffix>receipt</mat-icon>
+                    <input matInput placeholder="Ingrese DNI/Doc" [(ngModel)]="cotizacion.dni" name="dni" #txtDni
+                        (blur)="verificarNroDocumento(cotizacion.dni)"
+                        (keydown.enter)="onDniEnter($event)" cdkFocusInitial>
+                    @if (isSearchingDni) {
+                    <mat-spinner matSuffix diameter="18" class="me-2"></mat-spinner>
+                    } @else {
+                    <button mat-icon-button matSuffix type="button"
+                        (click)="verificarNroDocumento(cotizacion.dni)"
+                        [disabled]="!cotizacion.dni" matTooltip="Buscar por DNI/Documento">
+                        <mat-icon>search</mat-icon>
+                    </button>
+                    }
                 </mat-form-field>
 
-                <!-- 5. Tipo Documento -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                <!-- 2. Tipo Documento -->
+                <mat-form-field class="col" appearance="outline">
                     <mat-label>Tipo Documento</mat-label>
-                    <mat-select placeholder="" [(ngModel)]="cotizacion.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtTelefono.focus()" appPreventEnterSelect>
+                    <mat-select placeholder="" [(ngModel)]="cotizacion.tipo_doc_id" name="tipo_doc_id" #cboTipoDocId (keydown.enter)="txtNombre.focus()" appPreventEnterSelect>
+                        <mat-option [value]="null">-- Ninguno --</mat-option>
                         @for (item of tiposDocumento; track item.id) {
                             <mat-option [value]="item.id">{{ item.tipo_documento }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
 
+                <!-- 3. Nombre -->
+                <mat-form-field class="col" appearance="outline">
+                    <mat-label>Nombre*</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.nombre" name="nombre" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>
+                    <mat-icon matSuffix class="text-secondary">face</mat-icon>
+                </mat-form-field>
+
+                <!-- 4. Primer Apellido -->
+                <mat-form-field class="col" appearance="outline">
+                    <mat-label>Primer Apellido</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()">
+                    <mat-icon matSuffix class="text-secondary">face</mat-icon>
+                </mat-form-field>
+
+                <!-- 5. Segundo Apellido -->
+                <mat-form-field class="col" appearance="outline">
+                    <mat-label>Segundo Apellido</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.segundo_apellido" name="segundo_apellido" #txtSegundoApellido (keydown.enter)="txtTelefono.focus()">
+                    <mat-icon matSuffix class="text-secondary">face</mat-icon>
+                </mat-form-field>
+
                 <!-- 6. Teléfono -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field class="col" appearance="outline">
                     <mat-label>Teléfono</mat-label>
                     <input matInput placeholder="" [(ngModel)]="cotizacion.telefono" name="telefono" #txtTelefono (keydown.enter)="txtFechaIni.focus()">
-                    <mat-icon matSuffix>phone</mat-icon>
+                    <mat-icon matSuffix class="text-secondary">call</mat-icon>
                 </mat-form-field>
             </div>
         </div>
@@ -70,7 +81,7 @@
             </div>
             <div class="row g-2">
                 <!-- Fecha Ingreso -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field class="col-12 col-md-6" appearance="outline">
                     <mat-label>Fecha Ingreso*</mat-label>
                     <input matInput [matDatepicker]="picker_fecha_ini" [max]="cotizacion.fecha_fin"
                         [(ngModel)]="cotizacion.fecha_ini" name="fecha_ini" (dateChange)="validarFechas()" required
@@ -80,7 +91,7 @@
                 </mat-form-field>
 
                 <!-- Fecha Salida -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field class="col-12 col-md-6" appearance="outline">
                     <mat-label>Fecha Salida*</mat-label>
                     <input matInput [matDatepicker]="picker_fecha_fin" [min]="cotizacion.fecha_ini"
                         [(ngModel)]="cotizacion.fecha_fin" name="fecha_fin" (dateChange)="validarFechas()" required
@@ -90,10 +101,10 @@
                 </mat-form-field>
 
                 <!-- Observaciones -->
-                <mat-form-field class="col-12 col-md-4" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field class="col-12" appearance="outline">
                     <mat-label>Observaciones</mat-label>
                     <input matInput placeholder="" [(ngModel)]="cotizacion.detalle" name="detalle" #txtDetalle>
-                    <mat-icon matSuffix>description</mat-icon>
+                    <mat-icon matSuffix class="text-secondary">description</mat-icon>
                 </mat-form-field>
             </div>
         </div>
@@ -225,23 +236,23 @@
                     </mat-form-field>
 
                     <!-- Col 5: Total -->
-                    <mat-form-field appearance="outline" class="col-12 col-md-6">
+                    <mat-form-field appearance="outline" class="col-12 col-md-6" subscriptSizing="dynamic">
                         <mat-label>Total</mat-label>
                         <input type="number" matInput [(ngModel)]="nuevoServicio.total" name="nuevo_total" readonly
                             class="fw-bold text-success" placeholder="0.00">
                     </mat-form-field>
 
-                    <!-- Col 6: Botón Agregar (+) Elegante con Spinner -->
+                    <!-- Col 6: Botón Agregar Item -->
                     <div class="col-12 col-md-6 btn-add-wrapper">
-                        <button mat-mini-fab type="button" class="btn-add-servicio"
+                        <button type="button" class="btn-agregar-item-outline"
                             (click)="agregarServicioAdicional()"
-                            [disabled]="!nuevoServicio.producto_id || isProcessingServicio"
-                            [matTooltip]="isProcessingServicio ? 'Procesando...' : 'Agregar servicio adicional'">
+                            [disabled]="!nuevoServicio.producto_id || isProcessingServicio">
                             @if (isProcessingServicio) {
-                            <mat-spinner diameter="22" class="spinner-btn-add"></mat-spinner>
+                            <mat-spinner diameter="16" class="me-1"></mat-spinner>
                             } @else {
                             <mat-icon>add</mat-icon>
                             }
+                            <span>Agregar Item</span>
                         </button>
                     </div>
                 </div>
@@ -345,7 +356,7 @@
 
     </mat-dialog-content>
 
-    <mat-dialog-actions class="d-flex justify-content-around bg-light py-2">
+    <mat-dialog-actions class="cotizacion-dialog-footer d-flex justify-content-around py-2">
         <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white rounded-button" style="min-width: 120px;">Cancelar</button>
         <button mat-raised-button type="submit" class="bg-success text-black rounded-button" style="min-width: 120px;" appBotonGuardar [form]="f">
             <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon> Guardar

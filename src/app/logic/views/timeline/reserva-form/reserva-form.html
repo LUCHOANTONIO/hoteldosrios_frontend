@@ -302,23 +302,23 @@
                             </mat-form-field>
 
                             <!-- Col 5: Total -->
-                            <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-form-field appearance="outline" class="col-12 col-md-6" subscriptSizing="dynamic">
                                 <mat-label>Total</mat-label>
                                 <input type="number" matInput [(ngModel)]="nuevoServicio.total" name="nuevo_total" readonly
                                     class="fw-bold text-success" placeholder="0.00">
                             </mat-form-field>
 
-                            <!-- Col 6: Botón Agregar (+) Elegante con Spinner -->
+                            <!-- Col 6: Botón Agregar Item -->
                             <div class="col-12 col-md-6 btn-add-wrapper">
-                                <button mat-mini-fab type="button" class="btn-add-servicio"
+                                <button type="button" class="btn-agregar-item-outline"
                                     (click)="agregarServicioAdicional()"
-                                    [disabled]="isDisabled || !nuevoServicio.producto_id || isProcessingServicio"
-                                    [matTooltip]="isProcessingServicio ? 'Procesando...' : 'Agregar servicio adicional'">
+                                    [disabled]="isDisabled || !nuevoServicio.producto_id || isProcessingServicio">
                                     @if (isProcessingServicio) {
-                                    <mat-spinner diameter="22" class="spinner-btn-add"></mat-spinner>
+                                    <mat-spinner diameter="16" class="me-1"></mat-spinner>
                                     } @else {
                                     <mat-icon>add</mat-icon>
                                     }
+                                    <span>Agregar Item</span>
                                 </button>
                             </div>
                         </div>

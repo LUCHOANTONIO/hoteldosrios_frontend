@@ -119,7 +119,8 @@ export class CotizacionComponent implements AfterViewInit {
     const dialogRef = this.dialog.open(CotizacionFormComponent, {
       data: { cotizacion: this.cotizacion, cotizaciones: this.cotizaciones },
       width: "98vw",
-      maxWidth: "950px",
+      maxWidth: "600px",
+      maxHeight: "92vh",
       disableClose: true
     });
 
@@ -135,7 +136,8 @@ export class CotizacionComponent implements AfterViewInit {
     const dialogRef = this.dialog.open(CotizacionFormComponent, {
       data: { cotizacion: this.cotizacion, cotizaciones: this.cotizaciones },
       width: "98vw",
-      maxWidth: "950px",
+      maxWidth: "600px",
+      maxHeight: "92vh",
       disableClose: true
     });
     this.cambiarfondoFila("azure");

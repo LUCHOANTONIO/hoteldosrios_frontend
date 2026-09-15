@@ -14,6 +14,7 @@ import { TipoDocumentoService } from '../../../../base/services/tipodocumento.se
 import { CategoriaService } from '../../../services/categoria.service';
 import { ProductoService } from '../../../services/producto.service';
 import { AlertService } from '../../../../base/services/local/alert.service';
+import { PersonaService } from '../../../../base/services/persona.service';
 
 // ANGULAR MATERIAL
 import { MatButtonModule } from '@angular/material/button';
@@ -37,7 +38,7 @@ import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-
 import { SelectSearchComponent } from '../../../../base/shared/views/select-search/select-search';
 
 // VARIOS
-import { Component, Inject, ViewChild } from '@angular/core';
+import { Component, Inject, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
@@ -98,6 +99,8 @@ export class CotizacionFormComponent {
   displayedColumnsServicios: string[] = ['accion', 'descripcion', 'cantidad', 'precio_unitario', 'total'];
   isProcessingServicio: boolean = false;
   isVisibleServiciosExtra: boolean = false;
+  isSearchingDni: boolean = false;
+  @ViewChild('cboTipoDocId') cboTipoDocId: any;
 
   toggleServiciosExtra(): void {
     this.isVisibleServiciosExtra = !this.isVisibleServiciosExtra;
@@ -113,7 +116,9 @@ export class CotizacionFormComponent {
     private tipoDocumentoService: TipoDocumentoService,
     private categoriaService: CategoriaService,
     private productoService: ProductoService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private personaService: PersonaService,
+    private cdr: ChangeDetectorRef
   ) {
     this.cotizacion = data.cotizacion;
     this.cotizaciones = data.cotizaciones;
@@ -391,7 +396,6 @@ export class CotizacionFormComponent {
     this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
     this.isVisibleServiciosExtra = true;
     this.inicializarNuevoServicio();
-    this.alertService.show("Servicio adicional agregado", { duration: 2500, type: 'success' });
   }
 
   eliminarServicioAdicional(index: number, item: CotizacionDetalleModel) {
@@ -447,6 +451,55 @@ export class CotizacionFormComponent {
         this.alertService.show("La Fecha Ingreso no puede ser mayor a la Fecha Salida", { duration: 3000, type: 'warning' });
       }
     }
+  }
+
+  onDniEnter(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    this.verificarNroDocumento(this.cotizacion.dni);
+    if (this.cboTipoDocId) {
+      this.cboTipoDocId.focus();
+    }
+  }
+
+  verificarNroDocumento(nro_documento: string) {
+    const doc = nro_documento ? (nro_documento + '').trim() : '';
+    if (!doc) return;
+
+    this.isSearchingDni = true;
+    this.personaService.personaPorNroDocumento(doc).subscribe({
+      next: (res: any) => {
+        this.isSearchingDni = false;
+        if (res && typeof res === 'object' && Object.keys(res).length > 0) {
+          const {
+            tipo_doc_id,
+            nombre,
+            primer_apellido,
+            segundo_apellido,
+            telefono
+          } = res;
+
+          this.cotizacion.tipo_doc_id = tipo_doc_id ? Number(tipo_doc_id) : (this.cotizacion.tipo_doc_id || 1);
+          this.cotizacion.nombre = nombre || '';
+          this.cotizacion.primer_apellido = primer_apellido || '';
+          this.cotizacion.segundo_apellido = segundo_apellido || '';
+          this.cotizacion.telefono = telefono || '';
+        } else {
+          // Cliente nuevo: asegurar valores válidos para selectores requeridos
+          if (!this.cotizacion.tipo_doc_id) {
+            this.cotizacion.tipo_doc_id = 1;
+          }
+        }
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.isSearchingDni = false;
+        console.error('Error al verificar documento:', error);
+        if (!this.cotizacion.tipo_doc_id) this.cotizacion.tipo_doc_id = 1;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   bloquearNegativos(event: KeyboardEvent): void {
