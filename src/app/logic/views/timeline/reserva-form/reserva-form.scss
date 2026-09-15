@@ -224,6 +224,17 @@
   tr.mat-mdc-row:hover {
     background-color: #f8fafc;
   }
+
+  tr.mat-mdc-footer-row {
+    background-color: #f8fafc;
+    border-top: 1.5px solid #cbd5e1;
+
+    td.mat-mdc-footer-cell {
+      padding: 8px;
+      font-size: 13.5px;
+      color: #1e293b;
+    }
+  }
 }
 
 .btn-add-wrapper {
@@ -293,6 +304,70 @@
     ::ng-deep circle {
       stroke: #ffffff !important;
     }
+  }
+}
+
+/* RESUMEN TOTAL GENERAL */
+.resumen-total-general-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  padding: 14px 20px !important;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+
+  .resumen-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .resumen-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .resumen-divider {
+    border-top: 1px solid #cbd5e1;
+    margin: 4px 0;
+    width: 100%;
+  }
+
+  .resumen-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+    min-width: 125px;
+  }
+
+  .resumen-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+  }
+
+  .resumen-label-total {
+    font-size: 15px;
+    font-weight: 700;
+    color: #047857;
+    white-space: nowrap;
+    min-width: 125px;
+  }
+
+  .resumen-value-total {
+    font-size: 21px;
+    font-weight: 800;
+    color: #059669;
+    white-space: nowrap;
+    letter-spacing: -0.2px;
   }
 }
 

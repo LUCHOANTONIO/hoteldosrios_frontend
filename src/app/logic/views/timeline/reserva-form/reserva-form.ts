@@ -932,6 +932,12 @@ export class ReservaFormComponent {
     return this.reserva.transacciones.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
   }
 
+  getTotalGeneral(): number {
+    const totalPrecios = Number(this.reserva?.total) || 0;
+    const totalServicios = this.getTotalServiciosAdicionales();
+    return Math.round((totalPrecios + totalServicios) * 100) / 100;
+  }
+
   cargarDatosTransaccion(reserva_id: number) {
     forkJoin({
       transacciones: this.transaccionService.listarTransaccionesPorReservaId(reserva_id),

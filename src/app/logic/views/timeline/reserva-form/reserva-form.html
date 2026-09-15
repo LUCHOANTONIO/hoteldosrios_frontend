@@ -232,16 +232,9 @@
 
                 <!-- CARD 4: SERVICIOS ADICIONALES -->
                 <div class="form-section-card">
-                    <div class="section-header d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2">
-                            <mat-icon class="section-icon">room_service</mat-icon>
-                            <span class="section-title">Servicios Adicionales</span>
-                        </div>
-                        @if (getTotalServiciosAdicionales() > 0) {
-                        <span class="badge bg-primary text-white px-2 py-1" style="font-size: 0.8rem;">
-                            Subtotal: Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }}
-                        </span>
-                        }
+                    <div class="section-header">
+                        <mat-icon class="section-icon">room_service</mat-icon>
+                        <span class="section-title">Servicios Adicionales</span>
                     </div>
 
                     <!-- Fila de ingreso de Categoria, Productos, Cantidad, Precio Unidad, Total y Procesar en 2 columnas -->
@@ -313,6 +306,7 @@
                                         <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
                                     </button>
                                 </td>
+                                <td mat-footer-cell *matFooterCellDef></td>
                             </ng-container>
 
                             <!-- Columna Descripción / Producto -->
@@ -321,6 +315,7 @@
                                 <td mat-cell *matCellDef="let item" class="fw-semibold">
                                     {{ item.descripcion }}
                                 </td>
+                                <td mat-footer-cell *matFooterCellDef></td>
                             </ng-container>
 
                             <!-- Columna Cantidad -->
@@ -329,6 +324,7 @@
                                 <td mat-cell *matCellDef="let item" class="text-center">
                                     {{ item.cantidad }}
                                 </td>
+                                <td mat-footer-cell *matFooterCellDef></td>
                             </ng-container>
 
                             <!-- Columna Monto / Precio Unitario -->
@@ -336,6 +332,9 @@
                                 <th mat-header-cell *matHeaderCellDef style="width: 100px;" class="text-end">Monto</th>
                                 <td mat-cell *matCellDef="let item" class="text-end">
                                     Bs. {{ item.precio_unitario | number:'1.2-2' }}
+                                </td>
+                                <td mat-footer-cell *matFooterCellDef class="text-end fw-bold text-dark">
+                                    Subtotal:
                                 </td>
                             </ng-container>
 
@@ -345,10 +344,14 @@
                                 <td mat-cell *matCellDef="let item" class="text-end fw-bold text-success pe-2">
                                     Bs. {{ item.total | number:'1.2-2' }}
                                 </td>
+                                <td mat-footer-cell *matFooterCellDef class="text-end fw-bold text-primary pe-2">
+                                    Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }}
+                                </td>
                             </ng-container>
 
                             <tr mat-header-row *matHeaderRowDef="displayedColumnsTransaccion" class="bg-light"></tr>
                             <tr mat-row *matRowDef="let row; columns: displayedColumnsTransaccion;"></tr>
+                            <tr mat-footer-row *matFooterRowDef="displayedColumnsTransaccion" class="tabla-footer-row"></tr>
                         </table>
                     </div>
                     } @else {
@@ -357,6 +360,31 @@
                         No hay servicios adicionales registrados.
                     </div>
                     }
+                </div>
+
+                <!-- CARD 5: RESUMEN TOTAL GENERAL -->
+                <div class="form-section-card resumen-total-general-card">
+                    <div class="resumen-list">
+                        <!-- Fila 1: Total Reserva -->
+                        <div class="resumen-row">
+                            <span class="resumen-label">Total Reserva:</span>
+                            <span class="resumen-value">Bs. {{ (reserva.total || 0) | number:'1.2-2' }}</span>
+                        </div>
+
+                        <!-- Fila 2: Total Servicio -->
+                        <div class="resumen-row">
+                            <span class="resumen-label">Total Servicio:</span>
+                            <span class="resumen-value text-primary">Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }}</span>
+                        </div>
+
+                        <div class="resumen-divider"></div>
+
+                        <!-- Fila 3: Total General -->
+                        <div class="resumen-row">
+                            <span class="resumen-label-total">Total General:</span>
+                            <span class="resumen-value-total">Bs. {{ getTotalGeneral() | number:'1.2-2' }}</span>
+                        </div>
+                    </div>
                 </div>
             </mat-dialog-content>
 
