@@ -72,7 +72,9 @@ import { MatMenuModule } from '@angular/material/menu';
 
 //ANGULAR MATERIAL
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatCheckboxModule } from '@angular/material/checkbox'
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { CommonModule } from '@angular/common';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-reserva-form',
@@ -89,7 +91,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox'
     MatIconModule,
     MatDividerModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     // Angular Modules
+    CommonModule,
     FormsModule,
     // CDK Modules
     CdkDrag,
@@ -167,6 +171,7 @@ export class ReservaFormComponent {
   dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
   @ViewChild(MatPaginator) paginator: MatPaginator;
   transaccion: TransaccionModel = new TransaccionModel();
+  nuevoServicio: TransaccionModel = new TransaccionModel();
 
   constructor(
     public dialogRef: MatDialogRef<ReservaFormComponent>,
@@ -275,7 +280,11 @@ export class ReservaFormComponent {
       }
     }
 
-    this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>([]);
+    this.inicializarNuevoServicio();
+    if (!this.reserva.transacciones) {
+      this.reserva.transacciones = [];
+    }
+    this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
   }
 
   //Begin: Filtrar habitacion
@@ -400,6 +409,14 @@ export class ReservaFormComponent {
         this.reserva.is_grupal = false;
         this.reserva.habitacion_ids = [this.reserva.habitacion_id];
       }
+      if (this.nuevoServicio.producto_id && Number(this.nuevoServicio.cantidad) > 0) {
+        this.calcularTotalNuevoServicio();
+        if (!this.reserva.transacciones) {
+          this.reserva.transacciones = [];
+        }
+        this.reserva.transacciones.push({ ...this.nuevoServicio });
+        this.inicializarNuevoServicio();
+      }
       this.botonGuardarDirectiva.deshabilitarFormBoton();
       if (this.reserva.id > 0) {
         this.modificarReserva();
@@ -422,7 +439,8 @@ export class ReservaFormComponent {
       ...this.reserva,
       cantidad: this.getNoches(),
       precio_unitario: totalPorNoche,
-      cantidad_huesped: (this.reserva as any).cantidad_huesped || 1
+      cantidad_huesped: (this.reserva as any).cantidad_huesped || 1,
+      transacciones: this.reserva.transacciones || []
     };
 
     this.reservaService.crear(payload).subscribe({
@@ -525,7 +543,8 @@ export class ReservaFormComponent {
       ...this.reserva,
       cantidad: this.getNoches(),
       precio_unitario: totalPorNoche,
-      cantidad_huesped: (this.reserva as any).cantidad_huesped || 1
+      cantidad_huesped: (this.reserva as any).cantidad_huesped || 1,
+      transacciones: this.reserva.transacciones || []
     };
 
     this.reservaService.modificar(payload).subscribe({
@@ -761,6 +780,123 @@ export class ReservaFormComponent {
   }
 
   //BEGIN TRANSACCIONES
+
+  inicializarNuevoServicio(): void {
+    this.nuevoServicio = new TransaccionModel();
+    this.nuevoServicio.cantidad = 1;
+    this.nuevoServicio.precio_unitario = 0;
+    this.nuevoServicio.total = 0;
+  }
+
+  onProductoServicioChange(event: any): void {
+    const selectedId = event?.value !== undefined ? event.value : event;
+    const selectedProducto = event?.object || this.productos.find(p => p.id === selectedId);
+    if (selectedProducto) {
+      this.nuevoServicio.producto_id = selectedProducto.id;
+      this.nuevoServicio.descripcion = selectedProducto.descripcion;
+      this.nuevoServicio.categoria_id = selectedProducto.categoria_id;
+      this.nuevoServicio.precio_unitario = Number(selectedProducto.precio) || 0;
+      if (!this.nuevoServicio.cantidad || this.nuevoServicio.cantidad <= 0) {
+        this.nuevoServicio.cantidad = 1;
+      }
+      this.calcularTotalNuevoServicio();
+    }
+  }
+
+  calcularTotalNuevoServicio(): void {
+    const cantidad = Number(this.nuevoServicio.cantidad) || 0;
+    const precio = Number(this.nuevoServicio.precio_unitario) || 0;
+    this.nuevoServicio.total = Math.round((cantidad * precio) * 100) / 100;
+  }
+
+  agregarServicioAdicional(): void {
+    if (!this.nuevoServicio.producto_id) {
+      this.alertService.show("Seleccione un producto", { duration: 3000, type: 'info' });
+      return;
+    }
+    const cantidad = Number(this.nuevoServicio.cantidad) || 0;
+    if (cantidad <= 0) {
+      this.alertService.show("La cantidad debe ser mayor a 0", { duration: 3000, type: 'info' });
+      return;
+    }
+    const precio = Number(this.nuevoServicio.precio_unitario) || 0;
+    if (precio < 0) {
+      this.alertService.show("El monto no puede ser negativo", { duration: 3000, type: 'info' });
+      return;
+    }
+
+    this.calcularTotalNuevoServicio();
+
+    // Si la reserva ya fue guardada en BD
+    if (this.reserva && this.reserva.id > 0) {
+      const itemAGuardar = { ...this.nuevoServicio, reserva_id: this.reserva.id };
+      this.transaccionService.crear(itemAGuardar).subscribe({
+        next: (res) => {
+          if (res.correcto) {
+            const data = JSON.parse(res.dato);
+            this.reserva.transacciones = data.transacciones as TransaccionModel[];
+            this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+            this.balance.set(data.balance);
+            this.reserva.saldo = data.balance.saldo;
+            if (this.items) {
+              this.items.update({ id: this.reserva.id, saldo: this.reserva.saldo });
+            }
+            this.comunicacionService.executeActionReserva.set(true);
+            this.comunicacionService.loadBitacoraSignal.set({ reserva_id: this.reserva.id, trigger: Date.now() });
+            this.inicializarNuevoServicio();
+            this.alertService.show("Servicio adicional agregado", { duration: 3000, type: 'success' });
+          } else {
+            this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.alertService.show("Error al guardar el servicio adicional", { duration: 5000, type: 'info' });
+        }
+      });
+    } else {
+      // Para reserva nueva (aún no guardada)
+      if (!this.reserva.transacciones) {
+        this.reserva.transacciones = [];
+      }
+      this.reserva.transacciones.push({ ...this.nuevoServicio });
+      this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+      this.inicializarNuevoServicio();
+      this.alertService.show("Servicio adicional agregado", { duration: 2500, type: 'success' });
+    }
+  }
+
+  eliminarServicioAdicional(index: number, item: TransaccionModel): void {
+    if (item.id && item.id > 0) {
+      this.transaccionService.eliminar(item.id).subscribe({
+        next: (res) => {
+          if (res.correcto) {
+            const data = JSON.parse(res.dato);
+            this.reserva.transacciones = data.transacciones as TransaccionModel[];
+            this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+            this.balance.set(data.balance);
+            this.reserva.saldo = data.balance.saldo;
+            if (this.items) {
+              this.items.update({ id: this.reserva.id, saldo: this.reserva.saldo });
+            }
+            this.comunicacionService.executeActionReserva.set(true);
+            this.comunicacionService.loadBitacoraSignal.set({ reserva_id: this.reserva.id, trigger: Date.now() });
+            this.alertService.show("Servicio adicional eliminado", { duration: 3000, type: 'success' });
+          } else {
+            this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
+          }
+        }
+      });
+    } else {
+      this.reserva.transacciones.splice(index, 1);
+      this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+    }
+  }
+
+  getTotalServiciosAdicionales(): number {
+    if (!this.reserva?.transacciones || this.reserva.transacciones.length === 0) return 0;
+    return this.reserva.transacciones.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
+  }
 
   cargarDatosTransaccion(reserva_id: number) {
     forkJoin({

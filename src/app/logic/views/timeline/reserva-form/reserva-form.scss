@@ -201,4 +201,29 @@
     width: 100%;
 }
 //END: Ajustes para la tabla de transacciones
+
+/* Tabla de Servicios Adicionales en Formulario de Reserva */
+.tabla-servicios-extra {
+  font-size: 13px;
+
+  th.mat-mdc-header-cell {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 6px 8px;
+  }
+
+  td.mat-mdc-cell {
+    padding: 4px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+  }
+
+  tr.mat-mdc-row:hover {
+    background-color: #f8fafc;
+  }
+}
+
   
