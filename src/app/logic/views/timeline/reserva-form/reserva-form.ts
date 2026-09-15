@@ -128,6 +128,7 @@ export class ReservaFormComponent {
   @ViewChild(BitacoraFormComponent) bitacoraFormComponent: BitacoraFormComponent;
   @ViewChild('cboHabitacion') cboHabitacion: any;
   @ViewChild('cboCanalReserva') cboCanalReserva: any;
+  @ViewChild('cboTipoDocId') cboTipoDocId: any;
 
   items: any;
   groups: any;
@@ -177,6 +178,7 @@ export class ReservaFormComponent {
   categorias: CategoriaModel[] = [];
   productos_filtrados: ProductoModel[] = [];
   isProcessingServicio: boolean = false;
+  isSearchingDni: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<ReservaFormComponent>,
@@ -437,7 +439,16 @@ export class ReservaFormComponent {
         this.crearReserva();
       }
     } else {
-      this.alertService.show("Debe llenar los campos", { duration: 5000, type: 'info' });
+      const invalidFields: string[] = [];
+      if (f.controls) {
+        Object.keys(f.controls).forEach(key => {
+          if (f.controls[key].invalid) {
+            invalidFields.push(key);
+          }
+        });
+      }
+      console.warn('Campos inválidos en formulario:', invalidFields);
+      this.alertService.show("Debe llenar todos los campos requeridos", { duration: 5000, type: 'info' });
     }
   }
 
@@ -450,6 +461,7 @@ export class ReservaFormComponent {
 
     const payload: any = {
       ...this.reserva,
+      email: this.reserva.correo || (this.reserva as any).email || '',
       cantidad: this.getNoches(),
       precio_unitario: totalPorNoche,
       cantidad_huesped: (this.reserva as any).cantidad_huesped || 1,
@@ -554,6 +566,7 @@ export class ReservaFormComponent {
 
     const payload: any = {
       ...this.reserva,
+      email: this.reserva.correo || (this.reserva as any).email || '',
       cantidad: this.getNoches(),
       precio_unitario: totalPorNoche,
       cantidad_huesped: (this.reserva as any).cantidad_huesped || 1,
@@ -707,44 +720,70 @@ export class ReservaFormComponent {
     });
   }
 
-  verificarNroDocumento(nro_documento: string) {
-    if (this.reserva.id == null && nro_documento?.trim()) {
-      this.personaService.personaPorNroDocumento(nro_documento).subscribe({
-        next: (res) => {
-          if (Object.keys(res).length != 0) {
-
-            const {
-              detalle,
-              tipo_doc_id,
-              nacionalidad_id,
-              nombre,
-              primer_apellido,
-              segundo_apellido,
-              telefono
-            } = res;
-
-            this.reserva.tipo_doc_id = Number(tipo_doc_id);
-            this.reserva.nacionalidad_id = Number(nacionalidad_id);
-            this.reserva.nombre = nombre;
-            this.reserva.primer_apellido = primer_apellido;
-            this.reserva.segundo_apellido = segundo_apellido;
-            this.reserva.telefono = telefono;
-
-          } else {
-            this.reserva.tipo_doc_id = null;
-            this.reserva.nacionalidad_id = null;
-            this.reserva.nombre = "";
-            this.reserva.primer_apellido = "";
-            this.reserva.segundo_apellido = "";
-            this.reserva.telefono = "";
-            this.reserva.correo = "";
-          }
-        },
-        error: (error) => {
-          console.error(error);
-        }
-      });
+  onDniEnter(event?: Event): void {
+    if (event) {
+      event.preventDefault();
     }
+    this.verificarNroDocumento(this.reserva.nro_documento);
+    if (this.cboTipoDocId) {
+      this.cboTipoDocId.focus();
+    }
+  }
+
+  verificarNroDocumento(nro_documento: string) {
+    if (this.isDisabled) return;
+    const doc = nro_documento ? (nro_documento + '').trim() : '';
+    if (!doc) return;
+
+    this.isSearchingDni = true;
+    this.personaService.personaPorNroDocumento(doc).subscribe({
+      next: (res: any) => {
+        this.isSearchingDni = false;
+        if (res && typeof res === 'object' && Object.keys(res).length > 0) {
+          const {
+            tipo_doc_id,
+            nacionalidad_id,
+            nombre,
+            primer_apellido,
+            segundo_apellido,
+            telefono,
+            email,
+            id
+          } = res;
+
+          this.reserva.tipo_doc_id = tipo_doc_id ? Number(tipo_doc_id) : (this.reserva.tipo_doc_id || 1);
+          this.reserva.nacionalidad_id = nacionalidad_id ? Number(nacionalidad_id) : (this.reserva.nacionalidad_id || 1);
+          this.reserva.nombre = nombre || '';
+          this.reserva.primer_apellido = primer_apellido || '';
+          this.reserva.segundo_apellido = segundo_apellido || '';
+          this.reserva.telefono = telefono || '';
+          this.reserva.correo = email || res.correo || '';
+          if (id) {
+            this.reserva.cliente_id = Number(id);
+          }
+
+          const nombreCompleto = `${this.reserva.nombre} ${this.reserva.primer_apellido}`.trim();
+          this.alertService.show(`Cliente encontrado: ${nombreCompleto}`, { duration: 3000, type: 'success' });
+        } else {
+          // Cliente nuevo: asegurar valores válidos para selectores requeridos
+          if (!this.reserva.tipo_doc_id) {
+            this.reserva.tipo_doc_id = 1;
+          }
+          if (!this.reserva.nacionalidad_id) {
+            this.reserva.nacionalidad_id = 1;
+          }
+          this.alertService.show('DNI no registrado. Complete los datos del nuevo cliente.', { duration: 3500, type: 'info' });
+        }
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.isSearchingDni = false;
+        console.error('Error al verificar documento:', error);
+        if (!this.reserva.tipo_doc_id) this.reserva.tipo_doc_id = 1;
+        if (!this.reserva.nacionalidad_id) this.reserva.nacionalidad_id = 1;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   getNoches(): number {

@@ -20,10 +20,19 @@
                     <div class="row row-cols-1 row-cols-md-2 g-2">
                         <mat-form-field appearance="outline" class="col">
                             <mat-label>DNI</mat-label>
-                            <input matInput placeholder="" [(ngModel)]="reserva.nro_documento" name="nro_documento"
-                                [readonly]="isDisabled" #txtNroDocumento
-                                (blur)="verificarNroDocumento(reserva.nro_documento)" (keydown.enter)="cboTipoDocId.focus()"
-                                cdkFocusInitial>
+                            <input matInput placeholder="Ingrese DNI" [(ngModel)]="reserva.nro_documento"
+                                name="nro_documento" [readonly]="isDisabled" #txtNroDocumento
+                                (blur)="verificarNroDocumento(reserva.nro_documento)"
+                                (keydown.enter)="onDniEnter($event)" cdkFocusInitial>
+                            @if (isSearchingDni) {
+                            <mat-spinner matSuffix diameter="18" class="me-2"></mat-spinner>
+                            } @else {
+                            <button mat-icon-button matSuffix type="button"
+                                (click)="verificarNroDocumento(reserva.nro_documento)"
+                                [disabled]="isDisabled || !reserva.nro_documento" matTooltip="Buscar por DNI">
+                                <mat-icon>search</mat-icon>
+                            </button>
+                            }
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col">
@@ -53,8 +62,9 @@
 
                         <mat-form-field appearance="outline" class="col">
                             <mat-label>Segundo Apellido</mat-label>
-                            <input matInput placeholder="" [(ngModel)]="reserva.segundo_apellido" name="segundo_apellido"
-                                [readonly]="isDisabled" #txtSegundoApellido (keydown.enter)="txtTelefono.focus()">
+                            <input matInput placeholder="" [(ngModel)]="reserva.segundo_apellido"
+                                name="segundo_apellido" [readonly]="isDisabled" #txtSegundoApellido
+                                (keydown.enter)="txtTelefono.focus()">
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col">
@@ -79,8 +89,7 @@
                         <span class="section-title">Detalles de la Reserva</span>
                     </div>
                     <!-- MODALIDAD DE RESERVA: INDIVIDUAL O GRUPAL -->
-                    @if (!reserva.id || reserva.id <= 0) {
-                    <div class="tipo-reserva-wrapper mb-3">
+                    @if (!reserva.id || reserva.id <= 0) { <div class="tipo-reserva-wrapper mb-3">
                         <div class="tipo-reserva-label-group">
                             <span class="tipo-label">Modalidad de Reserva</span>
                             <span class="tipo-subtitle">Seleccione individual o grupal (múltiples habitaciones)</span>
@@ -97,87 +106,92 @@
                                 <span>Grupal</span>
                             </button>
                         </div>
-                    </div>
+                </div>
+                } @else {
+                @if (reserva.grupo_id) {
+                <div class="grupo-badge-info mb-3">
+                    <mat-icon>groups</mat-icon>
+                    <span>Reserva Grupal: <strong>{{ reserva.grupo_nombre || ('Grupo #' + reserva.grupo_id)
+                            }}</strong></span>
+                </div>
+                }
+                }
+
+                <div class="row g-2">
+                    @if (tipo_reserva === 'individual') {
+                    <mat-form-field appearance="outline" class="col-12">
+                        <mat-label>Habitacion</mat-label>
+                        <mat-select placeholder="" [(ngModel)]="reserva.habitacion_id" name="habitacion_id"
+                            [disabled]="isDisabled" #cboHabitacion (selectionChange)="changeHabitacion($event)"
+                            (keydown.enter)="cboCanalReserva.focus()" appPreventEnterSelect required>
+                            @for (x of habitaciones;track $index) {
+                            <mat-option [value]="x.id">{{x.nro_habitacion}} {{x.descripcion}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
                     } @else {
-                        @if (reserva.grupo_id) {
-                        <div class="grupo-badge-info mb-3">
-                            <mat-icon>groups</mat-icon>
-                            <span>Reserva Grupal: <strong>{{ reserva.grupo_nombre || ('Grupo #' + reserva.grupo_id) }}</strong></span>
-                        </div>
-                        }
+                    <mat-form-field appearance="outline" class="col-12 col-md-6">
+                        <mat-label>Nombre del Grupo</mat-label>
+                        <input matInput placeholder="Ej: Familia Gómez / Delegación" [(ngModel)]="reserva.grupo_nombre"
+                            name="grupo_nombre" [readonly]="isDisabled">
+                        <mat-icon matSuffix class="text-secondary">groups</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-12 col-md-6">
+                        <mat-label>Habitaciones (Selección Múltiple)</mat-label>
+                        <mat-select placeholder="" multiple [(ngModel)]="selectedHabitaciones"
+                            name="selectedHabitaciones" [disabled]="isDisabled"
+                            (selectionChange)="changeHabitacionesMulti($event)" required>
+                            <mat-select-trigger>
+                                {{ selectedHabitaciones.length }} {{ selectedHabitaciones.length === 1 ? 'habitación
+                                seleccionada' : 'habitaciones seleccionadas' }}
+                            </mat-select-trigger>
+                            @for (x of habitaciones; track $index) {
+                            <mat-option [value]="x.id">
+                                Hab. {{x.nro_habitacion}} - {{x.descripcion}}
+                            </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
                     }
 
-                    <div class="row g-2">
-                        @if (tipo_reserva === 'individual') {
-                            <mat-form-field appearance="outline" class="col-12">
-                                <mat-label>Habitacion</mat-label>
-                                <mat-select placeholder="" [(ngModel)]="reserva.habitacion_id" name="habitacion_id"
-                                    [disabled]="isDisabled" #cboHabitacion (selectionChange)="changeHabitacion($event)"
-                                    (keydown.enter)="cboCanalReserva.focus()" appPreventEnterSelect required>
-                                    @for (x of habitaciones;track $index) {
-                                    <mat-option [value]="x.id">{{x.nro_habitacion}} {{x.descripcion}}</mat-option>
-                                    }
-                                </mat-select>
-                            </mat-form-field>
-                        } @else {
-                            <mat-form-field appearance="outline" class="col-12 col-md-6">
-                                <mat-label>Nombre del Grupo</mat-label>
-                                <input matInput placeholder="Ej: Familia Gómez / Delegación" [(ngModel)]="reserva.grupo_nombre"
-                                    name="grupo_nombre" [readonly]="isDisabled">
-                                <mat-icon matSuffix class="text-secondary">groups</mat-icon>
-                            </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-12 col-md-6">
+                        <mat-label>Canal Reserva</mat-label>
+                        <mat-select placeholder="" [(ngModel)]="reserva.canal_reserva_id" name="canal_reserva_id"
+                            [disabled]="isDisabled" #cboCanalReserva (keydown.enter)="cboPaisProcedencia.focus()"
+                            appPreventEnterSelect required>
+                            @for (x of canal_reservas;track $index) {
+                            <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
 
-                            <mat-form-field appearance="outline" class="col-12 col-md-6">
-                                <mat-label>Habitaciones (Selección Múltiple)</mat-label>
-                                <mat-select placeholder="" multiple [(ngModel)]="selectedHabitaciones" name="selectedHabitaciones"
-                                    [disabled]="isDisabled" (selectionChange)="changeHabitacionesMulti($event)" required>
-                                    <mat-select-trigger>
-                                        {{ selectedHabitaciones.length }} {{ selectedHabitaciones.length === 1 ? 'habitación seleccionada' : 'habitaciones seleccionadas' }}
-                                    </mat-select-trigger>
-                                    @for (x of habitaciones; track $index) {
-                                    <mat-option [value]="x.id">
-                                        Hab. {{x.nro_habitacion}} - {{x.descripcion}} (Bs. {{x.precio}})
-                                    </mat-option>
-                                    }
-                                </mat-select>
-                            </mat-form-field>
-                        }
+                    <app-select-search class="col-12 col-md-6" #cboPaisProcedencia (keyupEnter)="txtFechaIni.focus()"
+                        label="País Procedencia" [(ngModel)]="reserva.pais_procedencia_id" [dataSource]="paises"
+                        (selectionChange)="{}" text="descripcion" value="id" name="pais_procedencia_id"
+                        showCleanButton="false" required [searchFields]="['descripcion']" [disabled]="isDisabled">
+                    </app-select-search>
 
-                        <mat-form-field appearance="outline" class="col-12 col-md-6">
-                            <mat-label>Canal Reserva</mat-label>
-                            <mat-select placeholder="" [(ngModel)]="reserva.canal_reserva_id" name="canal_reserva_id"
-                                [disabled]="isDisabled" #cboCanalReserva (keydown.enter)="cboPaisProcedencia.focus()"
-                                appPreventEnterSelect required>
-                                @for (x of canal_reservas;track $index) {
-                                <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-12 col-md-6">
+                        <mat-label>Fecha Inicial</mat-label>
+                        <input matInput [matDatepicker]="picker_fecha_ini" [(ngModel)]="reserva.fecha_ini"
+                            name="fecha_ini" [readonly]="isDisabled" #txtFechaIni required
+                            (dateChange)="calcularCantidad()" (keydown.enter)="txtFechaFin.focus()">
+                        <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"
+                            [disabled]="isDisabled"></mat-datepicker-toggle>
+                        <mat-datepicker #picker_fecha_ini [disabled]="isDisabled"></mat-datepicker>
+                    </mat-form-field>
 
-                        <app-select-search class="col-12 col-md-6" #cboPaisProcedencia (keyupEnter)="txtFechaIni.focus()"
-                            label="País Procedencia" [(ngModel)]="reserva.pais_procedencia_id" [dataSource]="paises"
-                            (selectionChange)="{}" text="descripcion" value="id" name="pais_procedencia_id"
-                            showCleanButton="false" required [searchFields]="['descripcion']" [disabled]="isDisabled">
-                        </app-select-search>
-
-                        <mat-form-field appearance="outline" class="col-12 col-md-6">
-                            <mat-label>Fecha Inicial</mat-label>
-                            <input matInput [matDatepicker]="picker_fecha_ini" [(ngModel)]="reserva.fecha_ini"
-                                name="fecha_ini" [readonly]="isDisabled" #txtFechaIni required
-                                (dateChange)="calcularCantidad()" (keydown.enter)="txtFechaFin.focus()">
-                            <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini" [disabled]="isDisabled"></mat-datepicker-toggle>
-                            <mat-datepicker #picker_fecha_ini [disabled]="isDisabled"></mat-datepicker>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-12 col-md-6">
-                            <mat-label>Fecha Final</mat-label>
-                            <input matInput [matDatepicker]="picker_fecha_fin" [(ngModel)]="reserva.fecha_fin"
-                                name="fecha_fin" [readonly]="isDisabled" #txtFechaFin required
-                                (dateChange)="calcularCantidad()" (keydown.enter)="txtCantidadAdulto.focus()">
-                            <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin" [disabled]="isDisabled"></mat-datepicker-toggle>
-                            <mat-datepicker #picker_fecha_fin [disabled]="isDisabled"></mat-datepicker>
-                        </mat-form-field>
-                    </div>
+                    <mat-form-field appearance="outline" class="col-12 col-md-6">
+                        <mat-label>Fecha Final</mat-label>
+                        <input matInput [matDatepicker]="picker_fecha_fin" [(ngModel)]="reserva.fecha_fin"
+                            name="fecha_fin" [readonly]="isDisabled" #txtFechaFin required
+                            (dateChange)="calcularCantidad()" (keydown.enter)="txtCantidadAdulto.focus()">
+                        <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin"
+                            [disabled]="isDisabled"></mat-datepicker-toggle>
+                        <mat-datepicker #picker_fecha_fin [disabled]="isDisabled"></mat-datepicker>
+                    </mat-form-field>
+                </div>
                 </div>
 
                 <!-- CARD 3: PRECIOS -->
@@ -189,9 +203,9 @@
                     <div class="row g-2">
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Cantidad Adulto</mat-label>
-                            <input type="number" matInput placeholder="1" [(ngModel)]="reserva.cantidad_adulto" name="cantidad_adulto"
-                                [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="1"
-                                (keydown)="bloquearNegativos($event)" required #txtCantidadAdulto
+                            <input type="number" matInput placeholder="1" [(ngModel)]="reserva.cantidad_adulto"
+                                name="cantidad_adulto" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                step="1" (keydown)="bloquearNegativos($event)" required #txtCantidadAdulto
                                 (keydown.enter)="txtPrecioUnitAdulto.focus()">
                             <mat-icon matSuffix class="text-secondary">person</mat-icon>
                         </mat-form-field>
@@ -199,15 +213,15 @@
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Precio Unit. Adulto</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unit_adulto"
-                                name="precio_unit_adulto" [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="any"
-                                (keydown)="bloquearSignosNegativos($event)" required #txtPrecioUnitAdulto
+                                name="precio_unit_adulto" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                step="any" (keydown)="bloquearSignosNegativos($event)" required #txtPrecioUnitAdulto
                                 (keydown.enter)="txtCantidadNinio.focus()">
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Cantidad Niño</mat-label>
-                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.cantidad_ninio" name="cantidad_ninio"
-                                [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="1"
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.cantidad_ninio"
+                                name="cantidad_ninio" [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="1"
                                 (keydown)="bloquearNegativos($event)" #txtCantidadNinio
                                 (keydown.enter)="txtPrecioUnitNinio.focus()">
                             <mat-icon matSuffix class="text-secondary">child_care</mat-icon>
@@ -216,15 +230,15 @@
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Precio Unit. Niño</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unit_ninio"
-                                name="precio_unit_ninio" [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="any"
-                                (keydown)="bloquearSignosNegativos($event)" #txtPrecioUnitNinio
+                                name="precio_unit_ninio" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                step="any" (keydown)="bloquearSignosNegativos($event)" #txtPrecioUnitNinio
                                 (keydown.enter)="txtPrecioTotal.focus()">
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-12">
                             <mat-label>Precio Total</mat-label>
-                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.total" name="precio_total"
-                                #txtPrecioTotal readonly required class="precio-total-input">
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.total"
+                                name="precio_total" #txtPrecioTotal readonly required class="precio-total-input">
                             <mat-icon matSuffix class="precio-total-icon">payments</mat-icon>
                         </mat-form-field>
                     </div>
@@ -240,19 +254,19 @@
                     <!-- Fila de ingreso de Categoria, Productos, Cantidad, Precio Unidad, Total y Procesar en 2 columnas -->
                     <div class="row g-2 align-items-start mb-2">
                         <!-- Col 1: Categoria -->
-                        <app-select-search class="col-12 col-md-6"
-                            label="Categoria" [(ngModel)]="nuevoServicio.categoria_id"
-                            [dataSource]="categorias" (selectionChange)="filtrarProductos()"
-                            text="descripcion" value="id" name="nuevo_categoria_id"
-                            showCleanButton="true" [searchFields]="['descripcion']" [disabled]="isDisabled">
+                        <app-select-search class="col-12 col-md-6" label="Categoria"
+                            [(ngModel)]="nuevoServicio.categoria_id" [dataSource]="categorias"
+                            (selectionChange)="filtrarProductos()" text="descripcion" value="id"
+                            name="nuevo_categoria_id" showCleanButton="true" [searchFields]="['descripcion']"
+                            [disabled]="isDisabled">
                         </app-select-search>
 
                         <!-- Col 2: Productos -->
-                        <app-select-search class="col-12 col-md-6" #cboProducto
-                            label="Productos" [(ngModel)]="nuevoServicio.producto_id"
-                            [dataSource]="productos_filtrados" (selectionChange)="onProductoServicioChange($event)"
-                            text="descripcion" value="id" name="nuevo_producto_id"
-                            showCleanButton="true" [searchFields]="['descripcion']" [disabled]="isDisabled">
+                        <app-select-search class="col-12 col-md-6" #cboProducto label="Productos"
+                            [(ngModel)]="nuevoServicio.producto_id" [dataSource]="productos_filtrados"
+                            (selectionChange)="onProductoServicioChange($event)" text="descripcion" value="id"
+                            name="nuevo_producto_id" showCleanButton="true" [searchFields]="['descripcion']"
+                            [disabled]="isDisabled">
                         </app-select-search>
 
                         <!-- Col 3: Cantidad -->
@@ -285,9 +299,9 @@
                                 [disabled]="isDisabled || !nuevoServicio.producto_id || isProcessingServicio"
                                 [matTooltip]="isProcessingServicio ? 'Procesando...' : 'Agregar servicio adicional'">
                                 @if (isProcessingServicio) {
-                                    <mat-spinner diameter="22" class="spinner-btn-add"></mat-spinner>
+                                <mat-spinner diameter="22" class="spinner-btn-add"></mat-spinner>
                                 } @else {
-                                    <mat-icon>add</mat-icon>
+                                <mat-icon>add</mat-icon>
                                 }
                             </button>
                         </div>
@@ -301,8 +315,9 @@
                             <ng-container matColumnDef="accion">
                                 <th mat-header-cell *matHeaderCellDef style="width: 50px;" class="text-center">#</th>
                                 <td mat-cell *matCellDef="let item; let i = index;" class="text-center">
-                                    <button type="button" mat-icon-button class="text-danger" (click)="eliminarServicioAdicional(i, item)"
-                                        [disabled]="isDisabled" matTooltip="Eliminar servicio">
+                                    <button type="button" mat-icon-button class="text-danger"
+                                        (click)="eliminarServicioAdicional(i, item)" [disabled]="isDisabled"
+                                        matTooltip="Eliminar servicio">
                                         <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
                                     </button>
                                 </td>
@@ -320,7 +335,8 @@
 
                             <!-- Columna Cantidad -->
                             <ng-container matColumnDef="cantidad">
-                                <th mat-header-cell *matHeaderCellDef style="width: 80px;" class="text-center">Cant.</th>
+                                <th mat-header-cell *matHeaderCellDef style="width: 80px;" class="text-center">Cant.
+                                </th>
                                 <td mat-cell *matCellDef="let item" class="text-center">
                                     {{ item.cantidad }}
                                 </td>
@@ -351,7 +367,8 @@
 
                             <tr mat-header-row *matHeaderRowDef="displayedColumnsTransaccion" class="bg-light"></tr>
                             <tr mat-row *matRowDef="let row; columns: displayedColumnsTransaccion;"></tr>
-                            <tr mat-footer-row *matFooterRowDef="displayedColumnsTransaccion" class="tabla-footer-row"></tr>
+                            <tr mat-footer-row *matFooterRowDef="displayedColumnsTransaccion" class="tabla-footer-row">
+                            </tr>
                         </table>
                     </div>
                     } @else {
@@ -374,7 +391,8 @@
                         <!-- Fila 2: Total Servicio -->
                         <div class="resumen-row">
                             <span class="resumen-label">Total Servicio:</span>
-                            <span class="resumen-value text-primary">Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }}</span>
+                            <span class="resumen-value text-primary">Bs. {{ getTotalServiciosAdicionales() |
+                                number:'1.2-2' }}</span>
                         </div>
 
                         <div class="resumen-divider"></div>
