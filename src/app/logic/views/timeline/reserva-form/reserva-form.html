@@ -244,41 +244,53 @@
                         }
                     </div>
 
-                    <!-- Fila de ingreso de Producto, Cantidad, Monto y Total -->
-                    <div class="row g-2 align-items-center mb-2" [hidden]="isDisabled">
-                        <app-select-search class="col-12 col-md-5" #cboProducto
-                            label="Producto" [(ngModel)]="nuevoServicio.producto_id"
-                            [dataSource]="productos" (selectionChange)="onProductoServicioChange($event)"
-                            text="descripcion" value="id" name="nuevo_producto_id"
-                            showCleanButton="true" [searchFields]="['descripcion']" [disabled]="isDisabled">
+                    <!-- Fila de ingreso de Categoria, Productos, Cantidad, Precio Unidad, Total y Procesar en 2 columnas -->
+                    <div class="row g-2 align-items-start mb-2">
+                        <!-- Col 1: Categoria -->
+                        <app-select-search class="col-12 col-md-6"
+                            label="Categoria" [(ngModel)]="nuevoServicio.categoria_id"
+                            [dataSource]="categorias" (selectionChange)="filtrarProductos()"
+                            text="descripcion" value="id" name="nuevo_categoria_id"
+                            showCleanButton="true" [searchFields]="['descripcion']">
                         </app-select-search>
 
-                        <mat-form-field appearance="outline" class="col-6 col-md-2">
+                        <!-- Col 2: Productos -->
+                        <app-select-search class="col-12 col-md-6" #cboProducto
+                            label="Productos" [(ngModel)]="nuevoServicio.producto_id"
+                            [dataSource]="productos_filtrados" (selectionChange)="onProductoServicioChange($event)"
+                            text="descripcion" value="id" name="nuevo_producto_id"
+                            showCleanButton="true" [searchFields]="['descripcion']">
+                        </app-select-search>
+
+                        <!-- Col 3: Cantidad -->
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Cantidad</mat-label>
                             <input type="number" matInput [(ngModel)]="nuevoServicio.cantidad" name="nuevo_cantidad"
                                 (input)="calcularTotalNuevoServicio()" min="1" step="1"
-                                (keydown)="bloquearNegativos($event)" placeholder="1" [readonly]="isDisabled">
-                            <mat-icon matSuffix class="text-secondary" style="font-size: 18px;">numbers</mat-icon>
+                                (keydown)="bloquearNegativos($event)" placeholder="1">
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col-6 col-md-2">
-                            <mat-label>Monto (P.U.)</mat-label>
+                        <!-- Col 4: Precio Unidad -->
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Precio Unidad</mat-label>
                             <input type="number" matInput [(ngModel)]="nuevoServicio.precio_unitario" name="nuevo_monto"
                                 (input)="calcularTotalNuevoServicio()" min="0" step="any"
-                                (keydown)="bloquearSignosNegativos($event)" placeholder="0.00" [readonly]="isDisabled">
+                                (keydown)="bloquearSignosNegativos($event)" placeholder="0.00">
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col-8 col-md-2">
+                        <!-- Col 5: Total -->
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Total</mat-label>
                             <input type="number" matInput [(ngModel)]="nuevoServicio.total" name="nuevo_total" readonly
                                 class="fw-bold text-success" placeholder="0.00">
                         </mat-form-field>
 
-                        <div class="col-4 col-md-1 d-flex align-items-center justify-content-center">
-                            <button type="button" mat-mini-fab color="primary" (click)="agregarServicioAdicional()"
-                                [disabled]="isDisabled || !nuevoServicio.producto_id" matTooltip="Agregar servicio adicional"
-                                style="width: 40px; height: 40px;">
-                                <mat-icon>add</mat-icon>
+                        <!-- Col 6: Botón Procesar -->
+                        <div class="col-12 col-md-6 btn-procesar-wrapper">
+                            <button mat-raised-button type="button" class="btn-procesar-servicio w-100"
+                                (click)="agregarServicioAdicional()"
+                                [disabled]="!nuevoServicio.producto_id">
+                                Procesar
                             </button>
                         </div>
                     </div>
@@ -292,7 +304,7 @@
                                 <th mat-header-cell *matHeaderCellDef style="width: 50px;" class="text-center">#</th>
                                 <td mat-cell *matCellDef="let item; let i = index;" class="text-center">
                                     <button type="button" mat-icon-button class="text-danger" (click)="eliminarServicioAdicional(i, item)"
-                                        [disabled]="isDisabled" matTooltip="Eliminar servicio">
+                                        matTooltip="Eliminar servicio">
                                         <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
                                     </button>
                                 </td>

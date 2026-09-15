@@ -1,8 +1,8 @@
 <form autocomplete="off" #transaccionForm="ngForm" appPreventEnterSubmit AnimarPerderFocoDirective>                        
     <div id="data_transaccion" class="container">
         <mat-dialog-content class="mat-typography"> 
-            <div class="row row-cols-1 row-cols-md-2">  
-                <app-select-search class="col"
+            <div class="row g-2 align-items-start">  
+                <app-select-search class="col-12 col-md-6"
                     #cboPaisProcedencia
                     (keyupEnter)="cboProducto.focus()"
                     label="Categoria"      
@@ -18,7 +18,7 @@
                     >                       
                 </app-select-search>                               
 
-                <app-select-search class="col"
+                <app-select-search class="col-12 col-md-6"
                     #cboProducto
                     (keyupEnter)="txtCantidad.focus()"
                     label="Productos"      
@@ -35,24 +35,26 @@
                 </app-select-search>             
                 
         
-                <mat-form-field class="col">
+                <mat-form-field appearance="outline" class="col-12 col-md-6">
                     <mat-label>Cantidad</mat-label>
                     <input matInput type="number" min="1" step="1" placeholder="" [(ngModel)]="transaccion.cantidad" name="cantidad" #txtCantidad (ngModelChange)="calcularTotal()" required>
                 </mat-form-field>
         
-                <mat-form-field class="col">
+                <mat-form-field appearance="outline" class="col-12 col-md-6">
                     <mat-label>Precio Unidad</mat-label>
-                    <input matInput type="number" min="0.01" step="1" placeholder="" [(ngModel)]="transaccion.precio_unitario" name="precio_unitario" #txtMonto (input)="calcularTotal()" required>
+                    <input matInput type="number" min="0.01" step="any" placeholder="" [(ngModel)]="transaccion.precio_unitario" name="precio_unitario" #txtMonto (input)="calcularTotal()" required>
                 </mat-form-field> 
 
-                <mat-form-field class="col">
+                <mat-form-field appearance="outline" class="col-12 col-md-6">
                     <mat-label>Total</mat-label>
                     <input matInput type="number" placeholder="" [(ngModel)]="transaccion.total" name="total" #txtTotal readonly required>
                 </mat-form-field>
                 
-                <button mat-raised-button type="button" #btnGuardarHuesped class="bg-success text-black rounded-button" (click)="submitTransaccion(transaccionForm)" appBotonGuardar  [form]="transaccionForm">
-                    <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Procesar
-                </button>
+                <div class="col-12 col-md-6 btn-procesar-wrapper">
+                    <button mat-raised-button type="button" #btnGuardarHuesped class="btn-procesar-servicio w-100" (click)="submitTransaccion(transaccionForm)" appBotonGuardar  [form]="transaccionForm">
+                        <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Procesar
+                    </button>
+                </div>
             </div>                                               
         </mat-dialog-content>
                                 

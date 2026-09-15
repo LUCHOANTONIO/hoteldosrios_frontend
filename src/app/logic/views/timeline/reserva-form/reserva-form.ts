@@ -10,6 +10,7 @@ import { HabitacionModel } from '../../../models/habitacion.model';
 import { ProductoModel } from '../../../models/producto.model';
 import { TransaccionModel } from '../../../models/transaccion.model';
 import { EstadoCivilModel } from '../../../../base/models/estadocivil.model';
+import { CategoriaModel } from '../../../models/categoria.model';
 
 //COMPONENT
 import { HuespedFormComponent } from '../huesped-form/huesped-form';
@@ -36,6 +37,7 @@ import { BalanceService } from '../../../services/balance.service';
 import { ComunicacionService } from '../../../services/local/comunicacion.service';
 import { TransaccionService } from '../../../services/transaccion.service';
 import { PermisoService } from '../../../../base/services/permiso.service';
+import { CategoriaService } from '../../../services/categoria.service';
 
 //ANGULAR MATERIAL
 import { MatButtonModule } from '@angular/material/button';
@@ -172,6 +174,8 @@ export class ReservaFormComponent {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   transaccion: TransaccionModel = new TransaccionModel();
   nuevoServicio: TransaccionModel = new TransaccionModel();
+  categorias: CategoriaModel[] = [];
+  productos_filtrados: ProductoModel[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<ReservaFormComponent>,
@@ -185,6 +189,7 @@ export class ReservaFormComponent {
     private transaccionService: TransaccionService,
     private comunicacionService: ComunicacionService,
     private permisoService: PermisoService,
+    private categoriaService: CategoriaService,
     private cdr: ChangeDetectorRef
   ) {
     // Asignación de datos desde el objeto 'data'
@@ -280,6 +285,13 @@ export class ReservaFormComponent {
       }
     }
 
+    this.productos_filtrados = [...this.productos];
+    this.categoriaService.listar().subscribe({
+      next: (res) => {
+        this.categorias = res;
+        this.filtrarProductos();
+      }
+    });
     this.inicializarNuevoServicio();
     if (!this.reserva.transacciones) {
       this.reserva.transacciones = [];
@@ -786,6 +798,20 @@ export class ReservaFormComponent {
     this.nuevoServicio.cantidad = 1;
     this.nuevoServicio.precio_unitario = 0;
     this.nuevoServicio.total = 0;
+    this.filtrarProductos();
+  }
+
+  filtrarProductos(): void {
+    if (this.nuevoServicio.categoria_id) {
+      this.productos_filtrados = this.productos.filter(p => p.categoria_id === this.nuevoServicio.categoria_id);
+    } else {
+      this.productos_filtrados = [...this.productos];
+    }
+    if (this.nuevoServicio.producto_id && !this.productos_filtrados.some(p => p.id === this.nuevoServicio.producto_id)) {
+      this.nuevoServicio.producto_id = null;
+      this.nuevoServicio.precio_unitario = 0;
+      this.nuevoServicio.total = 0;
+    }
   }
 
   onProductoServicioChange(event: any): void {

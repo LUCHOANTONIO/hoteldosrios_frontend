@@ -1,3 +1,7 @@
+:host {
+  display: block;
+}
+
 // Reset del panel de Material para que el buscador pegajoso funcione
 ::ng-deep .custom-select-panel {
   padding-top: 0 !important;

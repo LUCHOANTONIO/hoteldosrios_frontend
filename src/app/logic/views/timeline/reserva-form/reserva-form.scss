@@ -226,4 +226,34 @@
   }
 }
 
+.btn-procesar-wrapper {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.btn-procesar-servicio {
+  background-color: #00e676 !important;
+  color: #000000 !important;
+  font-weight: 600;
+  font-size: 15px;
+  height: 56px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  &:hover:not(:disabled) {
+    background-color: #00c853 !important;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  &:disabled {
+    background-color: #e0e0e0 !important;
+    color: #9e9e9e !important;
+  }
+}
+
   
