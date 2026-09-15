@@ -408,6 +408,14 @@ export class ReservaFormComponent {
 
   submitReserva(f: NgForm) {
     if (f.valid) {
+      if (!this.reserva.nombre || !this.reserva.nombre.trim()) {
+        this.alertService.show("El nombre es obligatorio", { duration: 5000, type: 'info' });
+        return;
+      }
+      if (!this.reserva.primer_apellido || !this.reserva.primer_apellido.trim()) {
+        this.alertService.show("El primer apellido es obligatorio", { duration: 5000, type: 'info' });
+        return;
+      }
       const noches = this.getNoches();
       if (!noches || noches <= 0) {
         this.alertService.show("La cantidad de noches debe ser mayor a 0", { duration: 5000, type: 'info' });

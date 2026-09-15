@@ -52,8 +52,8 @@
 
                 <!-- 4. Primer Apellido -->
                 <mat-form-field class="col" appearance="outline">
-                    <mat-label>Primer Apellido</mat-label>
-                    <input matInput placeholder="" [(ngModel)]="cotizacion.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()">
+                    <mat-label>Primer Apellido*</mat-label>
+                    <input matInput placeholder="" [(ngModel)]="cotizacion.primer_apellido" name="primer_apellido" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()" required>
                     <mat-icon matSuffix class="text-secondary">face</mat-icon>
                 </mat-form-field>
 

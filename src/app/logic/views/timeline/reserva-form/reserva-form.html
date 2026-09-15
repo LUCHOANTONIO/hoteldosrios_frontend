@@ -48,13 +48,13 @@
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col">
-                            <mat-label>Nombre</mat-label>
+                            <mat-label>Nombre*</mat-label>
                             <input matInput placeholder="" [(ngModel)]="reserva.nombre" name="nombre"
                                 [readonly]="isDisabled" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col">
-                            <mat-label>Primer Apellido</mat-label>
+                            <mat-label>Primer Apellido*</mat-label>
                             <input matInput placeholder="" [(ngModel)]="reserva.primer_apellido" name="primer_apellido"
                                 [readonly]="isDisabled" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()"
                                 required>

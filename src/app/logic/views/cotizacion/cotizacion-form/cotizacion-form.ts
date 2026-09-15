@@ -516,6 +516,16 @@ export class CotizacionFormComponent {
 
   submit(f: NgForm) {
     if (f.valid) {
+      if (!this.cotizacion.nombre || !this.cotizacion.nombre.trim()) {
+        this.alertService.show("El nombre es obligatorio", { duration: 4000, type: 'warning' });
+        return;
+      }
+
+      if (!this.cotizacion.primer_apellido || !this.cotizacion.primer_apellido.trim()) {
+        this.alertService.show("El primer apellido es obligatorio", { duration: 4000, type: 'warning' });
+        return;
+      }
+
       if (!this.cotizacion.fecha_ini || !this.cotizacion.fecha_fin) {
         this.alertService.show("Debe seleccionar la Fecha de Ingreso y la Fecha de Salida", { duration: 4000, type: 'warning' });
         return;
