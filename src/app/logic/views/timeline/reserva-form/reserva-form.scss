@@ -135,14 +135,20 @@
   }
 }
 
-/* TOTAL DESTACADO */
+/* TOTAL Y SALDO */
 .precio-total-input {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  font-size: 1.15rem !important;
+}
+
+.saldo-restante-input {
   color: #16a34a !important;
   font-weight: 800 !important;
   font-size: 1.15rem !important;
 }
 
-.precio-total-icon {
+.saldo-restante-icon {
   color: #16a34a !important;
 }
 

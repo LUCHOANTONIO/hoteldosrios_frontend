@@ -129,6 +129,7 @@ export class ReservaFormComponent {
   @ViewChild('cboHabitacion') cboHabitacion: any;
   @ViewChild('cboCanalReserva') cboCanalReserva: any;
   @ViewChild('cboTipoDocId') cboTipoDocId: any;
+  @ViewChild('cboFormaPagoAnticipo') cboFormaPagoAnticipo: any;
 
   items: any;
   groups: any;
@@ -233,6 +234,11 @@ export class ReservaFormComponent {
       } else {
         this.btnDeleteReserva = true;
       }
+
+      // Sincronizar anticipo mostrado cuando se visualiza una reserva existente
+      if (this.reserva && this.reserva.id > 0 && !this.isEditReserva) {
+        this.reserva.anticipo = this.getYaPagado();
+      }
     });
   }
 
@@ -248,9 +254,12 @@ export class ReservaFormComponent {
         }
         this.reserva.precio_unit_ninio = 0;
         this.reserva.total = 0;
+        this.reserva.anticipo = 0;
+        this.reserva.detalle_anticipo = '';
       } else {
         this.reserva.precio_unit_adulto = Number(this.reserva.precio_unit_adulto) || 0;
         this.reserva.precio_unit_ninio = Number(this.reserva.precio_unit_ninio) || 0;
+        this.reserva.anticipo = this.getYaPagado();
       }
 
       this.calcularCantidad();
@@ -428,6 +437,8 @@ export class ReservaFormComponent {
       this.mnuVisibleOpciones = true;
       this.btnVisibleCancelReserva = false;
       this.btnVisibleSaveReserva = false;
+      this.reserva.anticipo = this.getYaPagado();
+      this.reserva.detalle_anticipo = '';
       if (this.reserva.grupo_id || this.reserva.is_grupal) {
         this.selectedHabitaciones = (this.reserva.habitacion_ids && this.reserva.habitacion_ids.length > 0)
           ? this.reserva.habitacion_ids.map(id => Number(id))
@@ -460,6 +471,12 @@ export class ReservaFormComponent {
       if (!this.reserva.total || Number(this.reserva.total) <= 0) {
         this.alertService.show("El monto no puede ser vacío o cero", { duration: 5000, type: 'info' });
         return;
+      }
+      if (this.reserva.anticipo && Number(this.reserva.anticipo) > 0 && (!this.reserva.id || this.isEditReserva)) {
+        if (!this.reserva.forma_pago_id) {
+          this.alertService.show("Debe seleccionar la forma de pago del anticipo", { duration: 5000, type: 'info' });
+          return;
+        }
       }
       if (this.tipo_reserva === 'grupal') {
         if (!this.selectedHabitaciones || this.selectedHabitaciones.length === 0) {
@@ -523,6 +540,8 @@ export class ReservaFormComponent {
           const data = JSON.parse(res.dato);
           this.reserva = data.reserva as ReservaModel;
           this.balance.set(data.balance); //Establecer valor a por medio de signal                
+          this.reserva.anticipo = this.getYaPagado();
+          this.reserva.detalle_anticipo = '';
           let fecha_hora_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD HH:mm");
           let fecha_hora_fin = moment(this.reserva.fecha_fin).format("YYYY-MM-DD HH:mm");
           this.reserva.fecha_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD");
@@ -604,6 +623,8 @@ export class ReservaFormComponent {
     this.btnVisibleSaveReserva = true;
     this.btnVisibleCheckIn = false;
     this.btnVisibleCheckOut = false;
+    this.reserva.anticipo = 0;
+    this.reserva.detalle_anticipo = '';
   }
 
   modificarReserva() {
@@ -628,6 +649,8 @@ export class ReservaFormComponent {
           const data = JSON.parse(res.dato);
           this.reserva = data.reserva as ReservaModel;
           this.balance.set(data.balance); //Establecer valor a por medio de signal                
+          this.reserva.anticipo = this.getYaPagado();
+          this.reserva.detalle_anticipo = '';
           let fecha_hora_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD HH:mm");
           let fecha_hora_fin = moment(this.reserva.fecha_fin).format("YYYY-MM-DD HH:mm");
           this.reserva.fecha_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD");
@@ -867,6 +890,55 @@ export class ReservaFormComponent {
     const totalPorNoche = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
     const noches = this.getNoches();
     this.reserva.total = Math.max(0, Math.round((totalPorNoche * noches) * 100) / 100);
+    this.validarAnticipo();
+  }
+
+  getYaPagado(): number {
+    if (!this.reserva || !this.reserva.id || this.reserva.id <= 0) {
+      return 0;
+    }
+    const totalReserva = Number(this.reserva.total) || 0;
+    let pago = 0;
+    if (this.balance && this.balance() && this.balance().pago !== undefined && this.balance().pago !== null) {
+      pago = Number(this.balance().pago) || 0;
+    } else {
+      const saldo = Number(this.reserva.saldo) || 0;
+      pago = Math.max(0, totalReserva - saldo);
+    }
+    return Math.min(totalReserva, Math.max(0, Number(pago.toFixed(2))));
+  }
+
+  validarAnticipo(): void {
+    const total = Number(this.reserva.total) || 0;
+    let anticipo = Number(this.reserva.anticipo) || 0;
+    if (anticipo < 0) {
+      this.reserva.anticipo = 0;
+      anticipo = 0;
+    }
+    const yaPagado = this.getYaPagado();
+    const maxPermitido = this.reserva.id > 0 ? Math.max(0, Number((total - yaPagado).toFixed(2))) : total;
+    if (anticipo > maxPermitido) {
+      this.reserva.anticipo = maxPermitido;
+      anticipo = maxPermitido;
+    }
+    if (anticipo > 0 && !this.reserva.forma_pago_id && this.forma_pagos && this.forma_pagos.length > 0) {
+      const efectivo = this.forma_pagos.find(f => f.descripcion && f.descripcion.toLowerCase().includes('efectivo'));
+      this.reserva.forma_pago_id = efectivo ? efectivo.id : this.forma_pagos[0].id;
+    }
+  }
+
+  focusFormaPagoAnticipo(): void {
+    if (this.cboFormaPagoAnticipo?.focus) {
+      this.cboFormaPagoAnticipo.focus();
+    }
+  }
+
+  getSaldoCalculado(): number {
+    const totalReserva = Number(this.reserva?.total) || 0;
+    const yaPagado = this.getYaPagado();
+    const anticipo = (this.isEditReserva || !this.reserva?.id) ? (Number(this.reserva?.anticipo) || 0) : 0;
+    const saldo = totalReserva - yaPagado - anticipo;
+    return saldo > 0 ? Number(saldo.toFixed(2)) : 0;
   }
 
   onProductoChange(fila: TransaccionModel) {

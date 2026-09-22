@@ -140,8 +140,7 @@
                     <mat-form-field appearance="outline" class="col-12 col-md-6">
                         <mat-label>Habitaciones (Selección Múltiple)</mat-label>
                         <mat-select placeholder="" multiple [(ngModel)]="selectedHabitaciones"
-                            name="selectedHabitaciones" [disabled]="isDisabled"
-                            [compareWith]="compareHabitacionId"
+                            name="selectedHabitaciones" [disabled]="isDisabled" [compareWith]="compareHabitacionId"
                             (selectionChange)="changeHabitacionesMulti($event)" required>
                             <mat-select-trigger>
                                 {{ selectedHabitaciones.length }} {{ selectedHabitaciones.length === 1 ? 'habitación
@@ -199,7 +198,7 @@
                 <div class="form-section-card">
                     <div class="section-header">
                         <mat-icon class="section-icon">payments</mat-icon>
-                        <span class="section-title">Precios</span>
+                        <span class="section-title">Precios Reserva</span>
                     </div>
                     <div class="row g-2">
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
@@ -236,32 +235,71 @@
                                 (keydown.enter)="txtPrecioTotal.focus()">
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col-12">
+                        <mat-form-field appearance="outline" class="col-12 col-md-4">
                             <mat-label>Precio Total</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.total"
                                 name="precio_total" #txtPrecioTotal readonly required class="precio-total-input">
-                            <mat-icon matSuffix class="precio-total-icon">payments</mat-icon>
                         </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-4">
+                            <mat-label>{{ (reserva.id > 0 && !isEditReserva) ? 'Total Pagado' : 'Anticipo (Pago)'
+                                }}</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.anticipo" name="anticipo"
+                                [readonly]="isDisabled" (input)="validarAnticipo()" min="0" [max]="reserva.total"
+                                step="any" (keydown)="bloquearSignosNegativos($event)" #txtAnticipo
+                                (keydown.enter)="focusFormaPagoAnticipo()">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-4">
+                            <mat-label>Saldo Restante</mat-label>
+                            <input type="number" matInput placeholder="0" [value]="getSaldoCalculado()"
+                                name="saldo_restante" readonly class="saldo-restante-input">
+                            <mat-icon matSuffix class="saldo-restante-icon">payments</mat-icon>
+                        </mat-form-field>
+
+                        @if (reserva.anticipo && reserva.anticipo > 0 && (!reserva.id || isEditReserva)) {
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Forma de Pago Anticipo</mat-label>
+                            <mat-select placeholder="Seleccionar forma de pago" [(ngModel)]="reserva.forma_pago_id"
+                                name="forma_pago_id" [disabled]="isDisabled" #cboFormaPagoAnticipo required>
+                                @for (x of forma_pagos; track $index) {
+                                <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                                }
+                            </mat-select>
+                            <mat-icon matSuffix class="text-secondary">credit_card</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Detalle / Nota Anticipo</mat-label>
+                            <input matInput placeholder="Ej: Depósito bancario #1234 / Efectivo en recepción"
+                                [(ngModel)]="reserva.detalle_anticipo" name="detalle_anticipo" [readonly]="isDisabled">
+                            <mat-icon matSuffix class="text-secondary">receipt_long</mat-icon>
+                        </mat-form-field>
+                        }
                     </div>
                 </div>
 
                 <!-- CARD 4: SERVICIOS ADICIONALES -->
-                <div class="form-section-card servicios-card" [class.servicios-card-collapsed]="!isVisibleServiciosExtra">
+                <div class="form-section-card servicios-card"
+                    [class.servicios-card-collapsed]="!isVisibleServiciosExtra">
                     <div class="section-header d-flex align-items-center justify-content-between"
                         (click)="toggleServiciosExtra()" style="cursor: pointer; user-select: none;">
                         <div class="d-flex align-items-center gap-2">
                             <mat-icon class="section-icon">room_service</mat-icon>
                             <span class="section-title">Servicios Adicionales</span>
                             @if (reserva.transacciones && reserva.transacciones.length > 0) {
-                            <span class="badge rounded-pill bg-primary text-white ms-1 px-2 py-1" style="font-size: 11px; font-weight: 600;">
-                                {{ reserva.transacciones.length }} {{ reserva.transacciones.length === 1 ? 'servicio' : 'servicios' }} (Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }})
+                            <span class="badge rounded-pill bg-primary text-white ms-1 px-2 py-1"
+                                style="font-size: 11px; font-weight: 600;">
+                                {{ reserva.transacciones.length }} {{ reserva.transacciones.length === 1 ? 'servicio' :
+                                'servicios' }} (Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }})
                             </span>
                             }
                         </div>
                         <button type="button" class="btn-toggle-servicios"
                             (click)="$event.stopPropagation(); toggleServiciosExtra()"
                             [matTooltip]="isVisibleServiciosExtra ? 'Comprimir servicios adicionales' : 'Desplegar servicios adicionales'">
-                            <mat-icon>{{ isVisibleServiciosExtra ? 'expand_less' : (reserva.transacciones && reserva.transacciones.length > 0 ? 'expand_more' : 'add') }}</mat-icon>
+                            <mat-icon>{{ isVisibleServiciosExtra ? 'expand_less' : (reserva.transacciones &&
+                                reserva.transacciones.length > 0 ? 'expand_more' : 'add') }}</mat-icon>
                             <span>{{ isVisibleServiciosExtra ? 'Comprimir' : 'Desplegar' }}</span>
                         </button>
                     </div>
@@ -297,16 +335,17 @@
                             <!-- Col 4: Precio Unidad -->
                             <mat-form-field appearance="outline" class="col-12 col-md-6">
                                 <mat-label>Precio Unidad</mat-label>
-                                <input type="number" matInput [(ngModel)]="nuevoServicio.precio_unitario" name="nuevo_monto"
-                                    (input)="calcularTotalNuevoServicio()" min="0" step="any"
-                                    (keydown)="bloquearSignosNegativos($event)" placeholder="0.00" [readonly]="isDisabled">
+                                <input type="number" matInput [(ngModel)]="nuevoServicio.precio_unitario"
+                                    name="nuevo_monto" (input)="calcularTotalNuevoServicio()" min="0" step="any"
+                                    (keydown)="bloquearSignosNegativos($event)" placeholder="0.00"
+                                    [readonly]="isDisabled">
                             </mat-form-field>
 
                             <!-- Col 5: Total -->
                             <mat-form-field appearance="outline" class="col-12 col-md-6" subscriptSizing="dynamic">
                                 <mat-label>Total</mat-label>
-                                <input type="number" matInput [(ngModel)]="nuevoServicio.total" name="nuevo_total" readonly
-                                    class="fw-bold text-success" placeholder="0.00">
+                                <input type="number" matInput [(ngModel)]="nuevoServicio.total" name="nuevo_total"
+                                    readonly class="fw-bold text-success" placeholder="0.00">
                             </mat-form-field>
 
                             <!-- Col 6: Botón Agregar Item -->
@@ -330,12 +369,14 @@
                             <table mat-table [dataSource]="dataSourceTransaccion" class="w-100 tabla-servicios-extra">
                                 <!-- Columna Acciones -->
                                 <ng-container matColumnDef="accion">
-                                    <th mat-header-cell *matHeaderCellDef style="width: 50px;" class="text-center">#</th>
+                                    <th mat-header-cell *matHeaderCellDef style="width: 50px;" class="text-center">#
+                                    </th>
                                     <td mat-cell *matCellDef="let item; let i = index;" class="text-center">
                                         <button type="button" mat-icon-button class="text-danger"
                                             (click)="eliminarServicioAdicional(i, item)" [disabled]="isDisabled"
                                             matTooltip="Eliminar servicio">
-                                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
+                                            <mat-icon
+                                                style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
                                         </button>
                                     </td>
                                     <td mat-footer-cell *matFooterCellDef></td>
@@ -362,7 +403,8 @@
 
                                 <!-- Columna Monto / Precio Unitario -->
                                 <ng-container matColumnDef="precio_unitario">
-                                    <th mat-header-cell *matHeaderCellDef style="width: 100px;" class="text-end">Monto</th>
+                                    <th mat-header-cell *matHeaderCellDef style="width: 100px;" class="text-end">Monto
+                                    </th>
                                     <td mat-cell *matCellDef="let item" class="text-end">
                                         Bs. {{ item.precio_unitario | number:'1.2-2' }}
                                     </td>
@@ -373,7 +415,8 @@
 
                                 <!-- Columna Total -->
                                 <ng-container matColumnDef="total">
-                                    <th mat-header-cell *matHeaderCellDef style="width: 110px;" class="text-end">Total</th>
+                                    <th mat-header-cell *matHeaderCellDef style="width: 110px;" class="text-end">Total
+                                    </th>
                                     <td mat-cell *matCellDef="let item" class="text-end fw-bold text-success pe-2">
                                         Bs. {{ item.total | number:'1.2-2' }}
                                     </td>
@@ -384,13 +427,15 @@
 
                                 <tr mat-header-row *matHeaderRowDef="displayedColumnsTransaccion" class="bg-light"></tr>
                                 <tr mat-row *matRowDef="let row; columns: displayedColumnsTransaccion;"></tr>
-                                <tr mat-footer-row *matFooterRowDef="displayedColumnsTransaccion" class="tabla-footer-row">
+                                <tr mat-footer-row *matFooterRowDef="displayedColumnsTransaccion"
+                                    class="tabla-footer-row">
                                 </tr>
                             </table>
                         </div>
                         } @else {
                         <div class="text-muted small py-2 px-1 fst-italic">
-                            <mat-icon style="font-size: 16px; vertical-align: middle; margin-right: 4px;">info</mat-icon>
+                            <mat-icon
+                                style="font-size: 16px; vertical-align: middle; margin-right: 4px;">info</mat-icon>
                             No hay servicios adicionales registrados.
                         </div>
                         }

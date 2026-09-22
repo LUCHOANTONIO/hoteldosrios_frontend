@@ -38,5 +38,7 @@ export class ReservaModel {
     is_externo: number = 0;
     saldo: number = 0;
     total: number = 0;
+    anticipo: number = 0;
+    detalle_anticipo: string = "";
     transacciones: TransaccionModel[] = [];
 }
