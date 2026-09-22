@@ -148,7 +148,7 @@ export class TimelineComponent implements AfterViewInit {
       const colorGrupo = habitacion.color || '#FFFFFF'; // Protección contra null
       return {
         id: habitacion.id,
-        content: `${habitacion.piso} ${iconoSeparador} ${habitacion.descripcion}`,
+        content: `${habitacion.nro_habitacion} ${iconoSeparador} ${habitacion.descripcion}`,
         style: `
             background-color: ${colorGrupo};
             color: ${this.getContrastColor(colorGrupo)};
@@ -479,6 +479,7 @@ export class TimelineComponent implements AfterViewInit {
         const dialogRef = this.dialog.open(ReservaFormComponent, {
           data: {
             reserva: this.reserva,
+            reservas: this.reservas,
             habitaciones: this.habitaciones,
             tipo_documentos: this.tipo_documentos,
             estado_civil: this.estado_civil,

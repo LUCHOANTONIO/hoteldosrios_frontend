@@ -108,7 +108,7 @@
                         </div>
                 </div>
                 } @else {
-                @if (reserva.grupo_id) {
+                @if (reserva.grupo_id || reserva.is_grupal) {
                 <div class="grupo-badge-info mb-3">
                     <mat-icon>groups</mat-icon>
                     <span>Reserva Grupal: <strong>{{ reserva.grupo_nombre || ('Grupo #' + reserva.grupo_id)
@@ -141,6 +141,7 @@
                         <mat-label>Habitaciones (Selección Múltiple)</mat-label>
                         <mat-select placeholder="" multiple [(ngModel)]="selectedHabitaciones"
                             name="selectedHabitaciones" [disabled]="isDisabled"
+                            [compareWith]="compareHabitacionId"
                             (selectionChange)="changeHabitacionesMulti($event)" required>
                             <mat-select-trigger>
                                 {{ selectedHabitaciones.length }} {{ selectedHabitaciones.length === 1 ? 'habitación

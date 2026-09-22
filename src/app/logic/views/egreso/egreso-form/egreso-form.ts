@@ -2,7 +2,6 @@
 import { EgresoModel } from '../../../models/egreso.model';
 import { CuentaModel } from '../../../models/cuenta.model';
 import { FormaPagoModel } from '../../../models/forma_pago.model';
-import { AgenciaModel } from '../../../../base/models/agencia.model';
 
 //SERVICES
 import { EgresoService } from '../../../services/egreso.service';
@@ -48,15 +47,13 @@ export class EgresoFormComponent {
     @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;     
     egreso:EgresoModel; 
     cuentas:CuentaModel[]=[];
-    forma_pagos: FormaPagoModel[] = [];     
-    agencias:AgenciaModel[]=[];
+    forma_pagos: FormaPagoModel[] = [];
     
     constructor(public dialogRef: MatDialogRef<EgresoFormComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any, private dialog:MatDialog, private cajaRecepcionService:EgresoService,private alertService:AlertService) {        
           this.egreso=data.egreso;
           this.cuentas=data.cuentas;
-          this.forma_pagos=data.forma_pagos;
-          this.agencias=data.agencias;          
+          this.forma_pagos=data.forma_pagos;          
           this.dialogRef.backdropClick().subscribe(x => {})          
     }
 

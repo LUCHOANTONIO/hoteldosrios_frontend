@@ -3,14 +3,12 @@
 import { IngresoModel } from '../../models/ingreso.model';
 import { CuentaModel } from '../../models/cuenta.model';
 import { FormaPagoModel } from '../../models/forma_pago.model';
-import { AgenciaModel } from '../../../base/models/agencia.model';
 
 //SERVICES
 import { IngresoService } from '../../services/ingreso.service';
 import { AlertService } from '../../../base/services/local/alert.service';
 import { CuentaService } from '../../services/cuenta.service';
 import { FormaPagoService } from '../../services/forma_pago.service';
-import { AgenciaService } from '../../../base/services/agencia.service';
 
 //PARA FECHA
 import moment from "moment";
@@ -51,7 +49,6 @@ import { SpanishPaginatorIntl } from '../../../base/utils/spanish-paginator-intl
 export class IngresoComponent implements AfterViewInit{   
     ingresos:IngresoModel[]=[];
     ingreso:IngresoModel=new IngresoModel();
-    agencias:AgenciaModel[]=[];
     forma_pagos: FormaPagoModel[] = []; 
     cuentas:CuentaModel[]=[]; 
     buttonEnabled = false; // Deshabilita el botón Add
@@ -61,7 +58,7 @@ export class IngresoComponent implements AfterViewInit{
     mostrar_btn_edit:boolean=true;
     mostrar_btn_destroy:boolean=true;
 
-    displayedColumns: string[] = ['actions', 'fecha','agencia','cuenta','detalle','forma_pago','cantidad','monto'];
+    displayedColumns: string[] = ['actions', 'fecha','cuenta','detalle','forma_pago','cantidad','monto'];
     dataSource : MatTableDataSource<IngresoModel>;
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -69,8 +66,7 @@ export class IngresoComponent implements AfterViewInit{
     constructor(private ingresoService:IngresoService,
                 private cuentaService:CuentaService, 
                 private alertService:AlertService, 
-                private formaPagoService: FormaPagoService,
-                private agenciaService:AgenciaService) 
+                private formaPagoService: FormaPagoService) 
     {
         this.cargarDatos();       
     }
@@ -83,11 +79,9 @@ export class IngresoComponent implements AfterViewInit{
       forkJoin({
         ingresos: this.ingresoService.listar(),  
         cuentas: this.cuentaService.cuenta_ingresos(),
-        forma_pagos: this.formaPagoService.listar(),
-        agencias: this.agenciaService.listar(),          
+        forma_pagos: this.formaPagoService.listar(),          
       }).subscribe({
         next: (res) => {
-          this.agencias = res.agencias;
           this.cuentas = res.cuentas; 
           this.ingresos = res.ingresos; 
           this.forma_pagos = res.forma_pagos;  
@@ -103,7 +97,7 @@ export class IngresoComponent implements AfterViewInit{
       this.ingreso={...a};//clone
       this.ingreso.fecha = moment(this.ingreso.fecha, "DD/MM/YYYY HH:mm:ss").format("YYYY-MM-DD"); //formato para datepicker 
       const dialogRef = this.dialog.open(IngresoFormComponent,
-        { data: {ingreso: this.ingreso,cuentas: this.cuentas,forma_pagos: this.forma_pagos,agencias: this.agencias},
+        { data: {ingreso: this.ingreso,cuentas: this.cuentas,forma_pagos: this.forma_pagos},
           width: "98vw",
           maxWidth: "600px",
           disableClose:true
@@ -130,7 +124,7 @@ export class IngresoComponent implements AfterViewInit{
       this.ingreso=new IngresoModel();
       this.ingreso.fecha = moment().format("YYYY-MM-DD"); //Fecha actual 
       const dialogRef = this.dialog.open(IngresoFormComponent,
-        { data: {ingreso: this.ingreso,cuentas: this.cuentas,forma_pagos: this.forma_pagos,agencias: this.agencias},
+        { data: {ingreso: this.ingreso,cuentas: this.cuentas,forma_pagos: this.forma_pagos},
           width: "98vw",
           maxWidth: "600px",
           disableClose:true

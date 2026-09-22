@@ -25,15 +25,6 @@
             <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
 
-         <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-            <mat-label>Agencia</mat-label>
-            <mat-select placeholder="" [(ngModel)]="egreso.agencia_id" name="agencia_id" #cboAgencia appPreventEnterSelect (keydown.enter)="txtCantidad.focus()" required>
-                @for (x of agencias;track $index) {
-                    <mat-option [value]="x.id">{{x.nombre}}</mat-option>
-                }
-            </mat-select>
-        </mat-form-field>        
-        
         <mat-form-field class="col-lg-6 col-md-6 col-sm-6 col-xs-12">                       
             <mat-label>Cantidad</mat-label>
             <input type="number" matInput min="0" placeholder="" [(ngModel)]="egreso.cantidad" name="cantidad" #txtCantidad (keydown)="bloquearNegativos($event)" required>              
@@ -44,9 +35,9 @@
             <input type="number" matInput min="0" placeholder="" [(ngModel)]="egreso.monto" name="monto" #txtMonto (keydown)="bloquearNegativos($event)" required>              
         </mat-form-field>
 
-        <mat-form-field class="col-6">
+        <mat-form-field class="col-12">
             <mat-label>Forma de Pago</mat-label>
-            <mat-select [(ngModel)]="egreso.forma_pago_id" name="forma_pago_id" #cboFormaPago (keydown.enter)="txtMonto.focus()" appPreventEnterSelect required>
+            <mat-select [(ngModel)]="egreso.forma_pago_id" name="forma_pago_id" #cboFormaPago (keydown.enter)="txtDetalle.focus()" appPreventEnterSelect required>
                 @for (x of forma_pagos;track $index) {
                     <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
                 }

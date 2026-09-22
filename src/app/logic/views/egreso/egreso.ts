@@ -3,14 +3,12 @@
 import { EgresoModel } from '../../models/egreso.model';
 import { CuentaModel } from '../../models/cuenta.model';
 import { FormaPagoModel } from '../../models/forma_pago.model';
-import { AgenciaModel } from '../../../base/models/agencia.model';
 
 //SERVICES
 import { EgresoService } from '../../services/egreso.service';
 import { AlertService } from '../../../base/services/local/alert.service';
 import { CuentaService } from '../../services/cuenta.service';
 import { FormaPagoService } from '../../services/forma_pago.service';
-import { AgenciaService } from '../../../base/services/agencia.service';
 
 //PARA FECHA
 import moment from "moment";
@@ -51,7 +49,6 @@ import { SpanishPaginatorIntl } from '../../../base/utils/spanish-paginator-intl
 export class EgresoComponent implements AfterViewInit{   
     egresos:EgresoModel[]=[];
     egreso:EgresoModel=new EgresoModel();
-    agencias:AgenciaModel[]=[];
     forma_pagos: FormaPagoModel[] = []; 
     cuentas:CuentaModel[]=[]; 
     buttonEnabled = false; // Deshabilita el botón Add
@@ -61,7 +58,7 @@ export class EgresoComponent implements AfterViewInit{
     mostrar_btn_edit:boolean=true;
     mostrar_btn_destroy:boolean=true;
 
-    displayedColumns: string[] = ['actions', 'fecha','agencia','cuenta','detalle','forma_pago','cantidad','monto'];
+    displayedColumns: string[] = ['actions', 'fecha','cuenta','detalle','forma_pago','cantidad','monto'];
     dataSource : MatTableDataSource<EgresoModel>;
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -69,8 +66,7 @@ export class EgresoComponent implements AfterViewInit{
     constructor(private egresoService:EgresoService,
                 private cuentaService:CuentaService, 
                 private alertService:AlertService, 
-                private formaPagoService: FormaPagoService, 
-                private agenciaService:AgenciaService) {
+                private formaPagoService: FormaPagoService) {
         this.cargarDatos();       
     }
 
@@ -82,11 +78,9 @@ export class EgresoComponent implements AfterViewInit{
       forkJoin({
         egresos: this.egresoService.listar(),  
         cuentas: this.cuentaService.cuenta_egresos(),
-        forma_pagos: this.formaPagoService.listar(),
-        agencias: this.agenciaService.listar()          
+        forma_pagos: this.formaPagoService.listar(),          
       }).subscribe({
         next: (res) => {
-          this.agencias = res.agencias;
           this.cuentas = res.cuentas; 
           this.egresos = res.egresos; 
           this.forma_pagos = res.forma_pagos;  
@@ -102,7 +96,7 @@ export class EgresoComponent implements AfterViewInit{
       this.egreso={...a};//clone
       this.egreso.fecha = moment(this.egreso.fecha, "DD/MM/YYYY HH:mm:ss").format("YYYY-MM-DD"); //formato para datepicker     
       const dialogRef = this.dialog.open(EgresoFormComponent,
-        { data: {egreso: this.egreso,cuentas: this.cuentas,forma_pagos: this.forma_pagos,agencias: this.agencias},
+        { data: {egreso: this.egreso,cuentas: this.cuentas,forma_pagos: this.forma_pagos},
           width: "98vw",
           maxWidth: "600px",
           disableClose:true
@@ -129,7 +123,7 @@ export class EgresoComponent implements AfterViewInit{
       this.egreso=new EgresoModel();
       this.egreso.fecha = moment().format("YYYY-MM-DD"); //Fecha actual 
       const dialogRef = this.dialog.open(EgresoFormComponent,
-        { data: {egreso: this.egreso,cuentas: this.cuentas,forma_pagos: this.forma_pagos,agencias: this.agencias},
+        { data: {egreso: this.egreso,cuentas: this.cuentas,forma_pagos: this.forma_pagos},
           width: "98vw",
           maxWidth: "600px",
           disableClose:true

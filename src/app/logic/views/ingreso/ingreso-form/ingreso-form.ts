@@ -2,7 +2,6 @@
 import { IngresoModel } from '../../../models/ingreso.model';
 import { CuentaModel } from '../../../models/cuenta.model';
 import { FormaPagoModel } from '../../../models/forma_pago.model';
-import { AgenciaModel } from '../../../../base/models/agencia.model';
 
 //SERVICES
 import { IngresoService } from '../../../services/ingreso.service';
@@ -47,15 +46,13 @@ import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 })
 export class IngresoFormComponent {
     @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;     
-    ingreso:IngresoModel; 
-    agencias:AgenciaModel[]=[]; 
+    ingreso:IngresoModel;
     cuentas:CuentaModel[]=[];
     forma_pagos: FormaPagoModel[] = [];     
 
     constructor(public dialogRef: MatDialogRef<IngresoFormComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any, private dialog:MatDialog, private cajaRecepcionService:IngresoService,private alertService:AlertService) {        
           this.ingreso=data.ingreso;
-          this.agencias=data.agencias;
           this.cuentas=data.cuentas;
           this.forma_pagos=data.forma_pagos;
           this.dialogRef.backdropClick().subscribe(x => {})          

@@ -132,6 +132,7 @@ export class ReservaFormComponent {
 
   items: any;
   groups: any;
+  reservas: any[] = [];
   habitaciones: HabitacionModel[] = [];
   forma_pagos: FormaPagoModel[] = [];
   forma_pagos_servicio: FormaPagoModel[] = [];
@@ -209,6 +210,7 @@ export class ReservaFormComponent {
     this.tipo_huespedes = data.tipo_huespedes;
     this.motivos = data.motivos;
     this.canal_reservas = data.canal_reservas;
+    this.reservas = data.reservas || [];
 
     // Configuración de suscripciones y servicios
     this.dialogRef.backdropClick().subscribe(x => { });
@@ -255,14 +257,37 @@ export class ReservaFormComponent {
       this.calcularTotal();
 
       if (this.reserva.id > 0) {
-        if (this.reserva.grupo_id) {
+        let habitacionIds: number[] = [];
+
+        // 1. Si viene habitacion_ids desde backend (getAllReservaById)
+        if (this.reserva.habitacion_ids && this.reserva.habitacion_ids.length > 0) {
+          habitacionIds = this.reserva.habitacion_ids.map(id => Number(id));
+        }
+
+        // 2. Si es grupal por grupo_id y no tenemos la lista completa aún, buscar en this.reservas de timeline
+        if (this.reserva.grupo_id && habitacionIds.length <= 1 && this.reservas && this.reservas.length > 0) {
+          const matchedHabs = this.reservas
+            .filter((r: any) => r.grupo_id == this.reserva.grupo_id)
+            .map((r: any) => Number(r.habitacion_id));
+          if (matchedHabs.length > 0) {
+            habitacionIds = [...new Set([...habitacionIds, ...matchedHabs])];
+          }
+        }
+
+        const isGrupal = !!this.reserva.grupo_id || habitacionIds.length > 1;
+
+        if (isGrupal) {
           this.tipo_reserva = 'grupal';
           this.reserva.is_grupal = true;
-          this.selectedHabitaciones = [this.reserva.habitacion_id];
+          this.selectedHabitaciones = habitacionIds.length > 0
+            ? habitacionIds
+            : [Number(this.reserva.habitacion_id)];
+          this.reserva.habitacion_ids = [...this.selectedHabitaciones];
         } else {
           this.tipo_reserva = 'individual';
           this.reserva.is_grupal = false;
-          this.selectedHabitaciones = [this.reserva.habitacion_id];
+          this.selectedHabitaciones = [Number(this.reserva.habitacion_id)];
+          this.reserva.habitacion_ids = [...this.selectedHabitaciones];
         }
         setTimeout(() => {
           this.isDisabled = true;
@@ -275,7 +300,8 @@ export class ReservaFormComponent {
       } else {
         this.tipo_reserva = 'individual';
         this.reserva.is_grupal = false;
-        this.selectedHabitaciones = this.reserva.habitacion_id ? [this.reserva.habitacion_id] : [];
+        this.selectedHabitaciones = this.reserva.habitacion_id ? [Number(this.reserva.habitacion_id)] : [];
+        this.reserva.habitacion_ids = [...this.selectedHabitaciones];
       }
 
       // En tu ngOnInit o donde cargues los datos de la reserva
@@ -381,6 +407,9 @@ export class ReservaFormComponent {
       this.cboCanalReserva.focus();
     }
   }
+  compareHabitacionId(id1: any, id2: any): boolean {
+    return id1 != null && id2 != null && Number(id1) === Number(id2);
+  }
   //End: Metodos para Reserva Grupal   
 
   // Este método se llama desde el botón de cerrar
@@ -399,6 +428,13 @@ export class ReservaFormComponent {
       this.mnuVisibleOpciones = true;
       this.btnVisibleCancelReserva = false;
       this.btnVisibleSaveReserva = false;
+      if (this.reserva.grupo_id || this.reserva.is_grupal) {
+        this.selectedHabitaciones = (this.reserva.habitacion_ids && this.reserva.habitacion_ids.length > 0)
+          ? this.reserva.habitacion_ids.map(id => Number(id))
+          : [Number(this.reserva.habitacion_id)];
+      } else {
+        this.selectedHabitaciones = [Number(this.reserva.habitacion_id)];
+      }
       this.botonGuardarDirectiva.habilitarFormBoton();
       return;
     }
@@ -604,6 +640,13 @@ export class ReservaFormComponent {
           this.mnuVisibleOpciones = true;
           this.btnVisibleCancelReserva = false;
           this.btnVisibleSaveReserva = false;
+
+          // Si es grupal, mantener / sincronizar selectedHabitaciones
+          if (this.reserva.grupo_id || this.reserva.is_grupal) {
+            if (this.reserva.habitacion_ids && this.reserva.habitacion_ids.length > 0) {
+              this.selectedHabitaciones = this.reserva.habitacion_ids.map(id => Number(id));
+            }
+          }
 
           //Cargar transacciones del servicio extra al crear reserva 
           this.reserva.transacciones = data.transacciones;
