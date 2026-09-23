@@ -1,0 +1,448 @@
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+    FULL DAY
+    <button type="button" mat-icon-button (click)="onClose()">
+        <mat-icon style="color:white">close</mat-icon>
+    </button>
+</h1>
+
+<mat-tab-group>
+    <mat-tab label="FULL DAY">
+        <form id="formulariofullday" autocomplete="off" #fullDayForm="ngForm" (ngSubmit)="submitFullDay(fullDayForm)"
+            appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef"
+            style="display: flex; flex-direction: column; height: 100%;">
+            <mat-dialog-content class="mat-typography">
+
+                <!-- CARD 1: DATOS DEL CLIENTE -->
+                <div class="form-section-card">
+                    <div class="section-header">
+                        <mat-icon class="section-icon">person</mat-icon>
+                        <span class="section-title">Datos del Cliente</span>
+                    </div>
+                    <div class="row row-cols-1 row-cols-md-2 g-2">
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>DNI</mat-label>
+                            <input matInput placeholder="Ingrese DNI" [(ngModel)]="reserva.nro_documento"
+                                name="nro_documento" [readonly]="isDisabled" #txtNroDocumento
+                                (blur)="verificarNroDocumento(reserva.nro_documento)"
+                                (keydown.enter)="onDniEnter($event)" cdkFocusInitial>
+                            @if (isSearchingDni) {
+                            <mat-spinner matSuffix diameter="18" class="me-2"></mat-spinner>
+                            } @else {
+                            <button mat-icon-button matSuffix type="button"
+                                (click)="verificarNroDocumento(reserva.nro_documento)"
+                                [disabled]="isDisabled || !reserva.nro_documento" matTooltip="Buscar por DNI">
+                                <mat-icon>search</mat-icon>
+                            </button>
+                            }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Tipo Documento</mat-label>
+                            <mat-select placeholder="" [(ngModel)]="reserva.tipo_doc_id" name="tipo_doc_id"
+                                [disabled]="isDisabled" #cboTipoDocId (keydown.enter)="txtNombre.focus()">
+                                <mat-option [value]="null">-- Ninguno --</mat-option>
+                                @for (x of tipo_documentos; track $index) {
+                                <mat-option [value]="x.id">{{x.tipo_documento}}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Nombre*</mat-label>
+                            <input matInput placeholder="" [(ngModel)]="reserva.nombre" name="nombre"
+                                [readonly]="isDisabled" #txtNombre (keydown.enter)="txtPrimerApellido.focus()" required>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Primer Apellido*</mat-label>
+                            <input matInput placeholder="" [(ngModel)]="reserva.primer_apellido" name="primer_apellido"
+                                [readonly]="isDisabled" #txtPrimerApellido (keydown.enter)="txtSegundoApellido.focus()"
+                                required>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Segundo Apellido</mat-label>
+                            <input matInput placeholder="" [(ngModel)]="reserva.segundo_apellido"
+                                name="segundo_apellido" [readonly]="isDisabled" #txtSegundoApellido
+                                (keydown.enter)="txtTelefono.focus()">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Telefono</mat-label>
+                            <input matInput placeholder="" [(ngModel)]="reserva.telefono" name="telefono"
+                                [readonly]="isDisabled" #txtTelefono (keydown.enter)="cboNacionalidad.focus()">
+                            <mat-icon matSuffix class="text-secondary">call</mat-icon>
+                        </mat-form-field>
+
+                        <app-select-search class="col" #cboNacionalidad
+                            label="Nacionalidad*" [(ngModel)]="reserva.nacionalidad_id" [dataSource]="paises"
+                            (selectionChange)="{}" text="descripcion" value="id" name="nacionalidad_id"
+                            showCleanButton="false" required [searchFields]="['descripcion']" [disabled]="isDisabled">
+                        </app-select-search>
+                    </div>
+                </div>
+
+                <!-- CARD 2: DETALLES DEL FULL DAY -->
+                <div class="form-section-card">
+                    <div class="section-header">
+                        <mat-icon class="section-icon">wb_sunny</mat-icon>
+                        <span class="section-title">Detalles del Full Day</span>
+                    </div>
+
+                    <div class="row g-2">
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Canal Reserva*</mat-label>
+                            <mat-select placeholder="" [(ngModel)]="reserva.canal_reserva_id" name="canal_reserva_id"
+                                [disabled]="isDisabled" #cboCanalReserva (keydown.enter)="cboPaisProcedencia.focus()" required>
+                                @for (x of canal_reservas; track $index) {
+                                <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+
+                        <app-select-search class="col-12 col-md-6" #cboPaisProcedencia (keyupEnter)="txtFechaIni.focus()"
+                            label="País Procedencia*" [(ngModel)]="reserva.pais_procedencia_id" [dataSource]="paises"
+                            (selectionChange)="{}" text="descripcion" value="id" name="pais_procedencia_id"
+                            showCleanButton="false" required [searchFields]="['descripcion']" [disabled]="isDisabled">
+                        </app-select-search>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Fecha Full Day*</mat-label>
+                            <input matInput [matDatepicker]="picker_fecha_ini" [(ngModel)]="reserva.fecha_ini"
+                                name="fecha_ini" [readonly]="isDisabled" #txtFechaIni required (keydown.enter)="txtHoraLlegada.focus()">
+                            <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"
+                                [disabled]="isDisabled"></mat-datepicker-toggle>
+                            <mat-datepicker #picker_fecha_ini [disabled]="isDisabled"></mat-datepicker>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Hora Estimada Llegada</mat-label>
+                            <input type="time" matInput [(ngModel)]="reserva.hora_llegada" name="hora_llegada"
+                                [readonly]="isDisabled" #txtHoraLlegada (keydown.enter)="txtCantidadAdulto.focus()">
+                            <mat-icon matSuffix class="text-secondary">schedule</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12">
+                            <mat-label>Observación / Detalle</mat-label>
+                            <input matInput placeholder="Notas especiales, solicitudes, etc." [(ngModel)]="reserva.detalle"
+                                name="detalle" [readonly]="isDisabled">
+                            <mat-icon matSuffix class="text-secondary">notes</mat-icon>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- CARD 3: PRECIOS -->
+                <div class="form-section-card">
+                    <div class="section-header">
+                        <mat-icon class="section-icon">payments</mat-icon>
+                        <span class="section-title">Precios Full Day</span>
+                    </div>
+                    <div class="row g-2">
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Cantidad Adulto</mat-label>
+                            <input type="number" matInput placeholder="1" [(ngModel)]="reserva.cantidad_adulto"
+                                name="cantidad_adulto" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                step="1" (keydown)="bloquearNegativos($event)" required #txtCantidadAdulto
+                                (keydown.enter)="txtPrecioUnitAdulto.focus()">
+                            <mat-icon matSuffix class="text-secondary">person</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Precio Unit. Adulto</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unit_adulto"
+                                name="precio_unit_adulto" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                step="any" (keydown)="bloquearSignosNegativos($event)" required #txtPrecioUnitAdulto
+                                (keydown.enter)="txtCantidadNinio.focus()">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Cantidad Niño</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.cantidad_ninio"
+                                name="cantidad_ninio" [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="1"
+                                (keydown)="bloquearNegativos($event)" #txtCantidadNinio
+                                (keydown.enter)="txtPrecioUnitNinio.focus()">
+                            <mat-icon matSuffix class="text-secondary">child_care</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Precio Unit. Niño</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unit_ninio"
+                                name="precio_unit_ninio" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                step="any" (keydown)="bloquearSignosNegativos($event)" #txtPrecioUnitNinio
+                                (keydown.enter)="txtPrecioTotal.focus()">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-4">
+                            <mat-label>Precio Total</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.total"
+                                name="precio_total" #txtPrecioTotal readonly required class="precio-total-input">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-4">
+                            <mat-label>{{ (reserva.id > 0 && !isEditFullDay) ? 'Total Pagado' : 'Anticipo (Pago)' }}</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.anticipo" name="anticipo"
+                                [readonly]="isDisabled" (input)="validarAnticipo()" min="0" [max]="reserva.total"
+                                step="any" (keydown)="bloquearSignosNegativos($event)" #txtAnticipo
+                                (keydown.enter)="focusFormaPagoAnticipo()">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-4">
+                            <mat-label>Saldo Restante</mat-label>
+                            <input type="number" matInput placeholder="0" [value]="getSaldoCalculado()"
+                                name="saldo_restante" readonly class="saldo-restante-input">
+                            <mat-icon matSuffix class="saldo-restante-icon">payments</mat-icon>
+                        </mat-form-field>
+
+                        @if (reserva.anticipo && reserva.anticipo > 0 && (!reserva.id || isEditFullDay)) {
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Forma de Pago Anticipo</mat-label>
+                            <mat-select placeholder="Seleccionar forma de pago" [(ngModel)]="reserva.forma_pago_id"
+                                name="forma_pago_id" [disabled]="isDisabled" #cboFormaPagoAnticipo required>
+                                @for (x of forma_pagos; track $index) {
+                                <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
+                                }
+                            </mat-select>
+                            <mat-icon matSuffix class="text-secondary">credit_card</mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Detalle / Nota Anticipo</mat-label>
+                            <input matInput placeholder="Ej: Depósito bancario #1234 / Efectivo en recepción"
+                                [(ngModel)]="reserva.detalle_anticipo" name="detalle_anticipo" [readonly]="isDisabled">
+                            <mat-icon matSuffix class="text-secondary">receipt_long</mat-icon>
+                        </mat-form-field>
+                        }
+                    </div>
+                </div>
+
+                <!-- CARD 4: SERVICIOS ADICIONALES -->
+                <div class="form-section-card servicios-card"
+                    [class.servicios-card-collapsed]="!isVisibleServiciosExtra">
+                    <div class="section-header d-flex align-items-center justify-content-between"
+                        (click)="toggleServiciosExtra()" style="cursor: pointer; user-select: none;">
+                        <div class="d-flex align-items-center gap-2">
+                            <mat-icon class="section-icon">room_service</mat-icon>
+                            <span class="section-title">Servicios Adicionales</span>
+                            @if (reserva.transacciones && reserva.transacciones.length > 0) {
+                            <span class="badge rounded-pill bg-primary text-white ms-1 px-2 py-1"
+                                style="font-size: 11px; font-weight: 600;">
+                                {{ reserva.transacciones.length }} {{ reserva.transacciones.length === 1 ? 'servicio' :
+                                'servicios' }} (Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }})
+                            </span>
+                            }
+                        </div>
+                        <button type="button" class="btn-toggle-servicios"
+                            (click)="$event.stopPropagation(); toggleServiciosExtra()"
+                            [matTooltip]="isVisibleServiciosExtra ? 'Comprimir servicios adicionales' : 'Desplegar servicios adicionales'">
+                            <mat-icon>{{ isVisibleServiciosExtra ? 'expand_less' : (reserva.transacciones &&
+                                reserva.transacciones.length > 0 ? 'expand_more' : 'add') }}</mat-icon>
+                            <span>{{ isVisibleServiciosExtra ? 'Comprimir' : 'Desplegar' }}</span>
+                        </button>
+                    </div>
+
+                    @if (isVisibleServiciosExtra) {
+                    <div class="servicios-content animate-fade-in">
+                        <!-- Fila de ingreso de Categoria, Productos, Cantidad, Precio Unidad, Total y Procesar en 2 columnas -->
+                        <div class="row g-2 align-items-start mb-2">
+                            <!-- Col 1: Categoria -->
+                            <app-select-search class="col-12 col-md-6" label="Categoria"
+                                [(ngModel)]="nuevoServicio.categoria_id" [dataSource]="categorias"
+                                (selectionChange)="filtrarProductos()" text="descripcion" value="id"
+                                name="nuevo_categoria_id" showCleanButton="true" [searchFields]="['descripcion']"
+                                [disabled]="isDisabled">
+                            </app-select-search>
+
+                            <!-- Col 2: Productos -->
+                            <app-select-search class="col-12 col-md-6" #cboProducto label="Productos"
+                                [(ngModel)]="nuevoServicio.producto_id" [dataSource]="productos_filtrados"
+                                (selectionChange)="onProductoServicioChange($event)" text="descripcion" value="id"
+                                name="nuevo_producto_id" showCleanButton="false" [searchFields]="['descripcion']"
+                                [disabled]="isDisabled">
+                            </app-select-search>
+
+                            <!-- Fila 2: Cantidad, Precio Unidad, Total y Botón Agregar alineados -->
+                            <div class="col-12 d-flex flex-wrap align-items-center gap-2 mt-1">
+                                <mat-form-field appearance="outline" style="width: 120px;">
+                                    <mat-label>Cantidad</mat-label>
+                                    <input type="number" matInput [(ngModel)]="nuevoServicio.cantidad"
+                                        name="nuevo_cantidad" (input)="calcularTotalNuevoServicio()" min="1" step="1"
+                                        (keydown)="bloquearNegativos($event)" placeholder="1" [readonly]="isDisabled">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" style="width: 130px;">
+                                    <mat-label>Precio Unidad</mat-label>
+                                    <input type="number" matInput [(ngModel)]="nuevoServicio.precio_unitario"
+                                        name="nuevo_monto" (input)="calcularTotalNuevoServicio()" min="0" step="any"
+                                        (keydown)="bloquearSignosNegativos($event)" placeholder="0.00"
+                                        [readonly]="isDisabled">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" style="width: 130px;">
+                                    <mat-label>Total</mat-label>
+                                    <input type="number" matInput [(ngModel)]="nuevoServicio.total" name="nuevo_total"
+                                        readonly placeholder="0.00">
+                                </mat-form-field>
+
+                                <div class="btn-add-wrapper ms-auto">
+                                    <button type="button" class="btn-agregar-item-outline"
+                                        (click)="agregarServicioAdicional()"
+                                        [disabled]="isProcessingServicio || isDisabled"
+                                        matTooltip="Agregar a la lista">
+                                        <mat-icon>add_circle_outline</mat-icon>
+                                        <span>Agregar Consumo</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de servicios adicionales -->
+                        @if (reserva.transacciones && reserva.transacciones.length > 0) {
+                        <div class="table-responsive">
+                            <table mat-table [dataSource]="dataSourceTransaccion" class="w-100 tabla-servicios-extra">
+                                <ng-container matColumnDef="accion">
+                                    <th mat-header-cell *matHeaderCellDef style="width: 50px;" class="text-center">#
+                                    </th>
+                                    <td mat-cell *matCellDef="let item; let i = index;" class="text-center">
+                                        <button type="button" mat-icon-button class="text-danger"
+                                            (click)="eliminarServicioAdicional(i, item)" [disabled]="isDisabled"
+                                            matTooltip="Eliminar servicio">
+                                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
+                                        </button>
+                                    </td>
+                                    <td mat-footer-cell *matFooterCellDef></td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="descripcion">
+                                    <th mat-header-cell *matHeaderCellDef>Descripción</th>
+                                    <td mat-cell *matCellDef="let item">{{ item.descripcion }}</td>
+                                    <td mat-footer-cell *matFooterCellDef class="fw-bold">Total Servicios Extra:</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="cantidad">
+                                    <th mat-header-cell *matHeaderCellDef style="width: 80px;" class="text-center">
+                                        Cant.</th>
+                                    <td mat-cell *matCellDef="let item" class="text-center">{{ item.cantidad }}</td>
+                                    <td mat-footer-cell *matFooterCellDef></td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="precio_unitario">
+                                    <th mat-header-cell *matHeaderCellDef style="width: 100px;" class="text-end">Precio
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="text-end">Bs. {{ item.precio_unitario |
+                                        number:'1.2-2' }}</td>
+                                    <td mat-footer-cell *matFooterCellDef></td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="total">
+                                    <th mat-header-cell *matHeaderCellDef style="width: 110px;" class="text-end">Total
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="text-end fw-bold text-success pe-2">
+                                        Bs. {{ item.total | number:'1.2-2' }}
+                                    </td>
+                                    <td mat-footer-cell *matFooterCellDef class="text-end fw-bold text-primary pe-2">
+                                        Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }}
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="displayedColumnsTransaccion"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumnsTransaccion;"></tr>
+                                <tr mat-footer-row *matFooterRowDef="displayedColumnsTransaccion"></tr>
+                            </table>
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <!-- CARD 5: RESUMEN TOTAL GENERAL -->
+                <div class="resumen-total-general-card">
+                    <div class="resumen-list">
+                        <div class="resumen-row">
+                            <span class="resumen-label">Total Full Day:</span>
+                            <span class="resumen-value">Bs. {{ (reserva.total || 0) | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-row">
+                            <span class="resumen-label">Servicios Extra:</span>
+                            <span class="resumen-value text-primary">Bs. {{ getTotalServiciosAdicionales() |
+                                number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-divider"></div>
+                        <div class="resumen-row">
+                            <span class="resumen-label-total">Total General:</span>
+                            <span class="resumen-value-total">Bs. {{ getTotalGeneral() | number:'1.2-2' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </mat-dialog-content>
+
+            <br>
+
+            <mat-dialog-actions class="d-flex justify-content-around bg-light">
+                <button mat-raised-button class="bg-primary text-white" [hidden]="!btnVisibleCancel"
+                    (click)="onCancel()" type="button">Cancelar</button>
+
+                <button mat-raised-button type="submit" class="bg-success text-black" [hidden]="!btnVisibleSave"
+                    appBotonGuardar [form]="fullDayForm">
+                    <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Guardar
+                </button>
+
+                <div class="div" id="mnuOpciones" [hidden]="!mnuVisibleOpciones">
+                    <button type="button" mat-button [matMenuTriggerFor]="menu"
+                        [disabled]="!isDisabled">Opciones</button>
+                    <mat-menu #menu="matMenu" [overlapTrigger]="false" yPosition="above">
+                        <button type="button" mat-menu-item (click)="eliminarFullDay('0ms', '0ms')">
+                            <mat-icon>delete</mat-icon>
+                            Eliminar
+                        </button>
+                        <button type="button" mat-menu-item (click)="editarFullDay()">
+                            <mat-icon>edit</mat-icon>
+                            Modificar
+                        </button>
+                        <button type="button" mat-menu-item (click)="mostrarVisorPdf('')">
+                            <mat-icon>receipt</mat-icon>
+                            Comprobante
+                        </button>
+                    </mat-menu>
+                </div>
+            </mat-dialog-actions>
+        </form>
+    </mat-tab>
+
+    @if (isVisibleTabs) {
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <mat-icon>money</mat-icon>
+        </ng-template>
+        <app-pago-form [reserva]="reserva" [forma_pagos]="forma_pagos"></app-pago-form>
+    </mat-tab>
+
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <mat-icon>person</mat-icon>
+        </ng-template>
+        <app-huesped-form [reserva]="reserva" [paises]="paises" [tipo_documentos]="tipo_documentos"></app-huesped-form>
+    </mat-tab>
+
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <mat-icon>shopping_cart</mat-icon>
+        </ng-template>
+        <app-transaccion-form [reserva]="reserva" [productos]="productos"></app-transaccion-form>
+    </mat-tab>
+
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <mat-icon>notifications</mat-icon>
+        </ng-template>
+        <app-nota-form [reserva]="reserva"></app-nota-form>
+    </mat-tab>
+
+    <mat-tab>
+        <ng-template mat-tab-label>
+            <mat-icon>settings</mat-icon>
+        </ng-template>
+        <app-bitacora-form [reserva]="reserva"></app-bitacora-form>
+    </mat-tab>
+    }
+</mat-tab-group>

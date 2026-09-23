@@ -1,0 +1,55 @@
+.mat-column-actions {
+    width: 110px;
+    min-width: 110px;
+    text-align: center;
+}
+
+.mat-column-documento_btn {
+    width: 90px;
+    min-width: 90px;
+    text-align: center;
+}
+
+.mat-column-correlativo {
+    white-space: nowrap;
+    width: 110px;
+    min-width: 100px;
+    text-align: left;
+}
+
+.mat-column-fecha {
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+.mat-column-hora {
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.mat-column-cliente {
+    min-width: 160px;
+}
+
+.mat-column-telefono,
+.mat-column-nro_documento {
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+.mat-column-personas {
+    white-space: nowrap;
+    min-width: 110px;
+}
+
+.mat-column-total,
+.mat-column-pagado,
+.mat-column-saldo {
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+.mat-column-estado {
+    white-space: nowrap;
+    min-width: 100px;
+}

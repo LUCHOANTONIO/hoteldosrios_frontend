@@ -1,0 +1,341 @@
+/* SECCIONES Y TARJETAS DEL FORMULARIO */
+.form-section-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px 18px 4px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07);
+    border-color: #cbd5e1;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+
+  .section-icon {
+    color: #2563eb;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e3a8a;
+    letter-spacing: 0.2px;
+  }
+}
+
+/* TOTAL Y SALDO */
+.precio-total-input {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  font-size: 1.15rem !important;
+}
+
+.saldo-restante-input {
+  color: #16a34a !important;
+  font-weight: 800 !important;
+  font-size: 1.15rem !important;
+}
+
+.saldo-restante-icon {
+  color: #16a34a !important;
+}
+
+/*BEGIN: Linea mat-dividir */
+.divider-with-text {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.divider-with-text mat-divider {
+  flex: 1;
+}
+
+.divider-with-text .divider-text {
+  padding: 0 16px;
+  white-space: nowrap;
+  color: #3f51b5;
+  font-weight: bold;
+}
+/*END: Linea mat-dividir */
+
+//BEGIN: Ajustes para la tabla de transacciones
+.col-numerica {
+  width: 100px !important;
+  max-width: 100px !important;
+  text-align: center;
+}
+
+.mat-column-cantidad {
+  width: 100px !important;
+  max-width: 100px !important;
+}
+
+.mat-column-precio_unitario, 
+.mat-column-total {
+  width: 120px !important;
+  max-width: 120px !important;
+}
+
+.mat-mdc-table .mat-mdc-cell, 
+.mat-mdc-table .mat-mdc-header-cell {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.mat-column-cantidad mat-form-field,
+.mat-column-precio_unitario mat-form-field,
+.mat-column-total mat-form-field {
+  width: 100%;
+}
+//END: Ajustes para la tabla de transacciones
+
+/* Tabla de Servicios Adicionales en Formulario de Reserva */
+.tabla-servicios-extra {
+  font-size: 13px;
+
+  th.mat-mdc-header-cell {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 6px 8px;
+  }
+
+  td.mat-mdc-cell {
+    padding: 4px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+  }
+
+  tr.mat-mdc-row:hover {
+    background-color: #f8fafc;
+  }
+
+  tr.mat-mdc-footer-row {
+    background-color: #f8fafc;
+    border-top: 1.5px solid #cbd5e1;
+
+    td.mat-mdc-footer-cell {
+      padding: 8px;
+      font-size: 13.5px;
+      color: #1e293b;
+    }
+  }
+}
+
+.btn-add-wrapper {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  margin: 0;
+  padding: 0;
+}
+
+.btn-agregar-item-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #1d4ed8;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+    color: #1e40af;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+
+    mat-icon {
+      color: #94a3b8;
+    }
+  }
+}
+
+/* RESUMEN TOTAL GENERAL */
+.resumen-total-general-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  padding: 14px 20px !important;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+
+  .resumen-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .resumen-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .resumen-divider {
+    border-top: 1px solid #cbd5e1;
+    margin: 4px 0;
+    width: 100%;
+  }
+
+  .resumen-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+    min-width: 125px;
+  }
+
+  .resumen-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+  }
+
+  .resumen-label-total {
+    font-size: 15px;
+    font-weight: 700;
+    color: #047857;
+    white-space: nowrap;
+    min-width: 125px;
+  }
+
+  .resumen-value-total {
+    font-size: 21px;
+    font-weight: 800;
+    color: #059669;
+    white-space: nowrap;
+    letter-spacing: -0.2px;
+  }
+}
+
+/* SERVICIOS ADICIONALES: CARD COLAPSABLE */
+.servicios-card {
+  transition: all 0.25s ease-in-out;
+
+  &.servicios-card-collapsed {
+    padding: 12px 18px;
+
+    .section-header {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
+
+  .section-header {
+    border-radius: 6px;
+    padding: 4px 6px;
+    margin: -4px -6px 14px -6px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #f8fafc;
+    }
+  }
+}
+
+.btn-toggle-servicios {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:hover {
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+    color: #1e40af;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInServicios 0.25s ease-in-out;
+}
+
+@keyframes fadeInServicios {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

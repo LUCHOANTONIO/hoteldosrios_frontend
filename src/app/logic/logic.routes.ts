@@ -30,9 +30,11 @@ import { InventarioComponent } from './views/inventario/inventario';
 import { ReporteCuentasCobrarComponent } from './views/reporte/cuenta_cobrar/cuenta_cobrar';
 import { CotizacionComponent } from './views/cotizacion/cotizacion';
 import { TarifaComponent } from './views/tarifa/tarifa';
+import { FullDayComponent } from './views/full_day/full_day';
 
 export const LOGIC_ROUTES: Routes = [
     { path: 'timeline', component: TimelineComponent, canActivate: [authGuard] },
+    { path: 'full_day', component: FullDayComponent, canActivate: [authGuard] },
     { path: 'habitaciones', component: HabitacionComponent, canActivate: [authGuard] },
     { path: 'disponibilidad', component: DisponibilidadComponent, canActivate: [authGuard] },
     { path: 'tipo_habitaciones', component: TipoHabitacionComponent, canActivate: [authGuard] },
