@@ -276,29 +276,8 @@ export class TimelineComponent implements AfterViewInit {
     const dataItems = this.reservas.map((reserva) => {
       const isNaranja = reserva.is_externo == 1 && reserva.estado_reserva_id == 1;
 
-      let start = reserva.fecha_ini;
-      let end = reserva.fecha_fin;
-
-      const mIni = moment(reserva.fecha_ini);
-      const mFin = moment(reserva.fecha_fin);
-
-      if (mIni.isValid() && mFin.isValid()) {
-        const esMismoDia = mIni.isSame(mFin, 'day');
-        const habitacion = this.habitaciones.find((h) => Number(h.id) === Number(reserva.habitacion_id));
-        const esFullDay = habitacion ? this.isFullDayOrCamping(habitacion) : esMismoDia;
-
-        if (esFullDay || esMismoDia) {
-          start = mIni.clone().format('YYYY-MM-DD 03:00:00');
-          end = mIni.clone().format('YYYY-MM-DD 21:00:00');
-        } else {
-          const horaIni = mIni.format('HH:mm:ss');
-          const horaFin = mFin.format('HH:mm:ss');
-          start = horaIni === '00:00:00' ? mIni.clone().format('YYYY-MM-DD 13:00:00') : mIni.format('YYYY-MM-DD HH:mm:ss');
-          end = (horaFin === '00:00:00' || (horaFin === '12:00:00' && esMismoDia))
-            ? mFin.clone().format('YYYY-MM-DD 11:00:00')
-            : mFin.format('YYYY-MM-DD HH:mm:ss');
-        }
-      }
+      const start = moment(reserva.fecha_ini);
+      const end = moment(reserva.fecha_fin);
 
       return {
         id: reserva.id,
