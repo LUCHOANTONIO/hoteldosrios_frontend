@@ -30,11 +30,9 @@ import { InventarioComponent } from './views/inventario/inventario';
 import { ReporteCuentasCobrarComponent } from './views/reporte/cuenta_cobrar/cuenta_cobrar';
 import { CotizacionComponent } from './views/cotizacion/cotizacion';
 import { TarifaComponent } from './views/tarifa/tarifa';
-import { FullDayComponent } from './views/full_day/full_day';
 
 export const LOGIC_ROUTES: Routes = [
     { path: 'timeline', component: TimelineComponent, canActivate: [authGuard] },
-    { path: 'full_day', component: FullDayComponent, canActivate: [authGuard] },
     { path: 'habitaciones', component: HabitacionComponent, canActivate: [authGuard] },
     { path: 'disponibilidad', component: DisponibilidadComponent, canActivate: [authGuard] },
     { path: 'tipo_habitaciones', component: TipoHabitacionComponent, canActivate: [authGuard] },
@@ -46,7 +44,7 @@ export const LOGIC_ROUTES: Routes = [
     { path: 'categorias', component: CategoriaComponent, canActivate: [authGuard] },
     { path: 'canal_reservas', component: CanalReservaComponent, canActivate: [authGuard] },
     { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-    { path: 'checkout', component: ReservaCheckOutComponent, canActivate: [authGuard] },  
+    { path: 'checkout', component: ReservaCheckOutComponent, canActivate: [authGuard] },
     { path: 'ingresos', component: IngresoComponent, canActivate: [authGuard] },
     { path: 'egresos', component: EgresoComponent, canActivate: [authGuard] },
     { path: 'cuenta_cobrar', component: CuentaCobrarComponent, canActivate: [authGuard] },
@@ -62,6 +60,6 @@ export const LOGIC_ROUTES: Routes = [
     { path: 'reporte_siat', component: ReporteSiatComponent, canActivate: [authGuard] },
     { path: 'reporte_cuentas_cobrar', component: ReporteCuentasCobrarComponent, canActivate: [authGuard] },
     { path: 'inventarios', component: InventarioComponent, canActivate: [authGuard] },
-     { path: 'cotizaciones', component: CotizacionComponent, canActivate: [authGuard] },
+    { path: 'cotizaciones', component: CotizacionComponent, canActivate: [authGuard] },
     { path: 'tarifas', component: TarifaComponent, canActivate: [authGuard] }
 ];
