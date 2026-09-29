@@ -1,7 +1,62 @@
 
-<div class="timeline-wrapper"> 
-  <button class="btn-hoy" (click)="mostrarIrFecha('0ms', '0ms')">Ir a Fecha</button> 
-  <div class="timeline-container" #timelineContainer></div>
+<div class="timeline-page">
+  <!-- BARRA DE PESTAÑAS Y ACCIONES -->
+  <div class="timeline-header-bar">
+    <div class="timeline-tabs" role="tablist">
+      <button 
+        type="button" 
+        role="tab"
+        class="timeline-tab tab-habitaciones" 
+        [class.active]="tabActiva === 'habitaciones'"
+        [attr.aria-selected]="tabActiva === 'habitaciones'"
+        (click)="cambiarTab('habitaciones')">
+        <mat-icon class="tab-icon">hotel</mat-icon>
+        <span class="tab-title">Habitaciones</span>
+        <span class="tab-badge">{{ countHabitaciones }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        role="tab"
+        class="timeline-tab tab-fullday" 
+        [class.active]="tabActiva === 'fullday'"
+        [attr.aria-selected]="tabActiva === 'fullday'"
+        (click)="cambiarTab('fullday')">
+        <mat-icon class="tab-icon">deck</mat-icon>
+        <span class="tab-title">Full Day y Camping</span>
+        <span class="tab-badge">{{ countFullDayCamping }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        role="tab"
+        class="timeline-tab tab-todas" 
+        [class.active]="tabActiva === 'todas'"
+        [attr.aria-selected]="tabActiva === 'todas'"
+        (click)="cambiarTab('todas')">
+        <mat-icon class="tab-icon">view_list</mat-icon>
+        <span class="tab-title">Todas</span>
+        <span class="tab-badge">{{ countTodas }}</span>
+      </button>
+    </div>
+
+    <div class="timeline-actions">
+      <button type="button" class="action-btn" (click)="centrarTimelineEnHoy()" matTooltip="Centrar calendario en la fecha de hoy">
+        <mat-icon>today</mat-icon>
+        <span>Hoy</span>
+      </button>
+      <button type="button" class="action-btn btn-primary" (click)="mostrarIrFecha('0ms', '0ms')" matTooltip="Ir a una fecha específica">
+        <mat-icon>calendar_month</mat-icon>
+        <span>Ir a Fecha</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR DEL CALENDARIO -->
+  <div class="timeline-wrapper"> 
+    <button class="btn-hoy" (click)="mostrarIrFecha('0ms', '0ms')">Ir a Fecha</button> 
+    <div class="timeline-container" #timelineContainer></div>
+  </div>
 </div>
 
 <app-context-menu #contextMenu [selectedItems]="selectedItems" [items]="items"></app-context-menu>

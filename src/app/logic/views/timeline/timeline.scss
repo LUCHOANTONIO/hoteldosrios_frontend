@@ -1,8 +1,165 @@
+.timeline-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 12px;
+}
+
+.timeline-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.timeline-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.timeline-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  user-select: none;
+
+  .tab-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tab-title {
+    letter-spacing: 0.2px;
+  }
+
+  .tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    font-size: 11.5px;
+    font-weight: 700;
+    background: #e2e8f0;
+    color: #475569;
+    transition: all 0.2s ease;
+  }
+
+  &:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.75);
+    color: #1e293b;
+  }
+
+  &.active {
+    background: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+
+    &.tab-habitaciones {
+      color: #1d4ed8;
+      .tab-badge {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+    }
+
+    &.tab-fullday {
+      color: #b45309;
+      .tab-badge {
+        background: #fef3c7;
+        color: #92400e;
+      }
+    }
+
+    &.tab-todas {
+      color: #334155;
+      .tab-badge {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+    }
+  }
+}
+
+.timeline-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+
+    &.btn-primary {
+      background: #1976d2;
+      border-color: #1565c0;
+      color: #ffffff;
+
+      &:hover {
+        background: #1565c0;
+      }
+    }
+  }
+}
+
 .timeline-wrapper {
   position: relative;
   width: 100%;
   height: 600px;
   border: 1px solid lightgray;
+  border-radius: 6px;
+  background: #ffffff;
+  overflow: hidden;
 }
 
 //Para el boton ir hoy

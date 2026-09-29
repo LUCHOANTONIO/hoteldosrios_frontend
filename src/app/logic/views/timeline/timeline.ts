@@ -45,16 +45,28 @@ moment.locale('es');
 
 //ANGULAR MATERIAL
 import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-timeline',
   standalone: true,
-  imports: [MatMenuModule, ContextMenuComponent],
+  imports: [
+    CommonModule,
+    MatMenuModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    ContextMenuComponent
+  ],
   templateUrl: './timeline.html',
   styleUrls: ['./timeline.scss'],
 })
 export class TimelineComponent implements AfterViewInit {
   @ViewChild('contextMenu') contextMenu!: ContextMenuComponent;
+  tabActiva: 'habitaciones' | 'fullday' | 'todas' = 'habitaciones';
   habitaciones: HabitacionModel[] = [];
   productos: ProductoModel[] = [];
   tipo_documentos: TipoDocumentoModel[] = [];
@@ -142,8 +154,59 @@ export class TimelineComponent implements AfterViewInit {
     });
   }
 
+  isFullDayOrCamping(habitacion: HabitacionModel): boolean {
+    if (!habitacion) return false;
+    const desc = (habitacion.descripcion || '').trim().toUpperCase();
+    const tipo = (habitacion.tipo_habitacion || '').trim().toUpperCase();
+
+    return (
+      desc.includes('FULL DAY') ||
+      desc.includes('FULLDAY') ||
+      desc.includes('CAMPING') ||
+      desc.includes('CAMMPING') ||
+      tipo.includes('FULL DAY') ||
+      tipo.includes('FULLDAY') ||
+      tipo.includes('CAMPING') ||
+      tipo.includes('CAMMPING')
+    );
+  }
+
+  getHabitacionesFiltradas(): HabitacionModel[] {
+    if (this.tabActiva === 'fullday') {
+      return this.habitaciones.filter((h) => this.isFullDayOrCamping(h));
+    } else if (this.tabActiva === 'habitaciones') {
+      return this.habitaciones.filter((h) => !this.isFullDayOrCamping(h));
+    } else {
+      return this.habitaciones;
+    }
+  }
+
+  get countHabitaciones(): number {
+    return this.habitaciones.filter((h) => !this.isFullDayOrCamping(h)).length;
+  }
+
+  get countFullDayCamping(): number {
+    return this.habitaciones.filter((h) => this.isFullDayOrCamping(h)).length;
+  }
+
+  get countTodas(): number {
+    return this.habitaciones.length;
+  }
+
+  cambiarTab(nuevaTab: 'habitaciones' | 'fullday' | 'todas') {
+    if (this.tabActiva === nuevaTab) return;
+    this.tabActiva = nuevaTab;
+    this.loadGroups();
+    if (this.timeLine) {
+      this.items.remove('hover-item');
+      this.selectedItems = [];
+      this.timeLine.redraw();
+    }
+  }
+
   loadGroups() {
-    const dataGroups = this.habitaciones.map((habitacion) => {
+    const habitacionesFiltradas = this.getHabitacionesFiltradas();
+    const dataGroups = habitacionesFiltradas.map((habitacion) => {
       const iconoSeparador = '⏵'; //'⟶'; // Puedes usar otros como '•', '→', '⇨', '⮞', '⏵'
       const colorGrupo = habitacion.color || '#FFFFFF'; // Protección contra null
       return {
@@ -164,7 +227,15 @@ export class TimelineComponent implements AfterViewInit {
       };
     });
 
-    this.groups = new DataSet(dataGroups);
+    if (this.groups) {
+      this.groups.clear();
+      this.groups.add(dataGroups);
+      if (this.timeLine) {
+        this.timeLine.setGroups(this.groups);
+      }
+    } else {
+      this.groups = new DataSet(dataGroups);
+    }
   }
 
   ejecutarUpdateGroups(habitacion_id) {
@@ -441,7 +512,7 @@ export class TimelineComponent implements AfterViewInit {
     const dialogRef = this.dialog.open(ReservaFormComponent, {
       data: {
         reserva: this.reserva,
-        habitaciones: this.habitaciones,
+        habitaciones: this.getHabitacionesFiltradas(),
         tipo_documentos: this.tipo_documentos,
         estado_civil: this.estado_civil,
         paises: this.paises,
