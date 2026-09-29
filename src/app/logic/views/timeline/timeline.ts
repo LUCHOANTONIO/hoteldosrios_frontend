@@ -276,11 +276,35 @@ export class TimelineComponent implements AfterViewInit {
     const dataItems = this.reservas.map((reserva) => {
       const isNaranja = reserva.is_externo == 1 && reserva.estado_reserva_id == 1;
 
+      let start = reserva.fecha_ini;
+      let end = reserva.fecha_fin;
+
+      const mIni = moment(reserva.fecha_ini);
+      const mFin = moment(reserva.fecha_fin);
+
+      if (mIni.isValid() && mFin.isValid()) {
+        const esMismoDia = mIni.isSame(mFin, 'day');
+        const habitacion = this.habitaciones.find((h) => Number(h.id) === Number(reserva.habitacion_id));
+        const esFullDay = habitacion ? this.isFullDayOrCamping(habitacion) : esMismoDia;
+
+        if (esFullDay || esMismoDia) {
+          start = mIni.clone().format('YYYY-MM-DD 03:00:00');
+          end = mIni.clone().format('YYYY-MM-DD 21:00:00');
+        } else {
+          const horaIni = mIni.format('HH:mm:ss');
+          const horaFin = mFin.format('HH:mm:ss');
+          start = horaIni === '00:00:00' ? mIni.clone().format('YYYY-MM-DD 13:00:00') : mIni.format('YYYY-MM-DD HH:mm:ss');
+          end = (horaFin === '00:00:00' || (horaFin === '12:00:00' && esMismoDia))
+            ? mFin.clone().format('YYYY-MM-DD 11:00:00')
+            : mFin.format('YYYY-MM-DD HH:mm:ss');
+        }
+      }
+
       return {
         id: reserva.id,
         correlativo: reserva.correlativo,
-        start: reserva.fecha_ini,
-        end: reserva.fecha_fin,
+        start: start,
+        end: end,
         group: reserva.habitacion_id,
         className: isNaranja ? 'orange' : reserva.color,
         style: isNaranja ? `background-color: ${hexNaranja} !important; color: ${this.getContrastColor(hexNaranja)} !important;` : '',
@@ -289,7 +313,16 @@ export class TimelineComponent implements AfterViewInit {
         saldo: reserva.saldo,
       };
     });
-    this.items = new DataSet(dataItems);
+
+    if (this.items) {
+      this.items.clear();
+      this.items.add(dataItems);
+      if (this.timeLine) {
+        this.timeLine.setItems(this.items);
+      }
+    } else {
+      this.items = new DataSet(dataItems);
+    }
   }
 
   loadOptions() {
@@ -499,19 +532,24 @@ export class TimelineComponent implements AfterViewInit {
 
   readonly dialog = inject(MatDialog);
   mostrarFormularioNuevo(fecha_ini, fecha_fin, habitacion_id) {
+    const habSeleccionada = this.habitaciones.find(h => Number(h.id) === Number(habitacion_id));
+    const esFD = habSeleccionada ? this.isFullDayOrCamping(habSeleccionada) : (this.tabActiva === 'fullday');
+
     this.reserva = new ReservaModel();
     this.reserva.fecha_ini = fecha_ini;
-    this.reserva.fecha_fin = fecha_fin;
+    this.reserva.fecha_fin = esFD ? fecha_ini : fecha_fin;
     this.reserva.habitacion_id = habitacion_id;
     this.reserva.cantidad_adulto = 1;
     this.reserva.precio_unit_adulto = 0;
     this.reserva.cantidad_ninio = 0;
     this.reserva.precio_unit_ninio = 0;
+    this.reserva.canal_reserva_id = (this.canal_reservas && this.canal_reservas.length > 0) ? this.canal_reservas[0].id : 1;
     this.reserva.total = 0;
 
     const dialogRef = this.dialog.open(ReservaFormComponent, {
       data: {
         reserva: this.reserva,
+        reservas: this.reservas,
         habitaciones: this.getHabitacionesFiltradas(),
         tipo_documentos: this.tipo_documentos,
         estado_civil: this.estado_civil,
@@ -531,6 +569,17 @@ export class TimelineComponent implements AfterViewInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (!result) { return; }
+      let executeActionReserva = this.comunicacionService.executeActionReserva();
+      if (executeActionReserva) {
+        this.reservaService.listar().subscribe({
+          next: (res) => {
+            if (res && res.dato) {
+              this.reservas = JSON.parse(res.dato) as ReservaModel[];
+              this.loadItems();
+            }
+          }
+        });
+      }
     });
 
   }
@@ -576,6 +625,15 @@ export class TimelineComponent implements AfterViewInit {
           if (executeActionReserva == false) {
             this.items.update(this.item_original);
             this.timeLine.redraw();
+          } else {
+            this.reservaService.listar().subscribe({
+              next: (res) => {
+                if (res && res.dato) {
+                  this.reservas = JSON.parse(res.dato) as ReservaModel[];
+                  this.loadItems();
+                }
+              }
+            });
           }
         });
       },

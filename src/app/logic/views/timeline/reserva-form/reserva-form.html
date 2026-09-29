@@ -89,10 +89,12 @@
                         <span class="section-title">Detalles de la Reserva</span>
                     </div>
                     <!-- MODALIDAD DE RESERVA: INDIVIDUAL O GRUPAL -->
-                    @if (!reserva.id || reserva.id <= 0) { <div class="tipo-reserva-wrapper mb-3">
+                    @if (!reserva.id || reserva.id <= 0 || isEditReserva) { <div class="tipo-reserva-wrapper mb-3">
                         <div class="tipo-reserva-label-group">
                             <span class="tipo-label">Modalidad de Reserva</span>
-                            <span class="tipo-subtitle">Seleccione individual o grupal (múltiples habitaciones)</span>
+                            <span class="tipo-subtitle">{{ isFullDayOrCamping() ? 'Seleccione si la reserva es
+                                individual o grupal' : 'Seleccione individual o grupal (múltiples habitaciones)'
+                                }}</span>
                         </div>
                         <div class="tipo-reserva-pill-group">
                             <button type="button" class="tipo-pill-btn" [class.active]="tipo_reserva === 'individual'"
@@ -108,47 +110,52 @@
                         </div>
                 </div>
                 } @else {
-                @if (reserva.grupo_id || reserva.is_grupal) {
                 <div class="grupo-badge-info mb-3">
-                    <mat-icon>groups</mat-icon>
-                    <span>Reserva Grupal: <strong>{{ reserva.grupo_nombre || ('Grupo #' + reserva.grupo_id)
+                    <mat-icon>{{ (reserva.grupo_id || reserva.is_grupal || tipo_reserva === 'grupal') ? 'groups' :
+                        'person' }}</mat-icon>
+                    <span>Modalidad: <strong>{{ (reserva.grupo_id || reserva.is_grupal || tipo_reserva === 'grupal') ?
+                            ('Grupal: ' + (reserva.grupo_nombre || ('Grupo #' + reserva.grupo_id))) : 'Individual'
                             }}</strong></span>
                 </div>
-                }
                 }
 
                 <div class="row g-2">
                     @if (tipo_reserva === 'individual') {
                     <mat-form-field appearance="outline" class="col-12">
-                        <mat-label>Habitacion</mat-label>
+                        <mat-label>{{ isFullDayOrCamping() ? 'Servicio / Área' : 'Habitación' }}</mat-label>
                         <mat-select placeholder="" [(ngModel)]="reserva.habitacion_id" name="habitacion_id"
                             [disabled]="isDisabled" #cboHabitacion (selectionChange)="changeHabitacion($event)"
                             (keydown.enter)="cboCanalReserva.focus()" appPreventEnterSelect required>
                             @for (x of habitaciones;track $index) {
-                            <mat-option [value]="x.id">{{x.nro_habitacion}} {{x.descripcion}}</mat-option>
+                            <mat-option [value]="x.id">
+                                {{ isFullDayOrCamping() ? x.descripcion : (x.nro_habitacion + ' ' + x.descripcion) }}
+                            </mat-option>
                             }
                         </mat-select>
                     </mat-form-field>
                     } @else {
                     <mat-form-field appearance="outline" class="col-12 col-md-6">
-                        <mat-label>Nombre del Grupo</mat-label>
-                        <input matInput placeholder="Ej: Familia Gómez / Delegación" [(ngModel)]="reserva.grupo_nombre"
-                            name="grupo_nombre" [readonly]="isDisabled">
+                        <mat-label>{{ isFullDayOrCamping() ? 'Nombre del Grupo / Evento' : 'Nombre del Grupo'
+                            }}</mat-label>
+                        <input matInput
+                            [placeholder]="isFullDayOrCamping() ? 'Ej: Empresa X / Delegación / Familia' : 'Ej: Familia Gómez / Delegación'"
+                            [(ngModel)]="reserva.grupo_nombre" name="grupo_nombre" [readonly]="isDisabled">
                         <mat-icon matSuffix class="text-secondary">groups</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="col-12 col-md-6">
-                        <mat-label>Habitaciones (Selección Múltiple)</mat-label>
+                        <mat-label>{{ isFullDayOrCamping() ? 'Servicio / Área (Selección)' : 'Habitaciones (Selección
+                            Múltiple)' }}</mat-label>
                         <mat-select placeholder="" multiple [(ngModel)]="selectedHabitaciones"
                             name="selectedHabitaciones" [disabled]="isDisabled" [compareWith]="compareHabitacionId"
                             (selectionChange)="changeHabitacionesMulti($event)" required>
                             <mat-select-trigger>
-                                {{ selectedHabitaciones.length }} {{ selectedHabitaciones.length === 1 ? 'habitación
-                                seleccionada' : 'habitaciones seleccionadas' }}
+                                {{ getSelectedHabitacionesText() }}
                             </mat-select-trigger>
                             @for (x of habitaciones; track $index) {
                             <mat-option [value]="x.id">
-                                Hab. {{x.nro_habitacion}} - {{x.descripcion}}
+                                {{ isFullDayOrCamping() ? x.descripcion : ('Hab. ' + x.nro_habitacion + ' - ' +
+                                x.descripcion) }}
                             </mat-option>
                             }
                         </mat-select>
@@ -172,16 +179,18 @@
                         showCleanButton="false" required [searchFields]="['descripcion']" [disabled]="isDisabled">
                     </app-select-search>
 
-                    <mat-form-field appearance="outline" class="col-12 col-md-6">
-                        <mat-label>Fecha Inicial</mat-label>
+                    <mat-form-field appearance="outline"
+                        [ngClass]="isFullDayOrCamping() ? 'col-12' : 'col-12 col-md-6'">
+                        <mat-label>{{ isFullDayOrCamping() ? 'Fecha' : 'Fecha Inicial' }}</mat-label>
                         <input matInput [matDatepicker]="picker_fecha_ini" [(ngModel)]="reserva.fecha_ini"
                             name="fecha_ini" [readonly]="isDisabled" #txtFechaIni required
-                            (dateChange)="calcularCantidad()" (keydown.enter)="txtFechaFin.focus()">
+                            (dateChange)="onFechaIniChange()" (keydown.enter)="onEnterFechaIni()">
                         <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"
                             [disabled]="isDisabled"></mat-datepicker-toggle>
                         <mat-datepicker #picker_fecha_ini [disabled]="isDisabled"></mat-datepicker>
                     </mat-form-field>
 
+                    @if (!isFullDayOrCamping()) {
                     <mat-form-field appearance="outline" class="col-12 col-md-6">
                         <mat-label>Fecha Final</mat-label>
                         <input matInput [matDatepicker]="picker_fecha_fin" [(ngModel)]="reserva.fecha_fin"
@@ -191,6 +200,7 @@
                             [disabled]="isDisabled"></mat-datepicker-toggle>
                         <mat-datepicker #picker_fecha_fin [disabled]="isDisabled"></mat-datepicker>
                     </mat-form-field>
+                    }
                 </div>
                 </div>
 
