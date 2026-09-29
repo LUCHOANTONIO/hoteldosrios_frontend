@@ -522,9 +522,8 @@ export class ReservaFormComponent {
         this.alertService.show("El primer apellido es obligatorio", { duration: 5000, type: 'info' });
         return;
       }
-      const noches = this.getNoches();
-      if (!noches || noches <= 0) {
-        this.alertService.show("La cantidad de noches debe ser mayor a 0", { duration: 5000, type: 'info' });
+      if (!this.reserva.fecha_ini) {
+        this.alertService.show("La fecha inicial es obligatoria", { duration: 5000, type: 'info' });
         return;
       }
       if (!this.reserva.total || Number(this.reserva.total) <= 0) {
@@ -601,8 +600,6 @@ export class ReservaFormComponent {
           this.balance.set(data.balance); //Establecer valor a por medio de signal                
           this.reserva.anticipo = this.getYaPagado();
           this.reserva.detalle_anticipo = '';
-          let fecha_hora_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD HH:mm");
-          let fecha_hora_fin = moment(this.reserva.fecha_fin).format("YYYY-MM-DD HH:mm");
           this.reserva.fecha_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD");
           this.reserva.fecha_fin = moment(this.reserva.fecha_fin).format("YYYY-MM-DD");
 
@@ -644,8 +641,8 @@ export class ReservaFormComponent {
             });
             const msgSuccess = (this.tipo_reserva === 'grupal' && data.reservas && data.reservas.length > 1)
               ? (this.isFullDayOrCamping()
-                  ? `Reserva grupal creada con éxito`
-                  : `Reserva grupal creada con éxito (${data.reservas.length} habitaciones)`)
+                ? `Reserva grupal creada con éxito`
+                : `Reserva grupal creada con éxito (${data.reservas.length} habitaciones)`)
               : `Se guardó la reserva`;
             this.alertService.show(msgSuccess, { duration: 5000, type: 'success' });
           } else {
@@ -725,8 +722,6 @@ export class ReservaFormComponent {
           this.balance.set(data.balance); //Establecer valor a por medio de signal                
           this.reserva.anticipo = this.getYaPagado();
           this.reserva.detalle_anticipo = '';
-          let fecha_hora_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD HH:mm");
-          let fecha_hora_fin = moment(this.reserva.fecha_fin).format("YYYY-MM-DD HH:mm");
           this.reserva.fecha_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD");
           this.reserva.fecha_fin = moment(this.reserva.fecha_fin).format("YYYY-MM-DD");
           // Si es grupal y se crearon/actualizaron múltiples reservas, actualizarlas todas en el timeline
@@ -750,8 +745,8 @@ export class ReservaFormComponent {
             });
             const msgSuccess = (this.tipo_reserva === 'grupal' && data.reservas && data.reservas.length > 1)
               ? (this.isFullDayOrCamping()
-                  ? `Reserva grupal actualizada con éxito`
-                  : `Reserva grupal actualizada con éxito (${data.reservas.length} habitaciones)`)
+                ? `Reserva grupal actualizada con éxito`
+                : `Reserva grupal actualizada con éxito (${data.reservas.length} habitaciones)`)
               : `Se guardó la reserva`;
             this.alertService.show(msgSuccess, { duration: 5000, type: 'success' });
           } else {

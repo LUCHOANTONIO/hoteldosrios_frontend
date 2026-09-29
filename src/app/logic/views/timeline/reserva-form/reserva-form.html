@@ -183,8 +183,7 @@
                         [ngClass]="isFullDayOrCamping() ? 'col-12' : 'col-12 col-md-6'">
                         <mat-label>{{ isFullDayOrCamping() ? 'Fecha' : 'Fecha Inicial' }}</mat-label>
                         <input matInput [matDatepicker]="picker_fecha_ini" [(ngModel)]="reserva.fecha_ini"
-                            name="fecha_ini" [readonly]="isDisabled" #txtFechaIni required
-                            (dateChange)="onFechaIniChange()" (keydown.enter)="onEnterFechaIni()">
+                            name="fecha_ini" [readonly]="isDisabled" #txtFechaIni required>
                         <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"
                             [disabled]="isDisabled"></mat-datepicker-toggle>
                         <mat-datepicker #picker_fecha_ini [disabled]="isDisabled"></mat-datepicker>
@@ -194,8 +193,7 @@
                     <mat-form-field appearance="outline" class="col-12 col-md-6">
                         <mat-label>Fecha Final</mat-label>
                         <input matInput [matDatepicker]="picker_fecha_fin" [(ngModel)]="reserva.fecha_fin"
-                            name="fecha_fin" [readonly]="isDisabled" #txtFechaFin required
-                            (dateChange)="calcularCantidad()" (keydown.enter)="txtCantidadAdulto.focus()">
+                            name="fecha_fin" [readonly]="isDisabled" #txtFechaFin required>
                         <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin"
                             [disabled]="isDisabled"></mat-datepicker-toggle>
                         <mat-datepicker #picker_fecha_fin [disabled]="isDisabled"></mat-datepicker>
