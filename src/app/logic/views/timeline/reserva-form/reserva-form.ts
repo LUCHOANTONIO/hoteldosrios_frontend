@@ -175,8 +175,6 @@ export class ReservaFormComponent {
   displayedColumnsTransaccion: string[] = ['accion', 'descripcion', 'cantidad', 'precio_unitario', 'total'];
   dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild('txtFechaFin') txtFechaFin?: ElementRef;
-  @ViewChild('txtCantidadAdulto') txtCantidadAdulto?: ElementRef;
   transaccion: TransaccionModel = new TransaccionModel();
   nuevoServicio: TransaccionModel = new TransaccionModel();
   categorias: CategoriaModel[] = [];
@@ -267,7 +265,9 @@ export class ReservaFormComponent {
         this.reserva.anticipo = this.getYaPagado();
       }
 
-      this.calcularCantidad();
+      if (this.isFullDayOrCamping()) {
+        this.reserva.fecha_fin = this.reserva.fecha_ini;
+      }
       this.calcularTotal();
 
       if (this.reserva.id > 0) {
@@ -369,21 +369,6 @@ export class ReservaFormComponent {
       tipo.includes('CAMPING') ||
       tipo.includes('CAMMPING')
     );
-  }
-
-  onFechaIniChange(): void {
-    if (this.isFullDayOrCamping()) {
-      this.reserva.fecha_fin = this.reserva.fecha_ini;
-    }
-    this.calcularCantidad();
-  }
-
-  onEnterFechaIni(): void {
-    if (this.isFullDayOrCamping() || !this.txtFechaFin) {
-      this.txtCantidadAdulto?.nativeElement?.focus();
-    } else {
-      this.txtFechaFin?.nativeElement?.focus();
-    }
   }
 
   //Begin: Filtrar habitacion
@@ -973,26 +958,6 @@ export class ReservaFormComponent {
     const fecha_fin = moment(this.reserva.fecha_fin);
     let diff = Math.round(fecha_fin.diff(fecha_inicio, 'days', true));
     return diff <= 0 ? 1 : diff;
-  }
-
-  calcularCantidad() {
-    if (this.isFullDayOrCamping()) {
-      this.reserva.fecha_fin = this.reserva.fecha_ini;
-    }
-    this.calcularTotal();
-  }
-
-  calcularFechaFin() {
-    if (this.isFullDayOrCamping()) {
-      this.reserva.fecha_fin = this.reserva.fecha_ini;
-      this.calcularTotal();
-      return;
-    }
-    if (this.reserva.fecha_ini) {
-      const diasASumar = this.getNoches();
-      this.reserva.fecha_fin = moment(this.reserva.fecha_ini).add(diasASumar, 'days').format('YYYY-MM-DD');
-      this.calcularTotal();
-    }
   }
 
   calcularTotal() {
