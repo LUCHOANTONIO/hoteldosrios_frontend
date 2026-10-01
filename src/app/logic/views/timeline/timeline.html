@@ -22,9 +22,21 @@
         [class.active]="tabActiva === 'fullday'"
         [attr.aria-selected]="tabActiva === 'fullday'"
         (click)="cambiarTab('fullday')">
-        <mat-icon class="tab-icon">deck</mat-icon>
-        <span class="tab-title">Full Day y Camping</span>
-        <span class="tab-badge">{{ countFullDayCamping }}</span>
+        <mat-icon class="tab-icon">wb_sunny</mat-icon>
+        <span class="tab-title">Full Day</span>
+        <span class="tab-badge">{{ countFullDay }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        role="tab"
+        class="timeline-tab tab-camping" 
+        [class.active]="tabActiva === 'camping'"
+        [attr.aria-selected]="tabActiva === 'camping'"
+        (click)="cambiarTab('camping')">
+        <mat-icon class="tab-icon">forest</mat-icon>
+        <span class="tab-title">Camping</span>
+        <span class="tab-badge">{{ countCamping }}</span>
       </button>
 
       <button 

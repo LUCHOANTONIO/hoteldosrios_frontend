@@ -66,7 +66,7 @@ import { CommonModule } from '@angular/common';
 })
 export class TimelineComponent implements AfterViewInit {
   @ViewChild('contextMenu') contextMenu!: ContextMenuComponent;
-  tabActiva: 'habitaciones' | 'fullday' | 'todas' = 'habitaciones';
+  tabActiva: 'habitaciones' | 'fullday' | 'camping' | 'todas' = 'habitaciones';
   habitaciones: HabitacionModel[] = [];
   productos: ProductoModel[] = [];
   tipo_documentos: TipoDocumentoModel[] = [];
@@ -154,35 +154,63 @@ export class TimelineComponent implements AfterViewInit {
     });
   }
 
-  isFullDayOrCamping(habitacion: HabitacionModel): boolean {
+  isCamping(habitacion: HabitacionModel): boolean {
     if (!habitacion) return false;
     const desc = (habitacion.descripcion || '').trim().toUpperCase();
     const tipo = (habitacion.tipo_habitacion || '').trim().toUpperCase();
 
     return (
-      desc.includes('FULL DAY') ||
-      desc.includes('FULLDAY') ||
       desc.includes('CAMPING') ||
       desc.includes('CAMMPING') ||
-      tipo.includes('FULL DAY') ||
-      tipo.includes('FULLDAY') ||
       tipo.includes('CAMPING') ||
       tipo.includes('CAMMPING')
     );
   }
 
+  isFullDay(habitacion: HabitacionModel): boolean {
+    if (!habitacion) return false;
+    const desc = (habitacion.descripcion || '').trim().toUpperCase();
+    const tipo = (habitacion.tipo_habitacion || '').trim().toUpperCase();
+
+    return (
+      (desc.includes('FULL DAY') ||
+      desc.includes('FULLDAY') ||
+      tipo.includes('FULL DAY') ||
+      tipo.includes('FULLDAY')) &&
+      !this.isCamping(habitacion)
+    );
+  }
+
+  isHabitacion(habitacion: HabitacionModel): boolean {
+    return !this.isFullDay(habitacion) && !this.isCamping(habitacion);
+  }
+
+  isFullDayOrCamping(habitacion: HabitacionModel): boolean {
+    return this.isFullDay(habitacion) || this.isCamping(habitacion);
+  }
+
   getHabitacionesFiltradas(): HabitacionModel[] {
     if (this.tabActiva === 'fullday') {
-      return this.habitaciones.filter((h) => this.isFullDayOrCamping(h));
+      return this.habitaciones.filter((h) => this.isFullDay(h));
+    } else if (this.tabActiva === 'camping') {
+      return this.habitaciones.filter((h) => this.isCamping(h));
     } else if (this.tabActiva === 'habitaciones') {
-      return this.habitaciones.filter((h) => !this.isFullDayOrCamping(h));
+      return this.habitaciones.filter((h) => this.isHabitacion(h));
     } else {
       return this.habitaciones;
     }
   }
 
   get countHabitaciones(): number {
-    return this.habitaciones.filter((h) => !this.isFullDayOrCamping(h)).length;
+    return this.habitaciones.filter((h) => this.isHabitacion(h)).length;
+  }
+
+  get countFullDay(): number {
+    return this.habitaciones.filter((h) => this.isFullDay(h)).length;
+  }
+
+  get countCamping(): number {
+    return this.habitaciones.filter((h) => this.isCamping(h)).length;
   }
 
   get countFullDayCamping(): number {
@@ -193,7 +221,7 @@ export class TimelineComponent implements AfterViewInit {
     return this.habitaciones.length;
   }
 
-  cambiarTab(nuevaTab: 'habitaciones' | 'fullday' | 'todas') {
+  cambiarTab(nuevaTab: 'habitaciones' | 'fullday' | 'camping' | 'todas') {
     if (this.tabActiva === nuevaTab) return;
     this.tabActiva = nuevaTab;
     this.loadGroups();
@@ -512,7 +540,7 @@ export class TimelineComponent implements AfterViewInit {
   readonly dialog = inject(MatDialog);
   mostrarFormularioNuevo(fecha_ini, fecha_fin, habitacion_id) {
     const habSeleccionada = this.habitaciones.find(h => Number(h.id) === Number(habitacion_id));
-    const esFD = habSeleccionada ? this.isFullDayOrCamping(habSeleccionada) : (this.tabActiva === 'fullday');
+    const esFD = habSeleccionada ? this.isFullDayOrCamping(habSeleccionada) : (this.tabActiva === 'fullday' || this.tabActiva === 'camping');
 
     this.reserva = new ReservaModel();
     this.reserva.fecha_ini = fecha_ini;
