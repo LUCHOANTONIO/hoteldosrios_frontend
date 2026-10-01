@@ -284,89 +284,22 @@
                 </div>
 
                 <!-- CARD 4: SERVICIOS ADICIONALES -->
-                <div class="form-section-card servicios-card"
-                    [class.servicios-card-collapsed]="!isVisibleServiciosExtra">
-                    <div class="section-header d-flex align-items-center justify-content-between"
-                        (click)="toggleServiciosExtra()" style="cursor: pointer; user-select: none;">
+                <div class="form-section-card servicios-card">
+                    <div class="section-header d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center gap-2">
                             <mat-icon class="section-icon">room_service</mat-icon>
                             <span class="section-title">Servicios Adicionales</span>
-                            @if (reserva.transacciones && reserva.transacciones.length > 0) {
-                            <span class="badge rounded-pill bg-primary text-white ms-1 px-2 py-1"
-                                style="font-size: 11px; font-weight: 600;">
-                                {{ reserva.transacciones.length }} {{ reserva.transacciones.length === 1 ? 'servicio' :
-                                'servicios' }} (Bs. {{ getTotalServiciosAdicionales() | number:'1.2-2' }})
-                            </span>
-                            }
                         </div>
-                        <button type="button" class="btn-toggle-servicios"
-                            (click)="$event.stopPropagation(); toggleServiciosExtra()"
-                            [matTooltip]="isVisibleServiciosExtra ? 'Comprimir servicios adicionales' : 'Desplegar servicios adicionales'">
-                            <mat-icon>{{ isVisibleServiciosExtra ? 'expand_less' : (reserva.transacciones &&
-                                reserva.transacciones.length > 0 ? 'expand_more' : 'add') }}</mat-icon>
-                            <span>{{ isVisibleServiciosExtra ? 'Comprimir' : 'Desplegar' }}</span>
+                        <button type="button" class="btn-catalogo-header"
+                            (click)="abrirModalCatalogoProducto()"
+                            [disabled]="isDisabled"
+                            matTooltip="Abrir catálogo con selección por radio button, cantidad y precio">
+                            <mat-icon>storefront</mat-icon>
+                            <span>Catálogo</span>
                         </button>
                     </div>
 
-                    @if (isVisibleServiciosExtra) {
-                    <div class="servicios-content animate-fade-in">
-                        <!-- Fila de ingreso de Categoria, Productos, Cantidad, Precio Unidad, Total y Procesar en 2 columnas -->
-                        <div class="row g-2 align-items-start mb-2">
-                            <!-- Col 1: Categoria -->
-                            <app-select-search class="col-12 col-md-6" label="Categoria"
-                                [(ngModel)]="nuevoServicio.categoria_id" [dataSource]="categorias"
-                                (selectionChange)="filtrarProductos()" text="descripcion" value="id"
-                                name="nuevo_categoria_id" showCleanButton="true" [searchFields]="['descripcion']"
-                                [disabled]="isDisabled">
-                            </app-select-search>
-
-                            <!-- Col 2: Productos -->
-                            <app-select-search class="col-12 col-md-6" #cboProducto label="Productos"
-                                [(ngModel)]="nuevoServicio.producto_id" [dataSource]="productos_filtrados"
-                                (selectionChange)="onProductoServicioChange($event)" text="descripcion" value="id"
-                                name="nuevo_producto_id" showCleanButton="true" [searchFields]="['descripcion']"
-                                [disabled]="isDisabled">
-                            </app-select-search>
-
-                            <!-- Col 3: Cantidad -->
-                            <mat-form-field appearance="outline" class="col-12 col-md-6">
-                                <mat-label>Cantidad</mat-label>
-                                <input type="number" matInput [(ngModel)]="nuevoServicio.cantidad" name="nuevo_cantidad"
-                                    (input)="calcularTotalNuevoServicio()" min="1" step="1"
-                                    (keydown)="bloquearNegativos($event)" placeholder="1" [readonly]="isDisabled">
-                            </mat-form-field>
-
-                            <!-- Col 4: Precio Unidad -->
-                            <mat-form-field appearance="outline" class="col-12 col-md-6">
-                                <mat-label>Precio Unidad</mat-label>
-                                <input type="number" matInput [(ngModel)]="nuevoServicio.precio_unitario"
-                                    name="nuevo_monto" (input)="calcularTotalNuevoServicio()" min="0" step="any"
-                                    (keydown)="bloquearSignosNegativos($event)" placeholder="0.00"
-                                    [readonly]="isDisabled">
-                            </mat-form-field>
-
-                            <!-- Col 5: Total -->
-                            <mat-form-field appearance="outline" class="col-12 col-md-6" subscriptSizing="dynamic">
-                                <mat-label>Total</mat-label>
-                                <input type="number" matInput [(ngModel)]="nuevoServicio.total" name="nuevo_total"
-                                    readonly class="fw-bold text-success" placeholder="0.00">
-                            </mat-form-field>
-
-                            <!-- Col 6: Botón Agregar Item -->
-                            <div class="col-12 col-md-6 btn-add-wrapper">
-                                <button type="button" class="btn-agregar-item-outline"
-                                    (click)="agregarServicioAdicional()"
-                                    [disabled]="isDisabled || !nuevoServicio.producto_id || isProcessingServicio">
-                                    @if (isProcessingServicio) {
-                                    <mat-spinner diameter="16" class="me-1"></mat-spinner>
-                                    } @else {
-                                    <mat-icon>add</mat-icon>
-                                    }
-                                    <span>Agregar Item</span>
-                                </button>
-                            </div>
-                        </div>
-
+                    <div class="servicios-content">
                         <!-- Tabla de Servicios Adicionales Agregados -->
                         @if (reserva.transacciones && reserva.transacciones.length > 0) {
                         <div class="table-responsive border rounded mt-2 mb-2 bg-white">
@@ -444,7 +377,6 @@
                         </div>
                         }
                     </div>
-                    }
                 </div>
 
                 <!-- CARD 5: RESUMEN TOTAL GENERAL -->

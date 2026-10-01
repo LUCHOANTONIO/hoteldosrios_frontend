@@ -22,6 +22,7 @@ import { BitacoraFormComponent } from '../bitacora-form/bitacora-form';
 import { ConfirmarEliminarComponent } from '../../../../base/shared/views/confirmar-eliminar/confirmar-eliminar';
 import { PdfViewerComponent } from '../../../shared/views/pdf-viewer/pdf-viewer';
 import { SelectSearchComponent } from '../../../../base/shared/views/select-search/select-search';
+import { CatalogoProductoModalComponent, CatalogoItemResultado } from '../catalogo-producto-modal/catalogo-producto-modal';
 
 //DATA PICKER
 import { MatDatepickerModule } from '@angular/material/datepicker'; //Para fecha desplegable
@@ -337,8 +338,18 @@ export class ReservaFormComponent {
 
     this.productos_filtrados = [...this.productos];
     this.categoriaService.listar().subscribe({
-      next: (res) => {
-        this.categorias = res;
+      next: (res: any) => {
+        if (Array.isArray(res)) {
+          this.categorias = res;
+        } else if (res && Array.isArray(res.categorias)) {
+          this.categorias = res.categorias;
+        } else if (res && res.dato) {
+          try {
+            this.categorias = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
+          } catch {
+            this.categorias = [];
+          }
+        }
         this.filtrarProductos();
       }
     });
@@ -1226,31 +1237,145 @@ export class ReservaFormComponent {
     }
   }
 
-  eliminarServicioAdicional(index: number, item: TransaccionModel): void {
-    if (item.id && item.id > 0) {
-      this.transaccionService.eliminar(item.id).subscribe({
-        next: (res) => {
-          if (res.correcto) {
-            const data = JSON.parse(res.dato);
-            this.reserva.transacciones = data.transacciones as TransaccionModel[];
-            this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
-            this.balance.set(data.balance);
-            this.reserva.saldo = data.balance.saldo;
-            if (this.items) {
-              this.items.update({ id: this.reserva.id, saldo: this.reserva.saldo });
-            }
-            this.comunicacionService.executeActionReserva.set(true);
-            this.comunicacionService.loadBitacoraSignal.set({ reserva_id: this.reserva.id, trigger: Date.now() });
-            this.alertService.show("Servicio adicional eliminado", { duration: 3000, type: 'success' });
-          } else {
-            this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
-          }
+  abrirModalCatalogoProducto(): void {
+    const dialogRef = this.dialog.open(CatalogoProductoModalComponent, {
+      data: {
+        productos: this.productos,
+        categorias: this.categorias,
+        productoSeleccionadoId: this.nuevoServicio?.producto_id || null,
+        onAgregarItem: (item: CatalogoItemResultado) => {
+          return this.agregarServicioDesdeItem(item);
         }
-      });
-    } else {
-      this.reserva.transacciones.splice(index, 1);
-      this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
-    }
+      },
+      width: '95vw',
+      maxWidth: '850px',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe((itemSeleccionado: CatalogoItemResultado | null) => {
+      if (itemSeleccionado) {
+        this.agregarServicioDesdeItem(itemSeleccionado);
+      }
+    });
+  }
+
+  agregarServicioDesdeItem(item: CatalogoItemResultado): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.isVisibleServiciosExtra = true;
+      this.nuevoServicio.producto_id = item.producto_id;
+      this.nuevoServicio.descripcion = item.descripcion;
+      this.nuevoServicio.categoria_id = item.categoria_id;
+      this.nuevoServicio.cantidad = item.cantidad;
+      this.nuevoServicio.precio_unitario = item.precio_unitario;
+      this.nuevoServicio.total = item.total;
+
+      if (this.reserva && this.reserva.id > 0) {
+        this.isProcessingServicio = true;
+        const itemAGuardar = { ...this.nuevoServicio, reserva_id: this.reserva.id };
+        this.transaccionService.crear(itemAGuardar).subscribe({
+          next: (res) => {
+            this.isProcessingServicio = false;
+            if (res.correcto) {
+              const data = JSON.parse(res.dato);
+              this.reserva.transacciones = data.transacciones as TransaccionModel[];
+              this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+              this.balance.set(data.balance);
+              this.reserva.saldo = data.balance.saldo;
+              if (this.items) {
+                this.items.update({ id: this.reserva.id, saldo: this.reserva.saldo });
+              }
+              this.comunicacionService.executeActionReserva.set(true);
+              this.comunicacionService.loadBitacoraSignal.set({ reserva_id: this.reserva.id, trigger: Date.now() });
+              this.alertService.show(`"${item.descripcion}" agregado con éxito`, { duration: 3000, type: 'success' });
+              this.inicializarNuevoServicio();
+              resolve(true);
+            } else {
+              this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
+              resolve(false);
+            }
+          },
+          error: (err) => {
+            this.isProcessingServicio = false;
+            console.error(err);
+            this.alertService.show("Error al guardar el servicio adicional", { duration: 5000, type: 'info' });
+            resolve(false);
+          }
+        });
+      } else {
+        if (!this.reserva.transacciones) {
+          this.reserva.transacciones = [];
+        }
+        this.reserva.transacciones.push({ ...this.nuevoServicio });
+        this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+        this.alertService.show(`"${item.descripcion}" agregado a la lista`, { duration: 3000, type: 'success' });
+        this.inicializarNuevoServicio();
+        resolve(true);
+      }
+    });
+  }
+
+  eliminarServicioAdicional(index: number, item: TransaccionModel): void {
+    if (this.isDisabled) return;
+
+    const dialogRef = this.dialog.open(ConfirmarEliminarComponent, {
+      width: '250px',
+      enterAnimationDuration: '0ms',
+      exitAnimationDuration: '0ms',
+      data: item.id || index
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (item.id && item.id > 0) {
+          this.transaccionService.eliminar(item.id).subscribe({
+            next: (res) => {
+              if (res.correcto) {
+                const data = JSON.parse(res.dato);
+                this.reserva.transacciones = data.transacciones as TransaccionModel[];
+                this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+                if (data.balance) {
+                  this.balance.set(data.balance);
+                  this.reserva.saldo = data.balance.saldo;
+                }
+                if (this.items && this.reserva?.id) {
+                  try {
+                    const esMismoDia = moment(this.reserva.fecha_ini).isSame(moment(this.reserva.fecha_fin), 'day');
+                    const esFD = this.isFullDay() || esMismoDia;
+                    const timelineStart = esFD ? moment(this.reserva.fecha_ini).format("YYYY-MM-DD 03:00") : moment(this.reserva.fecha_ini).format("YYYY-MM-DD 13:00");
+                    const timelineEnd = esFD ? moment(this.reserva.fecha_ini).format("YYYY-MM-DD 21:00") : moment(this.reserva.fecha_fin).format("YYYY-MM-DD 11:00");
+                    this.items.update({
+                      id: this.reserva.id,
+                      correlativo: this.reserva.correlativo,
+                      cliente: this.reserva.cliente,
+                      start: timelineStart,
+                      end: timelineEnd,
+                      group: this.reserva.habitacion_id,
+                      className: this.reserva.color,
+                      saldo: this.reserva.saldo
+                    });
+                  } catch (e) {
+                    console.warn("Error updating timeline item", e);
+                  }
+                }
+                this.comunicacionService.executeActionReserva.set(true);
+                this.comunicacionService.loadBitacoraSignal.set({ reserva_id: this.reserva.id, trigger: Date.now() });
+                this.alertService.show("Servicio adicional eliminado", { duration: 3000, type: 'success' });
+              } else {
+                this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
+              }
+            },
+            error: (err) => {
+              console.error(err);
+              this.alertService.show("Error al eliminar servicio adicional", { duration: 5000, type: 'info' });
+            }
+          });
+        } else {
+          this.reserva.transacciones.splice(index, 1);
+          this.dataSourceTransaccion = new MatTableDataSource<TransaccionModel>(this.reserva.transacciones);
+          this.alertService.show("Servicio adicional removido de la lista", { duration: 3000, type: 'success' });
+        }
+      }
+    });
   }
 
   getTotalServiciosAdicionales(): number {

@@ -14,6 +14,7 @@ import { CategoriaService } from '../../../services/categoria.service';
 
 //COMPONENTES
 import { SelectSearchComponent } from '../../../../base/shared/views/select-search/select-search';
+import { CatalogoProductoModalComponent, CatalogoItemResultado } from '../catalogo-producto-modal/catalogo-producto-modal';
 
 //ANGULAR MATERIAL
 import { MatButtonModule } from '@angular/material/button';
@@ -102,6 +103,40 @@ export class TransaccionFormComponent implements OnInit {
       const permisos = this.permisoService.permisos();
       if (permisos.length > 0) {
         this.mostrar_btn_destroy = permisos.some(p => p.nombre === 'ELIMINAR TRANSACCION CALENDARIO');
+      }
+    });
+  }
+
+  abrirModalCatalogoProducto() {
+    const dialogRef = this.dialog.open(CatalogoProductoModalComponent, {
+      data: {
+        productos: this.productos,
+        categorias: this.categorias,
+        productoSeleccionadoId: this.transaccion?.producto_id || null,
+        onAgregarItem: (item: CatalogoItemResultado) => {
+          this.transaccion.categoria_id = item.categoria_id;
+          this.transaccion.producto_id = item.producto_id;
+          this.transaccion.descripcion = item.descripcion;
+          this.transaccion.cantidad = item.cantidad;
+          this.transaccion.precio_unitario = item.precio_unitario;
+          this.transaccion.total = item.total;
+          this.guardarTransaccion();
+        }
+      },
+      width: '95vw',
+      maxWidth: '850px',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe((itemSeleccionado: CatalogoItemResultado | null) => {
+      if (itemSeleccionado) {
+        this.transaccion.categoria_id = itemSeleccionado.categoria_id;
+        this.transaccion.producto_id = itemSeleccionado.producto_id;
+        this.transaccion.descripcion = itemSeleccionado.descripcion;
+        this.transaccion.cantidad = itemSeleccionado.cantidad;
+        this.transaccion.precio_unitario = itemSeleccionado.precio_unitario;
+        this.transaccion.total = itemSeleccionado.total;
+        this.guardarTransaccion();
       }
     });
   }
