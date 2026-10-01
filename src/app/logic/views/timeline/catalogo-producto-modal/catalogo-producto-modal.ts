@@ -15,6 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { ProductoModel } from '../../../models/producto.model';
 import { CategoriaModel } from '../../../models/categoria.model';
+import { ProductoService } from '../../../services/producto.service';
 import { CategoriaService } from '../../../services/categoria.service';
 import { SpanishPaginatorIntl } from '../../../../base/utils/spanish-paginator-intl';
 
@@ -64,6 +65,7 @@ export class CatalogoProductoModalComponent implements AfterViewInit {
   dataSource: MatTableDataSource<ProductoModel>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  private productoService = inject(ProductoService, { optional: true });
   private categoriaService = inject(CategoriaService, { optional: true });
 
   productos: ProductoModel[] = [];
@@ -83,13 +85,40 @@ export class CatalogoProductoModalComponent implements AfterViewInit {
     public dialogRef: MatDialogRef<CatalogoProductoModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: CatalogoProductoData
   ) {
-    this.productos = data?.productos ? [...data.productos] : [];
-    this.categorias = data?.categorias ? [...data.categorias] : [];
+    this.productos = data?.productos && Array.isArray(data.productos) ? [...data.productos] : [];
+    this.categorias = data?.categorias && Array.isArray(data.categorias) ? [...data.categorias] : [];
 
     // 1. Extraer categorías si los productos ya vienen con el nombre de categoría
     this.extraerCategoriasDeProductos();
 
-    // 2. Si no hay categorías, cargarlas con CategoriaService
+    // 2. Si no hay productos pasados o viene vacío, cargarlos con ProductoService
+    if (this.productos.length === 0 && this.productoService) {
+      this.productoService.listar().subscribe({
+        next: (res: any) => {
+          let prods: ProductoModel[] = [];
+          if (Array.isArray(res)) {
+            prods = res;
+          } else if (res && Array.isArray(res.productos)) {
+            prods = res.productos;
+          } else if (res && res.dato) {
+            try {
+              prods = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
+            } catch {
+              prods = [];
+            }
+          }
+          this.productos = prods;
+          this.extraerCategoriasDeProductos();
+          this.aplicarFiltros();
+          if (!this.productoSeleccionado && this.productos.length > 0) {
+            this.seleccionarProducto(this.productos[0]);
+          }
+        },
+        error: (err) => console.error("Error al cargar productos en modal catalogo:", err)
+      });
+    }
+
+    // 3. Si no hay categorías, cargarlas con CategoriaService
     if (this.categorias.length === 0 && this.categoriaService) {
       this.categoriaService.listar().subscribe({
         next: (res: any) => {
@@ -199,8 +228,12 @@ export class CatalogoProductoModalComponent implements AfterViewInit {
       filtrados = filtrados.filter(p => {
         if (Number(p.categoria_id) === Number(this.categoriaFiltroId)) return true;
         const catObj = this.categorias.find(c => Number(c.id) === Number(this.categoriaFiltroId));
-        if (catObj && (p as any).categoria && String((p as any).categoria).trim().toLowerCase() === catObj.descripcion.trim().toLowerCase()) {
-          return true;
+        if (catObj) {
+          const sel = catObj.descripcion.toLowerCase().trim();
+          const pCat = (p.categoria || this.getCategoriaDescripcion(p) || '').toLowerCase().trim();
+          if (pCat && (pCat === sel || pCat.startsWith(sel) || sel.startsWith(pCat))) {
+            return true;
+          }
         }
         return false;
       });

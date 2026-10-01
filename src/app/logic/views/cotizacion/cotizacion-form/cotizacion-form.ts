@@ -36,6 +36,8 @@ import { PreventEnterSelectDirective } from '../../../../base/shared/directives/
 import { AnimarPerderFocoDirective } from '../../../../base/shared/directives/animar-perder-foco.directive';
 import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-guardar.directive';
 import { SelectSearchComponent } from '../../../../base/shared/views/select-search/select-search';
+import { ConfirmarEliminarComponent } from '../../../../base/shared/views/confirmar-eliminar/confirmar-eliminar';
+import { CatalogoProductoModalComponent, CatalogoItemResultado } from '../../timeline/catalogo-producto-modal/catalogo-producto-modal';
 
 // VARIOS
 import { Component, Inject, ViewChild, ChangeDetectorRef } from '@angular/core';
@@ -185,20 +187,53 @@ export class CotizacionFormComponent {
   }
 
   cargarDatosIniciales() {
-    forkJoin({
-      tiposDoc: this.tipoDocumentoService.listar(),
-      tarifas: this.tarifaService.listar(),
-      categorias: this.categoriaService.listar(),
-      productos: this.productoService.listar()
-    }).subscribe({
-      next: (res) => {
-        this.tiposDocumento = res.tiposDoc || [];
-        this.tarifas = res.tarifas || [];
-        this.categorias = res.categorias || [];
-        this.productos = res.productos || [];
-        this.prepararTarifasParaSelect();
+    this.productoService.listar().subscribe({
+      next: (res: any) => {
+        let prods: ProductoModel[] = [];
+        if (Array.isArray(res)) {
+          prods = res;
+        } else if (res && Array.isArray(res.productos)) {
+          prods = res.productos;
+        } else if (res && res.dato) {
+          try {
+            prods = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
+          } catch {
+            prods = [];
+          }
+        }
+        this.productos = prods;
         this.filtrarProductos();
+      },
+      error: (err) => console.error("Error al cargar productos en cotizacion:", err)
+    });
 
+    this.categoriaService.listar().subscribe({
+      next: (res: any) => {
+        if (Array.isArray(res)) {
+          this.categorias = res;
+        } else if (res && Array.isArray(res.categorias)) {
+          this.categorias = res.categorias;
+        } else if (res && res.dato) {
+          try {
+            this.categorias = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
+          } catch {
+            this.categorias = [];
+          }
+        }
+        this.filtrarProductos();
+      },
+      error: (err) => console.error("Error al cargar categorias en cotizacion:", err)
+    });
+
+    this.tipoDocumentoService.listar().subscribe({
+      next: (res) => this.tiposDocumento = res || [],
+      error: (err) => console.error(err)
+    });
+
+    this.tarifaService.listar().subscribe({
+      next: (res) => {
+        this.tarifas = res || [];
+        this.prepararTarifasParaSelect();
         if (this.cotizacion.id > 0) {
           this.cargarDetallesExistentes();
         } else {
@@ -207,7 +242,7 @@ export class CotizacionFormComponent {
           this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
         }
       },
-      error: (err) => console.error("Error al cargar datos iniciales:", err)
+      error: (err) => console.error(err)
     });
   }
 
@@ -398,31 +433,85 @@ export class CotizacionFormComponent {
     this.inicializarNuevoServicio();
   }
 
+  abrirModalCatalogoProducto(): void {
+    const dialogRef = this.dialog.open(CatalogoProductoModalComponent, {
+      data: {
+        productos: this.productos,
+        categorias: this.categorias,
+        onAgregarItem: (item: CatalogoItemResultado) => {
+          this.agregarServicioDesdeItem(item);
+        }
+      },
+      width: '95vw',
+      maxWidth: '850px',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe((itemSeleccionado: CatalogoItemResultado | null) => {
+      if (itemSeleccionado) {
+        this.agregarServicioDesdeItem(itemSeleccionado);
+      }
+    });
+  }
+
+  agregarServicioDesdeItem(item: CatalogoItemResultado) {
+    const nuevo = new CotizacionDetalleModel();
+    nuevo.cotizacion_id = this.cotizacion?.id || 0;
+    nuevo.producto_id = item.producto_id;
+    nuevo.categoria_id = item.categoria_id;
+    nuevo.producto = item.descripcion;
+    nuevo.servicio = item.descripcion;
+    nuevo.detalle = item.descripcion;
+    nuevo.cantidad = item.cantidad;
+    nuevo.precio_unitario = item.precio_unitario;
+    nuevo.total = item.total;
+    nuevo.subtotal = item.total;
+    nuevo.is_base = 0;
+    nuevo.eliminado = 0;
+
+    this.serviciosAdicionales.push(nuevo);
+    this.serviciosAdicionales = [...this.serviciosAdicionales];
+    this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
+    this.alertService.show(`"${item.descripcion}" agregado a la lista`, { duration: 3000, type: 'success' });
+  }
+
   eliminarServicioAdicional(index: number, item: CotizacionDetalleModel) {
-    if (item.id && item.id > 0 && this.cotizacion && this.cotizacion.id > 0) {
-      this.cotizacionDetalleService.eliminar(item.id).subscribe({
-        next: (res) => {
-          if (res.correcto) {
-            this.serviciosAdicionales.splice(index, 1);
-            this.serviciosAdicionales = [...this.serviciosAdicionales];
-            this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
-            this.alertService.show("Servicio adicional eliminado", { duration: 3000, type: 'success' });
-          } else {
-            this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
-          }
-        },
-        error: (err) => {
-          console.error(err);
+    const dialogRef = this.dialog.open(ConfirmarEliminarComponent, {
+      width: '250px',
+      enterAnimationDuration: '0ms',
+      exitAnimationDuration: '0ms',
+      data: item.id || index
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (item.id && item.id > 0 && this.cotizacion && this.cotizacion.id > 0) {
+          this.cotizacionDetalleService.eliminar(item.id).subscribe({
+            next: (res) => {
+              if (res.correcto) {
+                this.serviciosAdicionales.splice(index, 1);
+                this.serviciosAdicionales = [...this.serviciosAdicionales];
+                this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
+                this.alertService.show("Servicio adicional eliminado", { duration: 3000, type: 'success' });
+              } else {
+                this.alertService.show(res.mensaje, { duration: 5000, type: 'info' });
+              }
+            },
+            error: (err) => {
+              console.error(err);
+              this.serviciosAdicionales.splice(index, 1);
+              this.serviciosAdicionales = [...this.serviciosAdicionales];
+              this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
+            }
+          });
+        } else {
           this.serviciosAdicionales.splice(index, 1);
           this.serviciosAdicionales = [...this.serviciosAdicionales];
           this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
+          this.alertService.show("Servicio adicional removido de la lista", { duration: 3000, type: 'success' });
         }
-      });
-    } else {
-      this.serviciosAdicionales.splice(index, 1);
-      this.serviciosAdicionales = [...this.serviciosAdicionales];
-      this.dataSourceServicios = new MatTableDataSource<CotizacionDetalleModel>(this.serviciosAdicionales);
-    }
+      }
+    });
   }
 
   // TOTALES
