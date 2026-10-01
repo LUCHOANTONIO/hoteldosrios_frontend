@@ -9,6 +9,7 @@ import { TipoHuespedModel } from '../../models/tipo_huesped.model';
 import { ProductoModel } from '../../models/producto.model';
 import { FormaPagoModel } from '../../models/forma_pago.model';
 import { EstadoCivilModel } from '../../../base/models/estadocivil.model';
+import { TipoHabitacionModel } from '../../models/tipo_habitacion.model';
 
 //SERVICES
 import { HabitacionService } from '../../services/habitacion.service';
@@ -22,6 +23,7 @@ import { MotivoService } from '../../services/motivo.service';
 import { ProductoService } from '../../services/producto.service';
 import { ComunicacionService } from '../../services/local/comunicacion.service';
 import { EstadoCivilService } from '../../../base/services/estadocivil.service';
+import { TipoHabitacionService } from '../../services/tipo_habitacion.service';
 
 //COMPONENT
 import { ReservaFormComponent } from './reserva-form/reserva-form';
@@ -67,6 +69,7 @@ import { CommonModule } from '@angular/common';
 export class TimelineComponent implements AfterViewInit {
   @ViewChild('contextMenu') contextMenu!: ContextMenuComponent;
   tabActiva: 'habitaciones' | 'fullday' | 'camping' | 'todas' = 'habitaciones';
+  tipo_habitaciones: TipoHabitacionModel[] = [];
   habitaciones: HabitacionModel[] = [];
   productos: ProductoModel[] = [];
   tipo_documentos: TipoDocumentoModel[] = [];
@@ -106,7 +109,8 @@ export class TimelineComponent implements AfterViewInit {
     private motivoService: MotivoService,
     private formaPagoService: FormaPagoService,
     private comunicacionService: ComunicacionService,
-    private estadoCivilService: EstadoCivilService
+    private estadoCivilService: EstadoCivilService,
+    private tipoHabitacionService: TipoHabitacionService
   ) {
     this.cargarDatos();
 
@@ -133,9 +137,11 @@ export class TimelineComponent implements AfterViewInit {
       tipo_huespedes: this.tipoHuespedService.listar(),
       motivos: this.motivoService.listar(),
       forma_pagos: this.formaPagoService.listar(),
-      estado_civil: this.estadoCivilService.listar()
+      estado_civil: this.estadoCivilService.listar(),
+      tipo_habitaciones: this.tipoHabitacionService.listar()
     }).subscribe({
       next: (res) => {
+        this.tipo_habitaciones = res.tipo_habitaciones;
         this.estado_civil = res.estado_civil;
         this.habitaciones = res.habitaciones;
         this.productos = res.productos;
@@ -154,31 +160,44 @@ export class TimelineComponent implements AfterViewInit {
     });
   }
 
+  get tipoCamping(): TipoHabitacionModel | undefined {
+    return this.tipo_habitaciones.find(th => 
+      th.codigo?.toUpperCase() === 'CAMP' || 
+      th.descripcion?.trim().toUpperCase() === 'CAMPING'
+    );
+  }
+
+  get tipoFullDay(): TipoHabitacionModel | undefined {
+    return this.tipo_habitaciones.find(th => 
+      th.codigo?.toUpperCase() === 'FULL' || 
+      th.descripcion?.trim().toUpperCase() === 'FULL DAY'
+    );
+  }
+
+  get labelCamping(): string {
+    return this.tipoCamping?.descripcion || 'Camping';
+  }
+
+  get labelFullDay(): string {
+    return this.tipoFullDay?.descripcion || 'Full Day';
+  }
+
   isCamping(habitacion: HabitacionModel): boolean {
     if (!habitacion) return false;
-    const desc = (habitacion.descripcion || '').trim().toUpperCase();
+    if (this.tipoCamping && Number(habitacion.tipo_habitacion_id) === Number(this.tipoCamping.id)) {
+      return true;
+    }
     const tipo = (habitacion.tipo_habitacion || '').trim().toUpperCase();
-
-    return (
-      desc.includes('CAMPING') ||
-      desc.includes('CAMMPING') ||
-      tipo.includes('CAMPING') ||
-      tipo.includes('CAMMPING')
-    );
+    return tipo === 'CAMPING' || (this.tipoCamping && tipo === this.tipoCamping.descripcion?.trim().toUpperCase());
   }
 
   isFullDay(habitacion: HabitacionModel): boolean {
     if (!habitacion) return false;
-    const desc = (habitacion.descripcion || '').trim().toUpperCase();
+    if (this.tipoFullDay && Number(habitacion.tipo_habitacion_id) === Number(this.tipoFullDay.id)) {
+      return true;
+    }
     const tipo = (habitacion.tipo_habitacion || '').trim().toUpperCase();
-
-    return (
-      (desc.includes('FULL DAY') ||
-      desc.includes('FULLDAY') ||
-      tipo.includes('FULL DAY') ||
-      tipo.includes('FULLDAY')) &&
-      !this.isCamping(habitacion)
-    );
+    return tipo === 'FULL DAY' || (this.tipoFullDay && tipo === this.tipoFullDay.descripcion?.trim().toUpperCase());
   }
 
   isHabitacion(habitacion: HabitacionModel): boolean {
@@ -540,7 +559,7 @@ export class TimelineComponent implements AfterViewInit {
   readonly dialog = inject(MatDialog);
   mostrarFormularioNuevo(fecha_ini, fecha_fin, habitacion_id) {
     const habSeleccionada = this.habitaciones.find(h => Number(h.id) === Number(habitacion_id));
-    const esFD = habSeleccionada ? this.isFullDayOrCamping(habSeleccionada) : (this.tabActiva === 'fullday' || this.tabActiva === 'camping');
+    const esFD = habSeleccionada ? this.isFullDay(habSeleccionada) : (this.tabActiva === 'fullday');
 
     this.reserva = new ReservaModel();
     this.reserva.fecha_ini = fecha_ini;
@@ -566,6 +585,7 @@ export class TimelineComponent implements AfterViewInit {
         tipo_huespedes: this.tipo_huespedes,
         motivos: this.motivos,
         productos: this.productos,
+        tipo_habitaciones: this.tipo_habitaciones,
         items: this.items,
         updateGroupsSignal: this.updateGroupsSignal
       },
@@ -616,6 +636,7 @@ export class TimelineComponent implements AfterViewInit {
             tipo_huespedes: this.tipo_huespedes,
             motivos: this.motivos,
             productos: this.productos,
+            tipo_habitaciones: this.tipo_habitaciones,
             items: this.items,
             updateGroupsSignal: this.updateGroupsSignal
           },

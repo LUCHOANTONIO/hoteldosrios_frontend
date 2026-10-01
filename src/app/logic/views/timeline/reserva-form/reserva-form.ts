@@ -11,6 +11,7 @@ import { ProductoModel } from '../../../models/producto.model';
 import { TransaccionModel } from '../../../models/transaccion.model';
 import { EstadoCivilModel } from '../../../../base/models/estadocivil.model';
 import { CategoriaModel } from '../../../models/categoria.model';
+import { TipoHabitacionModel } from '../../../models/tipo_habitacion.model';
 
 //COMPONENT
 import { HuespedFormComponent } from '../huesped-form/huesped-form';
@@ -142,6 +143,7 @@ export class ReservaFormComponent {
   estado_civil: EstadoCivilModel[] = [];
   paises: PaisModel[] = [];
   motivos: MotivoModel[] = [];
+  tipo_habitaciones: TipoHabitacionModel[] = [];
   tipo_huespedes: TipoHuespedModel[] = [];
   huespedes: HuespedModel[] = [];
   canal_reservas: CanalReservaModel[] = [];
@@ -211,6 +213,7 @@ export class ReservaFormComponent {
     this.tipo_huespedes = data.tipo_huespedes;
     this.motivos = data.motivos;
     this.canal_reservas = data.canal_reservas;
+    this.tipo_habitaciones = data.tipo_habitaciones || [];
     this.reservas = data.reservas || [];
 
     // Configuración de suscripciones y servicios
@@ -218,7 +221,7 @@ export class ReservaFormComponent {
     this.balance = this.balanceService.balance;
 
     // Lógica condicional de inicialización
-    if (this.isFullDayOrCamping()) {
+    if (this.isFullDay()) {
       this.reserva.fecha_fin = this.reserva.fecha_ini;
     }
     if (this.reserva.id > 0) {
@@ -265,7 +268,7 @@ export class ReservaFormComponent {
         this.reserva.anticipo = this.getYaPagado();
       }
 
-      if (this.isFullDayOrCamping()) {
+      if (this.isFullDay()) {
         this.reserva.fecha_fin = this.reserva.fecha_ini;
       }
       this.calcularTotal();
@@ -351,24 +354,95 @@ export class ReservaFormComponent {
     this.isVisibleServiciosExtra = !this.isVisibleServiciosExtra;
   }
 
-  isFullDayOrCamping(): boolean {
-    if ((this.reserva as any)?.is_full_day) return true;
+  getHabitacionActual(): HabitacionModel | undefined {
     const habitacionId = this.reserva?.habitacion_id || (this.selectedHabitaciones && this.selectedHabitaciones[0]);
-    if (!habitacionId || !this.habitaciones) return false;
-    const hab = this.habitaciones.find(h => Number(h.id) === Number(habitacionId));
-    if (!hab) return false;
-    const desc = (hab.descripcion || '').trim().toUpperCase();
-    const tipo = (hab.tipo_habitacion || '').trim().toUpperCase();
-    return (
-      desc.includes('FULL DAY') ||
-      desc.includes('FULLDAY') ||
-      desc.includes('CAMPING') ||
-      desc.includes('CAMMPING') ||
-      tipo.includes('FULL DAY') ||
-      tipo.includes('FULLDAY') ||
-      tipo.includes('CAMPING') ||
-      tipo.includes('CAMMPING')
+    if (!habitacionId || !this.habitaciones) return undefined;
+    return this.habitaciones.find(h => Number(h.id) === Number(habitacionId));
+  }
+
+  get tipoCamping(): TipoHabitacionModel | undefined {
+    return this.tipo_habitaciones.find(th => 
+      th.codigo?.toUpperCase() === 'CAMP' || 
+      th.descripcion?.trim().toUpperCase() === 'CAMPING'
     );
+  }
+
+  get tipoFullDay(): TipoHabitacionModel | undefined {
+    return this.tipo_habitaciones.find(th => 
+      th.codigo?.toUpperCase() === 'FULL' || 
+      th.descripcion?.trim().toUpperCase() === 'FULL DAY'
+    );
+  }
+
+  isCamping(habitacion?: HabitacionModel): boolean {
+    const hab = habitacion || this.getHabitacionActual();
+    if (!hab) {
+      if (this.selectedHabitaciones && this.selectedHabitaciones.length > 0 && this.habitaciones) {
+        return this.habitaciones.some(h => this.selectedHabitaciones.some(id => Number(id) === Number(h.id)) && this.isCamping(h));
+      }
+      return false;
+    }
+    if (this.tipoCamping && Number(hab.tipo_habitacion_id) === Number(this.tipoCamping.id)) {
+      return true;
+    }
+    const tipo = (hab.tipo_habitacion || '').trim().toUpperCase();
+    return tipo === 'CAMPING' || (this.tipoCamping && tipo === this.tipoCamping.descripcion?.trim().toUpperCase());
+  }
+
+  isFullDay(habitacion?: HabitacionModel): boolean {
+    if ((this.reserva as any)?.is_full_day) return true;
+    const hab = habitacion || this.getHabitacionActual();
+    if (!hab) {
+      if (this.selectedHabitaciones && this.selectedHabitaciones.length > 0 && this.habitaciones) {
+        return this.habitaciones.some(h => this.selectedHabitaciones.some(id => Number(id) === Number(h.id)) && this.isFullDay(h));
+      }
+      return false;
+    }
+    if (this.tipoFullDay && Number(hab.tipo_habitacion_id) === Number(this.tipoFullDay.id)) {
+      return true;
+    }
+    const tipo = (hab.tipo_habitacion || '').trim().toUpperCase();
+    return tipo === 'FULL DAY' || (this.tipoFullDay && tipo === this.tipoFullDay.descripcion?.trim().toUpperCase());
+  }
+
+  isFullDayOrCamping(): boolean {
+    return this.isFullDay() || this.isCamping();
+  }
+
+  getLabelHabitacion(): string {
+    if (this.isCamping()) return this.tipoCamping?.descripcion || 'Camping';
+    if (this.isFullDay()) return this.tipoFullDay?.descripcion || 'Servicio / Área';
+    return 'Habitación';
+  }
+
+  getLabelHabitacionesMulti(): string {
+    if (this.isCamping()) return `${this.tipoCamping?.descripcion || 'Camping'} (Selección Múltiple)`;
+    if (this.isFullDay()) return `${this.tipoFullDay?.descripcion || 'Servicio / Área'} (Selección)`;
+    return 'Habitaciones (Selección Múltiple)';
+  }
+
+  getNombreHabitacion(x: HabitacionModel): string {
+    if (!x) return '';
+    if (this.isFullDay(x) || this.isCamping(x)) return x.descripcion;
+    return `${x.nro_habitacion} ${x.descripcion}`;
+  }
+
+  getNombreHabitacionMulti(x: HabitacionModel): string {
+    if (!x) return '';
+    if (this.isFullDay(x) || this.isCamping(x)) return x.descripcion;
+    return `Hab. ${x.nro_habitacion} - ${x.descripcion}`;
+  }
+
+  getPlaceholderGrupo(): string {
+    if (this.isFullDay()) return 'Ej: Empresa X / Delegación / Familia';
+    if (this.isCamping()) return 'Ej: Grupo Scout / Familia Gómez';
+    return 'Ej: Familia Gómez / Delegación';
+  }
+
+  getModalidadSubtitle(): string {
+    if (this.isFullDay()) return 'Seleccione si la reserva es individual o grupal';
+    if (this.isCamping()) return 'Seleccione individual o grupal (múltiples campings)';
+    return 'Seleccione individual o grupal (múltiples habitaciones)';
   }
 
   //Begin: Filtrar habitacion
@@ -376,7 +450,7 @@ export class ReservaFormComponent {
     const selectedId = event.value;
     const selectedHabitacion = this.habitaciones.find(h => h.id === selectedId);
     if (selectedHabitacion) {
-      if (this.isFullDayOrCamping()) {
+      if (this.isFullDay(selectedHabitacion)) {
         this.reserva.fecha_fin = this.reserva.fecha_ini;
       }
       if (!this.reserva.cantidad_adulto || this.reserva.cantidad_adulto <= 0) {
@@ -399,13 +473,18 @@ export class ReservaFormComponent {
   //Begin: Metodos para Reserva Grupal
   getSelectedHabitacionesText(): string {
     if (!this.selectedHabitaciones || this.selectedHabitaciones.length === 0) {
-      return this.isFullDayOrCamping() ? 'Ningún servicio seleccionado' : 'Ninguna habitación seleccionada';
+      if (this.isCamping()) return 'Ningún camping seleccionado';
+      if (this.isFullDay()) return 'Ningún servicio seleccionado';
+      return 'Ninguna habitación seleccionada';
     }
-    if (this.isFullDayOrCamping()) {
+    if (this.isFullDay()) {
       const nombres = this.habitaciones
         .filter(h => this.selectedHabitaciones.some(id => Number(id) === Number(h.id)))
         .map(h => h.descripcion);
       return nombres.length > 0 ? nombres.join(', ') : `${this.selectedHabitaciones.length} seleccionado(s)`;
+    }
+    if (this.isCamping()) {
+      return `${this.selectedHabitaciones.length} ${this.selectedHabitaciones.length === 1 ? 'camping seleccionado' : 'campings seleccionados'}`;
     }
     return `${this.selectedHabitaciones.length} ${this.selectedHabitaciones.length === 1 ? 'habitación seleccionada' : 'habitaciones seleccionadas'}`;
   }
@@ -523,9 +602,12 @@ export class ReservaFormComponent {
       }
       if (this.tipo_reserva === 'grupal') {
         if (!this.selectedHabitaciones || this.selectedHabitaciones.length === 0) {
-          const msg = this.isFullDayOrCamping()
-            ? "Debe seleccionar al menos un servicio o área para la reserva grupal"
-            : "Debe seleccionar al menos una habitación para la reserva grupal";
+          let msg = "Debe seleccionar al menos una habitación para la reserva grupal";
+          if (this.isCamping()) {
+            msg = "Debe seleccionar al menos un camping para la reserva grupal";
+          } else if (this.isFullDay()) {
+            msg = "Debe seleccionar al menos un servicio o área para la reserva grupal";
+          }
           this.alertService.show(msg, { duration: 5000, type: 'info' });
           return;
         }
@@ -544,7 +626,7 @@ export class ReservaFormComponent {
         this.reserva.transacciones.push({ ...this.nuevoServicio });
         this.inicializarNuevoServicio();
       }
-      if (this.isFullDayOrCamping()) {
+      if (this.isFullDay()) {
         this.reserva.fecha_fin = this.reserva.fecha_ini;
       }
       this.botonGuardarDirectiva.deshabilitarFormBoton();
@@ -559,7 +641,7 @@ export class ReservaFormComponent {
   }
 
   crearReserva() {
-    if (this.isFullDayOrCamping()) {
+    if (this.isFullDay()) {
       this.reserva.fecha_fin = this.reserva.fecha_ini;
     }
     const cantAdulto = Number(this.reserva.cantidad_adulto) || 0;
@@ -609,7 +691,7 @@ export class ReservaFormComponent {
           if (data.reservas && Array.isArray(data.reservas) && data.reservas.length > 0) {
             data.reservas.forEach((r: any) => {
               const esMismoDia = moment(r.fecha_ini).isSame(moment(r.fecha_fin), 'day');
-              const esFD = this.isFullDayOrCamping() || esMismoDia;
+              const esFD = this.isFullDay() || esMismoDia;
               const r_ini = esFD ? moment(r.fecha_ini).format("YYYY-MM-DD 03:00") : moment(r.fecha_ini).format("YYYY-MM-DD 13:00");
               const r_fin = esFD ? moment(r.fecha_ini).format("YYYY-MM-DD 21:00") : moment(r.fecha_fin).format("YYYY-MM-DD 11:00");
               const newCls = r.color ? r.color + ' new-reservation-highlight' : 'new-reservation-highlight';
@@ -625,15 +707,17 @@ export class ReservaFormComponent {
               });
             });
             const msgSuccess = (this.tipo_reserva === 'grupal' && data.reservas && data.reservas.length > 1)
-              ? (this.isFullDayOrCamping()
-                ? `Reserva grupal creada con éxito`
-                : `Reserva grupal creada con éxito (${data.reservas.length} habitaciones)`)
+              ? (this.isCamping()
+                ? `Reserva grupal creada con éxito (${data.reservas.length} campings)`
+                : (this.isFullDay()
+                  ? `Reserva grupal creada con éxito`
+                  : `Reserva grupal creada con éxito (${data.reservas.length} habitaciones)`))
               : `Se guardó la reserva`;
             this.alertService.show(msgSuccess, { duration: 5000, type: 'success' });
           } else {
             const newClassName = this.reserva.color ? this.reserva.color + ' new-reservation-highlight' : 'new-reservation-highlight';
             const esMismoDia = moment(this.reserva.fecha_ini).isSame(moment(this.reserva.fecha_fin), 'day');
-            const esFD = this.isFullDayOrCamping() || esMismoDia;
+            const esFD = this.isFullDay() || esMismoDia;
             const timelineStart = esFD ? moment(this.reserva.fecha_ini).format("YYYY-MM-DD 03:00") : moment(this.reserva.fecha_ini).format("YYYY-MM-DD 13:00");
             const timelineEnd = esFD ? moment(this.reserva.fecha_ini).format("YYYY-MM-DD 21:00") : moment(this.reserva.fecha_fin).format("YYYY-MM-DD 11:00");
             this.items.update({ id: this.reserva.id, correlativo: this.reserva.correlativo, cliente: this.reserva.cliente, start: timelineStart, end: timelineEnd, group: this.reserva.habitacion_id, className: newClassName, saldo: this.reserva.saldo });
@@ -681,7 +765,7 @@ export class ReservaFormComponent {
   }
 
   modificarReserva() {
-    if (this.isFullDayOrCamping()) {
+    if (this.isFullDay()) {
       this.reserva.fecha_fin = this.reserva.fecha_ini;
     }
     const cantAdulto = Number(this.reserva.cantidad_adulto) || 0;
@@ -713,7 +797,7 @@ export class ReservaFormComponent {
           if (data.reservas && Array.isArray(data.reservas) && data.reservas.length > 0) {
             data.reservas.forEach((r: any) => {
               const esMismoDia = moment(r.fecha_ini).isSame(moment(r.fecha_fin), 'day');
-              const esFD = this.isFullDayOrCamping() || esMismoDia;
+              const esFD = this.isFullDay() || esMismoDia;
               const r_ini = esFD ? moment(r.fecha_ini).format("YYYY-MM-DD 03:00") : moment(r.fecha_ini).format("YYYY-MM-DD 13:00");
               const r_fin = esFD ? moment(r.fecha_ini).format("YYYY-MM-DD 21:00") : moment(r.fecha_fin).format("YYYY-MM-DD 11:00");
               const newCls = r.color ? r.color + ' new-reservation-highlight' : 'new-reservation-highlight';
@@ -729,14 +813,16 @@ export class ReservaFormComponent {
               });
             });
             const msgSuccess = (this.tipo_reserva === 'grupal' && data.reservas && data.reservas.length > 1)
-              ? (this.isFullDayOrCamping()
-                ? `Reserva grupal actualizada con éxito`
-                : `Reserva grupal actualizada con éxito (${data.reservas.length} habitaciones)`)
+              ? (this.isCamping()
+                ? `Reserva grupal actualizada con éxito (${data.reservas.length} campings)`
+                : (this.isFullDay()
+                  ? `Reserva grupal actualizada con éxito`
+                  : `Reserva grupal actualizada con éxito (${data.reservas.length} habitaciones)`))
               : `Se guardó la reserva`;
             this.alertService.show(msgSuccess, { duration: 5000, type: 'success' });
           } else {
             const esMismoDia = moment(this.reserva.fecha_ini).isSame(moment(this.reserva.fecha_fin), 'day');
-            const esFD = this.isFullDayOrCamping() || esMismoDia;
+            const esFD = this.isFullDay() || esMismoDia;
             const timelineStart = esFD ? moment(this.reserva.fecha_ini).format("YYYY-MM-DD 03:00") : moment(this.reserva.fecha_ini).format("YYYY-MM-DD 13:00");
             const timelineEnd = esFD ? moment(this.reserva.fecha_ini).format("YYYY-MM-DD 21:00") : moment(this.reserva.fecha_fin).format("YYYY-MM-DD 11:00");
             this.items.update({ id: this.reserva.id, correlativo: this.reserva.correlativo, cliente: this.reserva.cliente, start: timelineStart, end: timelineEnd, group: this.reserva.habitacion_id, className: this.reserva.color, saldo: this.reserva.saldo });
@@ -952,7 +1038,7 @@ export class ReservaFormComponent {
   }
 
   getNoches(): number {
-    if (this.isFullDayOrCamping()) return 1;
+    if (this.isFullDay()) return 1;
     if (!this.reserva.fecha_ini || !this.reserva.fecha_fin) return 1;
     const fecha_inicio = moment(this.reserva.fecha_ini);
     const fecha_fin = moment(this.reserva.fecha_fin);
