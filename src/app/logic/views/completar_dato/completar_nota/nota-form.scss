@@ -1,3 +1,112 @@
+.nota-container {
+  padding: 8px 4px;
+}
+
+.nota-input-box {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px 14px 4px 14px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+
+  .nota-field {
+    width: 100%;
+    margin-bottom: 0;
+
+    textarea {
+      resize: vertical;
+      min-height: 52px;
+    }
+  }
+
+  .nota-btn-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    button {
+      min-width: 110px;
+      height: 38px;
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 0 16px;
+
+      ::ng-deep .mdc-button__label {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1 !important;
+      }
+    }
+  }
+}
+
+.btn-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
+  vertical-align: middle;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    vertical-align: middle;
+  }
+
+  span {
+    line-height: 1;
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+.spinner-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  vertical-align: middle;
+
+  ::ng-deep circle {
+    stroke: currentColor;
+  }
+}
+
+.spinner-delete {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  vertical-align: middle;
+
+  ::ng-deep circle {
+    stroke: #dc2626;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+
+  .empty-icon {
+    font-size: 42px;
+    width: 42px;
+    height: 42px;
+    opacity: 0.6;
+  }
+}
 
 .timeline {
   position: relative;
@@ -8,42 +117,118 @@
   display: flex;
   align-items: flex-start;
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease-in-out;
+
+  &.item-seleccionado {
+    .timeline-content {
+      border: 2px solid #1976d2;
+      background-color: #e8f4fd;
+      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.18);
+    }
+
+    .timeline-dot {
+      background-color: #ff9800;
+      transform: scale(1.1);
+    }
+  }
 }
 
 .timeline-line {
   position: absolute;
-  left: 19px; /* Ajusta según el tamaño del punto */
-  top: 24px; /* Ajusta para alinear con el contenido */
-  bottom: 0;
+  left: 17px;
+  top: 24px;
+  bottom: -16px;
   width: 2px;
-  background-color: #ccc;
+  background-color: #d1d5db;
+}
+
+.timeline-item:last-child .timeline-line {
+  display: none;
 }
 
 .timeline-dot {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  // background-color: green;
-  background-color: rgb(33, 105, 238);
+  background-color: #2563eb;
   border-radius: 50%;
   position: relative;
   z-index: 1;
-}
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  transition: transform 0.2s ease;
 
-.timeline-dot mat-icon {
-  color: white; /* Color del icono */ 
+  mat-icon {
+    color: white;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 }
 
 .timeline-content {
-  margin-left: 20px; /* Espacio entre el punto y el contenido */
-  flex: 1; /* Ocupa el espacio restante */
-  background-color: #eaf2f3; /* Color celeste agua */
-  padding: 16px; /* Añade un poco de padding para que el contenido no esté pegado a los bordes */
-  border-radius: 8px; /* Bordes redondeados para un aspecto más suave */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera para dar profundidad */
+  margin-left: 14px;
+  flex: 1;
+  min-width: 0;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, background-color 0.2s;
+
+  .timeline-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+
+    .user-name {
+      color: #1e293b;
+      font-size: 0.9rem;
+    }
+
+    .nota-date {
+      color: #64748b;
+      font-size: 0.78rem;
+    }
+
+    .note-actions {
+      button {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+
+        &.btn-action-edit {
+          color: #0284c7;
+
+          &:hover {
+            background-color: rgba(2, 132, 199, 0.1);
+          }
+        }
+
+        &.btn-action-delete {
+          color: #dc2626;
+
+          &:hover {
+            background-color: rgba(220, 38, 38, 0.1);
+          }
+        }
+      }
+    }
+  }
 }
 
 .descripcion {
@@ -52,4 +237,43 @@
   overflow-wrap: break-word;
   max-width: 100%;
   margin: 0;
+  color: #334155;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 576px) {
+  .timeline {
+    padding-left: 5px;
+  }
+
+  .timeline-dot {
+    width: 30px;
+    height: 30px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .timeline-line {
+    left: 14px;
+  }
+
+  .timeline-content {
+    margin-left: 8px;
+    padding: 8px 10px;
+  }
+
+  .timeline-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+
+    .note-actions {
+      align-self: flex-end;
+      margin-top: -20px;
+    }
+  }
 }

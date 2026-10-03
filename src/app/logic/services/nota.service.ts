@@ -26,11 +26,11 @@ export class NotaService{
         return this.http.post<RespuestaRequest<any>>(this.URL_API_BASE,Nota);
     }
 
-    modificar(Nota:NotaModel):Observable<NotaModel>{
-        return this.http.put<NotaModel>(`${this.URL_API_BASE}/${Nota.id}`,Nota);
+    modificar(Nota:NotaModel):Observable<RespuestaRequest<any>>{
+        return this.http.put<RespuestaRequest<any>>(`${this.URL_API_BASE}/${Nota.id}`,Nota);
     }
 
-    eliminar(id:number):Observable<NotaModel>{
-        return this.http.delete<NotaModel>(`${this.URL_API_BASE}/${id}`);
+    eliminar(id:number):Observable<RespuestaRequest<any>>{
+        return this.http.delete<RespuestaRequest<any>>(`${this.URL_API_BASE}/${id}`);
     }
 }
