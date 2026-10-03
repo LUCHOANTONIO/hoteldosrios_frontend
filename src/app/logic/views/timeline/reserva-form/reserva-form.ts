@@ -659,14 +659,18 @@ export class ReservaFormComponent {
     const precioAdulto = Number(this.reserva.precio_unit_adulto) || 0;
     const cantNinio = Number(this.reserva.cantidad_ninio) || 0;
     const precioNinio = Number(this.reserva.precio_unit_ninio) || 0;
-    const totalPorNoche = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
+    const totalBase = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
 
     const payload: any = {
       ...this.reserva,
       email: this.reserva.correo || (this.reserva as any).email || '',
-      cantidad: this.getNoches(),
-      precio_unitario: totalPorNoche,
-      cantidad_huesped: (this.reserva as any).cantidad_huesped || 1,
+      cantidad: 1,
+      precio_unitario: totalBase,
+      cantidad_adulto: cantAdulto,
+      precio_unit_adulto: precioAdulto,
+      cantidad_ninio: cantNinio,
+      precio_unit_ninio: precioNinio,
+      cantidad_huesped: (cantAdulto + cantNinio) > 0 ? (cantAdulto + cantNinio) : 1,
       transacciones: this.reserva.transacciones || []
     };
 
@@ -783,14 +787,18 @@ export class ReservaFormComponent {
     const precioAdulto = Number(this.reserva.precio_unit_adulto) || 0;
     const cantNinio = Number(this.reserva.cantidad_ninio) || 0;
     const precioNinio = Number(this.reserva.precio_unit_ninio) || 0;
-    const totalPorNoche = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
+    const totalBase = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
 
     const payload: any = {
       ...this.reserva,
       email: this.reserva.correo || (this.reserva as any).email || '',
-      cantidad: this.getNoches(),
-      precio_unitario: totalPorNoche,
-      cantidad_huesped: (this.reserva as any).cantidad_huesped || 1,
+      cantidad: 1,
+      precio_unitario: totalBase,
+      cantidad_adulto: cantAdulto,
+      precio_unit_adulto: precioAdulto,
+      cantidad_ninio: cantNinio,
+      precio_unit_ninio: precioNinio,
+      cantidad_huesped: (cantAdulto + cantNinio) > 0 ? (cantAdulto + cantNinio) : 1,
       transacciones: this.reserva.transacciones || []
     };
 
@@ -1063,9 +1071,8 @@ export class ReservaFormComponent {
     const cantNinio = Number(this.reserva.cantidad_ninio) || 0;
     const precioNinio = Number(this.reserva.precio_unit_ninio) || 0;
 
-    const totalPorNoche = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
-    const noches = this.getNoches();
-    this.reserva.total = Math.max(0, Math.round((totalPorNoche * noches) * 100) / 100);
+    const totalBase = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
+    this.reserva.total = Math.max(0, Math.round(totalBase * 100) / 100);
     this.validarAnticipo();
   }
 
