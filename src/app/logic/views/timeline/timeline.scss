@@ -12,8 +12,8 @@
   flex-wrap: wrap;
   gap: 12px;
   background: #ffffff;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
@@ -21,37 +21,45 @@
 .timeline-tabs {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: #f1f5f9;
-  padding: 4px;
-  border-radius: 8px;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 5px;
+  border-radius: 10px;
   border: 1px solid #e2e8f0;
 }
 
 .timeline-tab {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 16px;
-  border: none;
-  background: transparent;
-  border-radius: 6px;
+  gap: 10px;
+  padding: 8px 16px;
+  border: 1.5px solid transparent;
+  background: #ffffff;
+  border-radius: 8px;
   font-family: inherit;
   font-size: 13.5px;
   font-weight: 500;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
   user-select: none;
+  position: relative;
+
+  .tab-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
 
   .tab-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.2s ease, color 0.2s ease;
   }
 
   .tab-title {
@@ -62,56 +70,136 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    border-radius: 10px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 11px;
     font-size: 11.5px;
     font-weight: 700;
-    background: #e2e8f0;
-    color: #475569;
     transition: all 0.2s ease;
   }
 
-  &:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.75);
-    color: #1e293b;
+  /* --- CADA DIVISIÓN CON SU IDENTIDAD VISUAL PROPIA --- */
+  &.tab-habitaciones {
+    border-color: #dbeafe;
+    color: #1e40af;
+    .tab-icon { color: #2563eb; }
+    .tab-badge {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    &:hover:not(.active) {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      .tab-icon { transform: scale(1.1); }
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-color: #2563eb;
+      color: #1e40af;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.22);
+
+      .tab-badge {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #1d4ed8;
+      }
+    }
   }
 
-  &.active {
-    background: #ffffff;
-    font-weight: 600;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-
-    &.tab-habitaciones {
-      color: #1d4ed8;
-      .tab-badge {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-    }
-
-    &.tab-fullday {
+  &.tab-fullday {
+    border-color: #fef3c7;
+    color: #92400e;
+    .tab-icon { color: #d97706; }
+    .tab-badge {
+      background: #fffbeb;
       color: #b45309;
-      .tab-badge {
-        background: #fef3c7;
-        color: #92400e;
-      }
+      border: 1px solid #fde68a;
     }
 
-    &.tab-camping {
+    &:hover:not(.active) {
+      background: #fffbeb;
+      border-color: #fcd34d;
+      .tab-icon { transform: scale(1.1); }
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border-color: #d97706;
+      color: #78350f;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.22);
+
+      .tab-badge {
+        background: #d97706;
+        color: #ffffff;
+        border-color: #b45309;
+      }
+    }
+  }
+
+  &.tab-camping {
+    border-color: #dcfce7;
+    color: #166534;
+    .tab-icon { color: #16a34a; }
+    .tab-badge {
+      background: #f0fdf4;
       color: #15803d;
-      .tab-badge {
-        background: #dcfce7;
-        color: #166534;
-      }
+      border: 1px solid #bbf7d0;
     }
 
-    &.tab-todas {
-      color: #334155;
+    &:hover:not(.active) {
+      background: #f0fdf4;
+      border-color: #86efac;
+      .tab-icon { transform: scale(1.1); }
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-color: #16a34a;
+      color: #14532d;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(22, 163, 74, 0.22);
+
       .tab-badge {
-        background: #e2e8f0;
-        color: #0f172a;
+        background: #16a34a;
+        color: #ffffff;
+        border-color: #15803d;
+      }
+    }
+  }
+
+  &.tab-todas {
+    border-color: #e2e8f0;
+    color: #334155;
+    .tab-icon { color: #64748b; }
+    .tab-badge {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+
+    &:hover:not(.active) {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      .tab-icon { transform: scale(1.1); }
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-color: #475569;
+      color: #0f172a;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(51, 65, 85, 0.18);
+
+      .tab-badge {
+        background: #334155;
+        color: #ffffff;
+        border-color: #1e293b;
       }
     }
   }
@@ -129,7 +217,7 @@
     padding: 7px 14px;
     font-size: 13px;
     font-weight: 500;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid #cbd5e1;
     background: #ffffff;
     color: #334155;
@@ -164,8 +252,124 @@
   position: relative;
   width: 100%;
   height: 600px;
-  border: 1px solid lightgray;
-  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
   background: #ffffff;
   overflow: hidden;
+}
+
+/* =========================================================
+   RESPONSIVE DESIGN (MÓVILES Y PANTALLAS PEQUEÑAS)
+   ========================================================= */
+@media (max-width: 767.98px) {
+  .timeline-page {
+    gap: 8px;
+  }
+
+  .timeline-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+
+  /* Divisiones en cuadrícula 2x2 clara y ordenada en celular */
+  .timeline-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  .timeline-tab {
+    width: 100%;
+    min-height: 42px;
+    padding: 7px 9px;
+    justify-content: space-between;
+    box-sizing: border-box;
+    border-radius: 7px;
+
+    .tab-content {
+      gap: 5px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .tab-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .tab-title {
+      font-size: 12.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tab-badge {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 5px;
+      font-size: 11px;
+      flex-shrink: 0;
+      margin-left: 4px;
+    }
+  }
+
+  .timeline-actions {
+    width: 100%;
+    gap: 8px;
+
+    .action-btn {
+      flex: 1;
+      justify-content: center;
+      padding: 8px 10px;
+      font-size: 13px;
+      min-height: 38px;
+    }
+  }
+
+  .timeline-wrapper {
+    height: calc(100vh - 230px);
+    min-height: 440px;
+  }
+
+  /* Ajustes en timeline para pantallas estrechas */
+  ::ng-deep .timeline-wrapper {
+    .vis-panel.vis-left {
+      max-width: 130px !important;
+      
+      .vis-inner {
+        padding: 0 4px !important;
+        font-size: 12px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+      }
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .timeline-tab {
+    padding: 6px 6px;
+
+    .tab-title {
+      font-size: 11.5px;
+    }
+
+    .tab-badge {
+      min-width: 18px;
+      height: 18px;
+      font-size: 10.5px;
+      padding: 0 4px;
+    }
+  }
 }

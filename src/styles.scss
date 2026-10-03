@@ -35,11 +35,18 @@ body {
 
 @media (max-width: 767.98px) {
     .cdk-overlay-pane {
-        max-width: 96vw !important;
+        max-width: 95vw !important;
+        margin-bottom: 24px !important;
+        margin-top: 12px !important;
+    }
+    .mat-mdc-dialog-container {
+        border-radius: 16px !important;
+        overflow: hidden !important;
     }
     .mat-mdc-dialog-container .mdc-dialog__surface {
         padding: 0 !important;
         overflow: hidden !important;
+        border-radius: 16px !important;
     }
 }
 /*END: Configura el tamaño del dialog y el boton close*/

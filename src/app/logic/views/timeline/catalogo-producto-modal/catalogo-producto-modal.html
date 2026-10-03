@@ -24,7 +24,7 @@
   <div class="filtros-toolbar px-2 px-sm-3 py-2 bg-light border-bottom">
     <div class="row g-2 align-items-center">
       <!-- Buscador por texto -->
-      <div class="col-12 col-md-5">
+      <div class="col-12 col-md-7">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 search-field">
           <mat-label>Buscar producto o servicio...</mat-label>
           <input matInput [ngModel]="textoBusqueda" (ngModelChange)="onBusquedaChange($event)"
@@ -39,7 +39,7 @@
       </div>
 
       <!-- Filtro de Categoría -->
-      <div class="col-8 col-sm-8 col-md-4">
+      <div class="col-12 col-md-5">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100 categoria-field">
           <mat-label>Filtrar por Categoría</mat-label>
           <mat-select [ngModel]="categoriaFiltroId" (ngModelChange)="onCategoriaFiltroChange($event)">
@@ -49,20 +49,12 @@
             }
           </mat-select>
           <mat-icon matPrefix class="text-secondary me-1">category</mat-icon>
+          @if (categoriaFiltroId !== null) {
+          <button mat-icon-button matSuffix (click)="onCategoriaFiltroChange(null)" type="button" matTooltip="Quitar filtro de categoría">
+            <mat-icon style="font-size: 18px;">close</mat-icon>
+          </button>
+          }
         </mat-form-field>
-      </div>
-
-      <!-- Resumen y Reset -->
-      <div class="col-4 col-sm-4 col-md-3 d-flex justify-content-end align-items-center gap-1 gap-sm-2">
-        <span class="badge-contador" [title]="dataSource.data.length + ' productos disponibles'">
-          {{ dataSource.data.length }} <span class="d-none d-sm-inline">{{ dataSource.data.length === 1 ? 'producto' : 'productos' }}</span>
-        </span>
-        @if (textoBusqueda || categoriaFiltroId !== null) {
-        <button type="button" mat-button class="text-secondary btn-sm btn-limpiar-filtros px-1 px-sm-2" (click)="limpiarFiltros()" matTooltip="Restablecer filtros">
-          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">filter_alt_off</mat-icon>
-          <span class="d-none d-sm-inline">Limpiar</span>
-        </button>
-        }
       </div>
     </div>
   </div>
@@ -217,20 +209,5 @@
     </div>
     }
   </div>
-
-  <!-- ACCIONES DE PIE DEL MODAL -->
-  <mat-dialog-actions class="d-flex justify-content-between align-items-center px-3 py-2 bg-light border-top m-0">
-    <div class="d-flex align-items-center gap-2">
-      @if (itemsAgregadosCount > 0) {
-      <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 11.5px;">
-        <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: -2px;">done_all</mat-icon>
-        {{ itemsAgregadosCount }} {{ itemsAgregadosCount === 1 ? 'servicio agregado' : 'servicios agregados' }}
-      </span>
-      }
-    </div>
-    <button mat-button (click)="cerrar()" type="button" class="btn-cancelar">
-      {{ itemsAgregadosCount > 0 ? 'Listo / Cerrar' : 'Cerrar' }}
-    </button>
-  </mat-dialog-actions>
 
 </div>

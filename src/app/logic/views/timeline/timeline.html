@@ -2,7 +2,7 @@
 <div class="timeline-page">
   <!-- BARRA DE PESTAÑAS Y ACCIONES -->
   <div class="timeline-header-bar">
-    <div class="timeline-tabs" role="tablist">
+    <div class="timeline-tabs" role="tablist" aria-label="Divisiones de servicios">
       <button 
         type="button" 
         role="tab"
@@ -10,8 +10,10 @@
         [class.active]="tabActiva === 'habitaciones'"
         [attr.aria-selected]="tabActiva === 'habitaciones'"
         (click)="cambiarTab('habitaciones')">
-        <mat-icon class="tab-icon">hotel</mat-icon>
-        <span class="tab-title">Habitaciones</span>
+        <span class="tab-content">
+          <mat-icon class="tab-icon">hotel</mat-icon>
+          <span class="tab-title">Habitaciones</span>
+        </span>
         <span class="tab-badge">{{ countHabitaciones }}</span>
       </button>
 
@@ -22,8 +24,10 @@
         [class.active]="tabActiva === 'fullday'"
         [attr.aria-selected]="tabActiva === 'fullday'"
         (click)="cambiarTab('fullday')">
-        <mat-icon class="tab-icon">wb_sunny</mat-icon>
-        <span class="tab-title">{{ labelFullDay }}</span>
+        <span class="tab-content">
+          <mat-icon class="tab-icon">wb_sunny</mat-icon>
+          <span class="tab-title">{{ labelFullDay }}</span>
+        </span>
         <span class="tab-badge">{{ countFullDay }}</span>
       </button>
 
@@ -34,8 +38,10 @@
         [class.active]="tabActiva === 'camping'"
         [attr.aria-selected]="tabActiva === 'camping'"
         (click)="cambiarTab('camping')">
-        <mat-icon class="tab-icon">forest</mat-icon>
-        <span class="tab-title">{{ labelCamping }}</span>
+        <span class="tab-content">
+          <mat-icon class="tab-icon">forest</mat-icon>
+          <span class="tab-title">{{ labelCamping }}</span>
+        </span>
         <span class="tab-badge">{{ countCamping }}</span>
       </button>
 
@@ -46,8 +52,10 @@
         [class.active]="tabActiva === 'todas'"
         [attr.aria-selected]="tabActiva === 'todas'"
         (click)="cambiarTab('todas')">
-        <mat-icon class="tab-icon">view_list</mat-icon>
-        <span class="tab-title">Todas</span>
+        <span class="tab-content">
+          <mat-icon class="tab-icon">view_list</mat-icon>
+          <span class="tab-title">Todas</span>
+        </span>
         <span class="tab-badge">{{ countTodas }}</span>
       </button>
     </div>
