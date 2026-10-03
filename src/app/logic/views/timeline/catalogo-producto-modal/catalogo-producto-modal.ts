@@ -255,10 +255,33 @@ export class CatalogoProductoModalComponent implements AfterViewInit {
   }
 
   seleccionarProducto(producto: ProductoModel) {
+    if (this.productoSeleccionado?.id === producto.id) {
+      return;
+    }
     this.productoSeleccionado = producto;
     this.cantidad = 1; // Cantidad por defecto 1
     this.precioUnitario = Number(producto.precio) || 0;
     this.calcularSubtotal();
+  }
+
+  incrementarCantidad() {
+    this.cantidad = (Number(this.cantidad) || 0) + 1;
+    this.calcularSubtotal();
+  }
+
+  decrementarCantidad() {
+    const actual = Number(this.cantidad) || 1;
+    if (actual > 1) {
+      this.cantidad = actual - 1;
+      this.calcularSubtotal();
+    }
+  }
+
+  deseleccionarProducto() {
+    this.productoSeleccionado = null;
+    this.cantidad = 1;
+    this.precioUnitario = 0;
+    this.subtotal = 0;
   }
 
   calcularSubtotal() {
@@ -268,7 +291,7 @@ export class CatalogoProductoModalComponent implements AfterViewInit {
   }
 
   bloquearNegativos(event: KeyboardEvent) {
-    if (event.key === '-' || event.key === 'e' || event.key === 'E' || event.key === '+') {
+    if (event.key === '-' || event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '.') {
       event.preventDefault();
     }
   }
