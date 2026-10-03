@@ -1,104 +1,99 @@
-<form autocomplete="off" #notaForm="ngForm" (ngSubmit)="submitNota(notaForm)">   
-  <div class="nota-container"> 
+<form autocomplete="off" #notaForm="ngForm" (ngSubmit)="submitNota(notaForm)">
+  <div class="nota-container">
 
     <!-- Formulario de ingreso / edición -->
     <div class="nota-input-box">
       <mat-form-field appearance="outline" class="w-100 nota-field">
         <mat-label>{{ modoEdicion ? 'Modificar Nota' : 'Nueva Nota' }}</mat-label>
-        <textarea matInput 
-                  rows="2"
-                  placeholder="Escriba la nota aquí..." 
-                  [(ngModel)]="nota.descripcion" 
-                  name="descripcion" 
-                  #txtNota 
-                  required 
-                  cdkFocusInitial
-                  [disabled]="isGuardando"
-                  (keydown.enter)="onEnterKey($event, notaForm)">
+        <textarea matInput rows="2" placeholder="Escriba la nota aquí..." [(ngModel)]="nota.descripcion"
+          name="descripcion" #txtNota required cdkFocusInitial [disabled]="isGuardando"
+          (keydown.enter)="onEnterKey($event, notaForm)">
         </textarea>
         @if (nota.descripcion && !isGuardando) {
-          <button matSuffix mat-icon-button type="button" (click)="nota.descripcion = ''" matTooltip="Limpiar texto">
-            <mat-icon>close</mat-icon>
-          </button>
+        <button matSuffix mat-icon-button type="button" (click)="nota.descripcion = ''" matTooltip="Limpiar texto">
+          <mat-icon>close</mat-icon>
+        </button>
         }
       </mat-form-field>
 
       <div class="nota-btn-group d-flex justify-content-end gap-2 mb-3">
         @if (modoEdicion) {
-          <button mat-stroked-button color="basic" type="button" (click)="cancelarEdicion()" [disabled]="isGuardando">
-            <span class="btn-content">
-              <mat-icon>close</mat-icon>
-              <span>Cancelar</span>
-            </span>
-          </button>
-          <button mat-flat-button color="primary" type="submit" [disabled]="!notaForm.valid || isGuardando">
-            <span class="btn-content">
-              @if (isGuardando) {
-                <mat-spinner diameter="18" class="spinner-btn"></mat-spinner>
-                <span>Guardando...</span>
-              } @else {
-                <mat-icon>save</mat-icon>
-                <span>Modificar</span>
-              }
-            </span>
-          </button>
+        <button mat-stroked-button color="basic" type="button" (click)="cancelarEdicion()" [disabled]="isGuardando">
+          <span class="btn-content">
+            <mat-icon>close</mat-icon>
+            <span>Cancelar</span>
+          </span>
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="!notaForm.valid || isGuardando">
+          <span class="btn-content">
+            @if (isGuardando) {
+            <mat-spinner diameter="18" class="spinner-btn"></mat-spinner>
+            <span>Guardando...</span>
+            } @else {
+            <mat-icon>save</mat-icon>
+            <span>Modificar</span>
+            }
+          </span>
+        </button>
         } @else {
-          <button mat-flat-button color="primary" type="submit" [disabled]="!notaForm.valid || isGuardando">
-            <span class="btn-content">
-              @if (isGuardando) {
-                <mat-spinner diameter="18" class="spinner-btn"></mat-spinner>
-                <span>Guardando...</span>
-              } @else {
-                <mat-icon>add</mat-icon>
-                <span>Adicionar</span>
-              }
-            </span>
-          </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="!notaForm.valid || isGuardando">
+          <span class="btn-content">
+            @if (isGuardando) {
+            <mat-spinner diameter="18" class="spinner-btn"></mat-spinner>
+            <span>Guardando...</span>
+            } @else {
+            <mat-icon>add</mat-icon>
+            <span>Adicionar</span>
+            }
+          </span>
+        </button>
         }
       </div>
     </div>
-      
+
     <!-- Lista de notas (timeline) -->
     @if (notas.length === 0) {
-      <div class="empty-state text-center py-4">
-        <mat-icon class="empty-icon text-muted">speaker_notes_off</mat-icon>
-        <p class="text-muted mt-2 mb-0">No hay notas registradas para esta reserva.</p>
-      </div>
+    <div class="empty-state text-center py-4">
+      <mat-icon class="empty-icon text-muted">speaker_notes_off</mat-icon>
+      <p class="text-muted mt-2 mb-0">No hay notas registradas para esta reserva.</p>
+    </div>
     } @else {
-      <div class="timeline">
-        @for (item of notas; track item.id) {
-          <div class="timeline-item" [class.item-seleccionado]="modoEdicion && notaSeleccionadaId === item.id">
-            <div class="timeline-line"></div>
-            <div class="timeline-dot">
-              <mat-icon>comment</mat-icon> 
+    <div class="timeline">
+      @for (item of notas; track item.id) {
+      <div class="timeline-item" [class.item-seleccionado]="modoEdicion && notaSeleccionadaId === item.id">
+        <div class="timeline-line"></div>
+        <div class="timeline-dot">
+          <mat-icon>comment</mat-icon>
+        </div>
+        <mat-card class="timeline-content">
+          <div class="timeline-header d-flex justify-content-between align-items-center flex-wrap gap-1">
+            <div class="user-meta">
+              <span class="user-name fw-bold">{{ item.usuario }}</span>
+              <span class="nota-date text-muted ms-2 small">{{ item.fecha }}</span>
             </div>
-            <mat-card class="timeline-content">
-              <div class="timeline-header d-flex justify-content-between align-items-center flex-wrap gap-1">
-                <div class="user-meta">
-                  <span class="user-name fw-bold">{{ item.usuario }}</span>
-                  <span class="nota-date text-muted ms-2 small">{{ item.fecha }}</span>
-                </div>
-                <div class="note-actions d-flex gap-1">
-                  <button mat-icon-button type="button" class="btn-action-edit" (click)="iniciarEdicion(item)" [disabled]="isGuardando || isEliminandoId !== null" matTooltip="Modificar nota">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button mat-icon-button type="button" class="btn-action-delete" (click)="eliminarNota(item)" [disabled]="isGuardando || isEliminandoId !== null" matTooltip="Eliminar nota">
-                    @if (isEliminandoId === item.id) {
-                      <mat-spinner diameter="16" class="spinner-delete"></mat-spinner>
-                    } @else {
-                      <mat-icon>delete</mat-icon>
-                    }
-                  </button>
-                </div>
-              </div>
-              <mat-card-content class="pt-2 pb-1 px-0">
-                <p class="descripcion">{{ item.descripcion }}</p>
-              </mat-card-content>
-            </mat-card>
+            <div class="note-actions d-flex gap-1">
+              <button mat-icon-button type="button" class="btn-action-edit" (click)="iniciarEdicion(item)"
+                [disabled]="isGuardando || isEliminandoId !== null" matTooltip="Modificar nota">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" class="btn-action-delete" (click)="eliminarNota(item)"
+                [disabled]="isGuardando || isEliminandoId !== null" matTooltip="Eliminar nota">
+                @if (isEliminandoId === item.id) {
+                <mat-spinner diameter="16" class="spinner-delete"></mat-spinner>
+                } @else {
+                <mat-icon>delete</mat-icon>
+                }
+              </button>
+            </div>
           </div>
-        }
+          <mat-card-content class="pt-2 pb-1 px-0">
+            <p class="descripcion">{{ item.descripcion }}</p>
+          </mat-card-content>
+        </mat-card>
       </div>
+      }
+    </div>
     }
-                           
-  </div>  
+
+  </div>
 </form>
