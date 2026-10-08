@@ -60,14 +60,14 @@
 
         <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 155px;">
           <mat-label>Salida</mat-label>
-          <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida"
-            (dateChange)="buscarDisponibilidad()" readonly>
+          <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida" (dateChange)="buscarDisponibilidad()"
+            readonly>
           <mat-datepicker-toggle matIconSuffix [for]="pickerSalida"></mat-datepicker-toggle>
           <mat-datepicker #pickerSalida></mat-datepicker>
         </mat-form-field>
 
-        <button mat-flat-button color="primary" class="btn-search"
-          (click)="buscarDisponibilidad()" [disabled]="buscando" matTooltip="Buscar habitaciones disponibles">
+        <button mat-flat-button color="primary" class="btn-search" (click)="buscarDisponibilidad()"
+          [disabled]="buscando" matTooltip="Buscar habitaciones disponibles">
           @if (buscando) {
           <mat-spinner diameter="16" class="spinner-white me-1"></mat-spinner>
           } @else {
@@ -108,7 +108,8 @@
           @for (hab of habitacionesHotel; track hab.id) {
           <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
             <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'ESTÁNDAR') | uppercase }}</span>
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'ESTÁNDAR') | uppercase
+                }}</span>
             </div>
 
             <div class="room-body">
@@ -140,12 +141,14 @@
           @for (hab of habitacionesFullDay; track hab.id) {
           <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
             <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'FULL DAY') | uppercase }}</span>
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'FULL DAY') | uppercase
+                }}</span>
             </div>
 
             <div class="room-body">
               <div class="status-footer">
-                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar Full Day">
+                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)"
+                  matTooltip="Reservar Full Day">
                   <mat-icon>event</mat-icon>
                   <span>Reservar</span>
                 </button>
@@ -172,12 +175,14 @@
           @for (hab of habitacionesCamping; track hab.id) {
           <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
             <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'CAMPING') | uppercase }}</span>
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'CAMPING') | uppercase
+                }}</span>
             </div>
 
             <div class="room-body">
               <div class="status-footer">
-                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar Camping">
+                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)"
+                  matTooltip="Reservar Camping">
                   <mat-icon>event</mat-icon>
                   <span>Reservar</span>
                 </button>
