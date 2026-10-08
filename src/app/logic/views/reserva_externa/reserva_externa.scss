@@ -260,7 +260,7 @@
   flex-direction: column;
   transition: all 0.2s ease;
   cursor: pointer;
-  height: 135px;
+  height: 98px;
 
   &:hover {
     transform: translateY(-2px);
@@ -278,7 +278,7 @@
 
   .room-header {
     background-color: transparent;
-    padding: 10px 12px 4px 12px;
+    padding: 12px 14px 6px 14px;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -286,7 +286,7 @@
 
     .room-num {
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14.5px;
       color: #1e293b;
       line-height: 1.2;
       white-space: nowrap;
@@ -297,42 +297,13 @@
   }
 
   .room-body {
-    padding: 6px 12px 10px 12px;
+    padding: 4px 14px 12px 14px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-end;
     position: relative;
     background-color: transparent;
-
-    .room-info-lines {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-
-      .info-line {
-        font-size: 10px;
-        color: #475569;
-        display: flex;
-        align-items: center;
-
-        .label {
-          font-weight: 700;
-          color: #94a3b8;
-          display: inline-block;
-          width: 72px;
-          flex-shrink: 0;
-        }
-
-        .val {
-          font-weight: 600;
-          color: #334155;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      }
-    }
 
     .status-footer {
       margin-top: auto;
@@ -347,21 +318,21 @@
         border: none;
         border-radius: 6px;
         padding: 5px 12px;
-        font-size: 11.5px;
+        font-size: 12px;
         font-weight: 700;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 5px;
+        gap: 6px;
         cursor: pointer;
         transition: background-color 0.15s ease;
-        height: 28px;
+        height: 30px;
         line-height: 1;
 
         mat-icon {
-          font-size: 15px;
-          width: 15px;
-          height: 15px;
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
         }
 
         &:hover {

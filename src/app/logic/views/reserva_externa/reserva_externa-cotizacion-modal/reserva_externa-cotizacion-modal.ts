@@ -10,12 +10,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTabsModule } from '@angular/material/tabs';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import moment from 'moment';
 
 import { CotizacionModel } from '../../../models/cotizacion.model';
 import { CotizacionDetalleModel } from '../../../models/cotizacion_detalle.model';
 import { TipoDocumentoModel } from '../../../../base/models/tipodocumento.model';
 import { HabitacionModel } from '../../../models/habitacion.model';
+import { PaisModel } from '../../../models/pais.model';
 import { CotizacionService } from '../../../services/cotizacion.service';
 import { PersonaService } from '../../../../base/services/persona.service';
 import { DocumentoService } from '../../../services/documento.service';
@@ -36,7 +39,9 @@ import { PdfViewerComponent } from '../../../shared/views/pdf-viewer/pdf-viewer'
     MatIconModule,
     MatDatepickerModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatTabsModule,
+    DragDropModule
   ],
   templateUrl: './reserva_externa-cotizacion-modal.html',
   styleUrls: ['./reserva_externa-cotizacion-modal.scss']
@@ -46,9 +51,12 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
   buscandoPersona: boolean = false;
 
   habitacionSeleccionada: HabitacionModel | null = null;
+  habitacionesDisponibles: HabitacionModel[] = [];
   tipoDocumentos: TipoDocumentoModel[] = [];
+  paises: PaisModel[] = [];
 
   form: {
+    habitacion_id: number | null;
     dni: string;
     tipo_doc_id: number;
     nombre: string;
@@ -56,12 +64,14 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
     segundo_apellido: string;
     telefono: string;
     correo: string;
+    pais_id: number;
     fecha_ini: Date;
     fecha_fin: Date;
     cantidad_adulto: number;
     cantidad_ninio: number;
     detalle: string;
   } = {
+    habitacion_id: null,
     dni: '',
     tipo_doc_id: 1,
     nombre: '',
@@ -69,6 +79,7 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
     segundo_apellido: '',
     telefono: '',
     correo: '',
+    pais_id: 1,
     fecha_ini: new Date(),
     fecha_fin: new Date(),
     cantidad_adulto: 1,
@@ -89,7 +100,9 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.habitacionSeleccionada = data.habitacionSeleccionada || null;
+    this.habitacionesDisponibles = data.habitacionesDisponibles || [];
     this.tipoDocumentos = data.tipoDocumentos || [];
+    this.paises = data.paises || [];
 
     if (data.fecha_ini) {
       this.form.fecha_ini = moment(data.fecha_ini).toDate();
@@ -99,6 +112,14 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
     }
     if (this.tipoDocumentos.length > 0) {
       this.form.tipo_doc_id = this.tipoDocumentos[0].id || 1;
+    }
+    if (this.paises.length > 0) {
+      const b = this.paises.find(p => p.descripcion?.toLowerCase().includes('bolivia'));
+      this.form.pais_id = b ? b.id : this.paises[0].id;
+    }
+
+    if (this.habitacionSeleccionada) {
+      this.form.habitacion_id = this.habitacionSeleccionada.id;
     }
 
     const tipoUpper = (this.habitacionSeleccionada?.tipo_habitacion || '').toUpperCase();
@@ -142,6 +163,7 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
           this.form.primer_apellido = res.primer_apellido || '';
           this.form.segundo_apellido = res.segundo_apellido || '';
           this.form.telefono = res.telefono || '';
+          this.form.correo = res.correo || '';
           this.alertService.show(`Cliente encontrado: ${res.nombre || ''} ${res.primer_apellido || ''}`, { duration: 3000, type: 'success' });
         }
         this.cdr.detectChanges();
@@ -168,6 +190,9 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
 
     this.guardando = true;
 
+    // Habitación seleccionada
+    const habObj = this.habitacionesDisponibles.find(h => h.id === Number(this.form.habitacion_id)) || this.habitacionSeleccionada;
+
     const cotizacion = new CotizacionModel();
     cotizacion.dni = (this.form.dni || '').trim();
     cotizacion.tipo_doc_id = this.form.tipo_doc_id ? Number(this.form.tipo_doc_id) : 1;
@@ -178,10 +203,11 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
     cotizacion.telefono = (this.form.telefono || '').trim();
     cotizacion.fecha_ini = fIni.format('YYYY-MM-DD');
     cotizacion.fecha_fin = fFin.format('YYYY-MM-DD');
-    const nomHab = this.habitacionSeleccionada
-      ? `Hab. ${this.habitacionSeleccionada.nro_habitacion} (${this.habitacionSeleccionada.tipo_habitacion || ''})`
-      : 'Habitación';
-    const tipoHosp = this.habitacionSeleccionada?.tipo_habitacion || 'Hospedaje';
+
+    const nomHab = habObj
+      ? `Hab. ${habObj.nro_habitacion} (${habObj.tipo_habitacion || ''})`
+      : 'Hospedaje General';
+    const tipoHosp = habObj?.tipo_habitacion || 'Hospedaje General';
 
     cotizacion.detalle = `[Cotización Externa - ${nomHab}] ${this.form.detalle || ''}`.trim();
 
@@ -192,11 +218,11 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
     detalleBase.cantidad = this.noches;
     detalleBase.cantidad_adulto = Number(this.form.cantidad_adulto) || 1;
     detalleBase.cantidad_ninio = Number(this.form.cantidad_ninio) || 0;
-    detalleBase.precio_unit_adulto = 0;
+    detalleBase.precio_unit_adulto = habObj && habObj.precio ? Number(habObj.precio) : 0;
     detalleBase.precio_unit_ninio = 0;
-    detalleBase.precio_unitario = 0;
-    detalleBase.subtotal = 0;
-    detalleBase.total = 0;
+    detalleBase.precio_unitario = habObj && habObj.precio ? Number(habObj.precio) : 0;
+    detalleBase.subtotal = (habObj && habObj.precio ? Number(habObj.precio) : 0) * this.noches;
+    detalleBase.total = detalleBase.subtotal;
     detalleBase.is_base = 1;
     detalleBase.detalle = `Hospedaje ${nomHab} (${this.noches} ${this.noches === 1 ? 'noche' : 'noches'})`;
 

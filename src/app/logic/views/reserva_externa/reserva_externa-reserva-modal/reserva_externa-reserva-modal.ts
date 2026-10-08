@@ -10,6 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTabsModule } from '@angular/material/tabs';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import moment from 'moment';
 
 import { ReservaModel } from '../../../models/reserva.model';
@@ -38,7 +40,9 @@ import { PdfViewerComponent } from '../../../shared/views/pdf-viewer/pdf-viewer'
     MatIconModule,
     MatDatepickerModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatTabsModule,
+    DragDropModule
   ],
   templateUrl: './reserva_externa-reserva-modal.html',
   styleUrls: ['./reserva_externa-reserva-modal.scss']
@@ -52,6 +56,7 @@ export class ReservaExternaModalComponent implements OnInit {
   tipoDocumentos: TipoDocumentoModel[] = [];
   paises: PaisModel[] = [];
   canalReservas: CanalReservaModel[] = [];
+  canalSeleccionadoId: number = 1;
 
   // Form Model
   form: {
@@ -127,6 +132,14 @@ export class ReservaExternaModalComponent implements OnInit {
     }
     if (this.tipoDocumentos.length > 0) {
       this.form.tipo_doc_id = this.tipoDocumentos[0].id || 1;
+    }
+    if (this.canalReservas.length > 0) {
+      const defCanal = this.canalReservas.find(c =>
+        c.descripcion?.toLowerCase().includes('whatsapp') ||
+        c.descripcion?.toLowerCase().includes('directo') ||
+        c.descripcion?.toLowerCase().includes('externo')
+      );
+      this.canalSeleccionadoId = defCanal ? defCanal.id : this.canalReservas[0].id;
     }
 
     // Determinar cantidad de adultos por tipo
@@ -236,7 +249,7 @@ export class ReservaExternaModalComponent implements OnInit {
       email: (this.form.correo || '').trim(),
       pais_procedencia_id: this.form.pais_id ? Number(this.form.pais_id) : 1,
       nacionalidad_id: this.form.pais_id ? Number(this.form.pais_id) : 1,
-      canal_reserva_id: canalId,
+      canal_reserva_id: this.canalSeleccionadoId || canalId,
       fecha_ini: fIni.format('YYYY-MM-DD'),
       fecha_fin: fFin.format('YYYY-MM-DD'),
       cantidad_adulto: Number(this.form.cantidad_adulto) || 1,

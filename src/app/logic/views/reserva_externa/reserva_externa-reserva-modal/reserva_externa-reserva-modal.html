@@ -1,227 +1,186 @@
-<div class="reserva-externa-modal-container">
-  <!-- Modal Header -->
-  <div class="modal-header">
-    <div class="header-left">
-      <div class="badge-icon">
-        <mat-icon>meeting_room</mat-icon>
-      </div>
-      <div>
-        <h2 class="modal-title">
-          @if (habitacionSeleccionada) {
-            Reservar Habitación {{ habitacionSeleccionada.nro_habitacion }} • {{ habitacionSeleccionada.tipo_habitacion }}
-          } @else {
-            Reservar Habitación
-          }
-        </h2>
-        <div class="modal-subtitle">
-          <span>Estadía de {{ noches }} {{ noches === 1 ? 'noche' : 'noches' }}</span>
-          <span class="dot-separator">•</span>
-          <span class="dates-tag">{{ form.fecha_ini | date:'dd/MM/yyyy' }} al {{ form.fecha_fin | date:'dd/MM/yyyy' }}</span>
-        </div>
-      </div>
-    </div>
-    <button mat-icon-button class="btn-close-modal" (click)="cerrar()" matTooltip="Cerrar">
-      <mat-icon>close</mat-icon>
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+    RESERVA
+    <button type="button" mat-icon-button (click)="cerrar()">
+        <mat-icon style="color:white">close</mat-icon>
     </button>
-  </div>
+</h1>
 
-  <!-- Modal Body Form -->
-  <form #formReserva="ngForm" (ngSubmit)="guardarReserva(formReserva)" class="modal-body-form" novalidate>
-    <!-- Section 1: Selección de Habitación y Fechas -->
-    <div class="form-section">
-      <div class="section-title">
-        <mat-icon>meeting_room</mat-icon>
-        <span>Habitación y Fechas de Estadía</span>
-      </div>
+<mat-tab-group>
+    <mat-tab label="RESERVA">
+        <form #formReserva="ngForm" (ngSubmit)="guardarReserva(formReserva)"
+            style="display: flex; flex-direction: column; height: 100%;">
+            <mat-dialog-content class="mat-typography">
+                <!-- CARD 1: DATOS DEL CLIENTE -->
+                <div class="form-section-card">
+                    <div class="section-header">
+                        <mat-icon class="section-icon">person</mat-icon>
+                        <span class="section-title">Datos del Cliente</span>
+                    </div>
+                    <div class="row row-cols-1 row-cols-md-2 g-2">
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>DNI</mat-label>
+                            <input matInput placeholder="Ingrese DNI" [(ngModel)]="form.dni" name="dni"
+                                (blur)="buscarPersonaPorDni()" (keydown.enter)="buscarPersonaPorDni(); $event.preventDefault()">
+                            @if (buscandoPersona) {
+                            <mat-spinner matSuffix diameter="18" class="me-2"></mat-spinner>
+                            } @else {
+                            <button mat-icon-button matSuffix type="button" (click)="buscarPersonaPorDni()"
+                                [disabled]="!form.dni" matTooltip="Buscar por DNI">
+                                <mat-icon>search</mat-icon>
+                            </button>
+                            }
+                        </mat-form-field>
 
-      <div class="row g-3">
-        <!-- Habitación Asignada -->
-        <div class="col-12 col-md-6">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Seleccionar Habitación Disponible</mat-label>
-            <mat-select [(ngModel)]="form.habitacion_id" name="habitacion_id" required #habSelect="ngModel">
-              @for (hab of habitacionesDisponibles; track hab.id) {
-                <mat-option [value]="hab.id">
-                  Habitación {{ hab.nro_habitacion }} {{ hab.piso ? '(Piso ' + hab.piso + ')' : '' }}
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix class="field-icon">vpn_key</mat-icon>
-            @if (habSelect.invalid && (habSelect.dirty || habSelect.touched)) {
-              <mat-error>Debe seleccionar una habitación</mat-error>
-            }
-          </mat-form-field>
-        </div>
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Tipo Documento</mat-label>
+                            <mat-select placeholder="Tipo Documento" [(ngModel)]="form.tipo_doc_id" name="tipo_doc_id">
+                                <mat-option [value]="null">-- Ninguno --</mat-option>
+                                @for (x of tipoDocumentos; track x.id) {
+                                <mat-option [value]="x.id">{{ x.tipo_documento }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
 
-        <!-- Huéspedes: Adultos y Niños -->
-        <div class="col-6 col-md-3">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Adultos</mat-label>
-            <input matInput type="number" min="1" max="10" [(ngModel)]="form.cantidad_adulto" name="cantidad_adulto" required>
-            <mat-icon matPrefix class="field-icon">person</mat-icon>
-          </mat-form-field>
-        </div>
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Nombre</mat-label>
+                            <input matInput placeholder="" [(ngModel)]="form.nombre" name="nombre" required>
+                        </mat-form-field>
 
-        <div class="col-6 col-md-3">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Niños</mat-label>
-            <input matInput type="number" min="0" max="10" [(ngModel)]="form.cantidad_ninio" name="cantidad_ninio">
-            <mat-icon matPrefix class="field-icon">child_care</mat-icon>
-          </mat-form-field>
-        </div>
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Primer Apellido</mat-label>
+                            <input matInput placeholder="" [(ngModel)]="form.primer_apellido" name="primer_apellido" required>
+                        </mat-form-field>
 
-        <!-- Fecha Llegada -->
-        <div class="col-12 col-md-6">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Fecha Llegada</mat-label>
-            <input matInput [matDatepicker]="pickerIni" [(ngModel)]="form.fecha_ini" (dateChange)="onFechaChange()" name="fecha_ini" required readonly>
-            <mat-datepicker-toggle matIconSuffix [for]="pickerIni"></mat-datepicker-toggle>
-            <mat-datepicker #pickerIni></mat-datepicker>
-          </mat-form-field>
-        </div>
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Segundo Apellido</mat-label>
+                            <input matInput placeholder="" [(ngModel)]="form.segundo_apellido" name="segundo_apellido">
+                        </mat-form-field>
 
-        <!-- Fecha Salida -->
-        <div class="col-12 col-md-6">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Fecha Salida</mat-label>
-            <input matInput [matDatepicker]="pickerFin" [(ngModel)]="form.fecha_fin" (dateChange)="onFechaChange()" name="fecha_fin" required readonly>
-            <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
-            <mat-datepicker #pickerFin></mat-datepicker>
-          </mat-form-field>
-        </div>
-      </div>
-    </div>
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Telefono</mat-label>
+                            <input matInput placeholder="" [(ngModel)]="form.telefono" name="telefono">
+                            <mat-icon matSuffix class="text-secondary">call</mat-icon>
+                        </mat-form-field>
 
-    <!-- Section 2: Datos del Huésped -->
-    <div class="form-section">
-      <div class="section-title">
-        <mat-icon>badge</mat-icon>
-        <span>Datos del Huésped / Titular</span>
-      </div>
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Nacionalidad</mat-label>
+                            <mat-select [(ngModel)]="form.pais_id" name="nacionalidad_id" required>
+                                @for (p of paises; track p.id) {
+                                <mat-option [value]="p.id">{{ p.descripcion }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
 
-      <div class="row g-3">
-        <!-- DNI / CI con búsqueda automática -->
-        <div class="col-12 col-md-4">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Nro. Documento / CI</mat-label>
-            <input matInput [(ngModel)]="form.dni" name="dni" (blur)="buscarPersonaPorDni()" (keydown.enter)="buscarPersonaPorDni(); $event.preventDefault()" placeholder="Ingrese CI y presione Enter">
-            <mat-icon matPrefix class="field-icon">credit_card</mat-icon>
-            <button mat-icon-button matSuffix type="button" (click)="buscarPersonaPorDni()" matTooltip="Buscar persona" [disabled]="buscandoPersona">
-              @if (buscandoPersona) {
-                <mat-spinner diameter="18"></mat-spinner>
-              } @else {
-                <mat-icon>search</mat-icon>
-              }
-            </button>
-          </mat-form-field>
-        </div>
+                        <mat-form-field appearance="outline" class="col">
+                            <mat-label>Correo Electrónico</mat-label>
+                            <input matInput type="email" placeholder="" [(ngModel)]="form.correo" name="correo">
+                            <mat-icon matSuffix class="text-secondary">email</mat-icon>
+                        </mat-form-field>
+                    </div>
+                </div>
 
-        <!-- Tipo Documento -->
-        <div class="col-12 col-md-4">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Tipo Documento</mat-label>
-            <mat-select [(ngModel)]="form.tipo_doc_id" name="tipo_doc_id" required>
-              @for (tipo of tipoDocumentos; track tipo.id) {
-                <mat-option [value]="tipo.id">{{ tipo.tipo_documento }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
+                <!-- CARD 2: DETALLES DE LA RESERVA -->
+                <div class="form-section-card">
+                    <div class="section-header">
+                        <mat-icon class="section-icon">hotel</mat-icon>
+                        <span class="section-title">Detalles de la Reserva</span>
+                    </div>
 
-        <!-- País de Procedencia -->
-        <div class="col-12 col-md-4">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>País</mat-label>
-            <mat-select [(ngModel)]="form.pais_id" name="pais_id">
-              @for (pais of paises; track pais.id) {
-                <mat-option [value]="pais.id">{{ pais.descripcion }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix class="field-icon">public</mat-icon>
-          </mat-form-field>
-        </div>
+                    <div class="grupo-badge-info mb-3">
+                        <mat-icon>person</mat-icon>
+                        <span>Modalidad: <strong>Individual</strong></span>
+                    </div>
 
-        <!-- Nombres -->
-        <div class="col-12 col-md-4">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Nombres</mat-label>
-            <input matInput [(ngModel)]="form.nombre" name="nombre" required #nombreField="ngModel">
-            <mat-icon matPrefix class="field-icon">person_outline</mat-icon>
-            @if (nombreField.invalid && (nombreField.dirty || nombreField.touched)) {
-              <mat-error>El nombre es obligatorio</mat-error>
-            }
-          </mat-form-field>
-        </div>
+                    <div class="row g-2">
+                        <mat-form-field appearance="outline" class="col-12">
+                            <mat-label>Habitación</mat-label>
+                            <mat-select [(ngModel)]="form.habitacion_id" name="habitacion_id" required>
+                                @for (hab of habitacionesDisponibles; track hab.id) {
+                                <mat-option [value]="hab.id">
+                                    {{ hab.nro_habitacion }} {{ hab.tipo_habitacion ? (hab.tipo_habitacion | uppercase) : '' }} {{ hab.piso ? '(Piso ' + hab.piso + ')' : '' }}
+                                </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
 
-        <!-- Primer Apellido -->
-        <div class="col-12 col-md-4">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Primer Apellido</mat-label>
-            <input matInput [(ngModel)]="form.primer_apellido" name="primer_apellido" required #apellidoField="ngModel">
-            @if (apellidoField.invalid && (apellidoField.dirty || apellidoField.touched)) {
-              <mat-error>El apellido es obligatorio</mat-error>
-            }
-          </mat-form-field>
-        </div>
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Canal Reserva</mat-label>
+                            <mat-select [(ngModel)]="canalSeleccionadoId" name="canal_reserva_id" required>
+                                @for (x of canalReservas; track x.id) {
+                                <mat-option [value]="x.id">{{ x.descripcion }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
 
-        <!-- Segundo Apellido -->
-        <div class="col-12 col-md-4">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Segundo Apellido</mat-label>
-            <input matInput [(ngModel)]="form.segundo_apellido" name="segundo_apellido">
-          </mat-form-field>
-        </div>
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>País Procedencia</mat-label>
+                            <mat-select [(ngModel)]="form.pais_id" name="pais_procedencia_id" required>
+                                @for (p of paises; track p.id) {
+                                <mat-option [value]="p.id">{{ p.descripcion }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
 
-        <!-- Teléfono -->
-        <div class="col-12 col-md-6">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Teléfono / WhatsApp</mat-label>
-            <input matInput [(ngModel)]="form.telefono" name="telefono" placeholder="Ej: 77712345">
-            <mat-icon matPrefix class="field-icon">phone</mat-icon>
-          </mat-form-field>
-        </div>
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Fecha Inicial</mat-label>
+                            <input matInput [matDatepicker]="picker_fecha_ini" [(ngModel)]="form.fecha_ini"
+                                (dateChange)="onFechaChange()" name="fecha_ini" required>
+                            <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"></mat-datepicker-toggle>
+                            <mat-datepicker #picker_fecha_ini></mat-datepicker>
+                        </mat-form-field>
 
-        <!-- Correo Electrónico -->
-        <div class="col-12 col-md-6">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Correo Electrónico (Opcional)</mat-label>
-            <input matInput type="email" [(ngModel)]="form.correo" name="correo" placeholder="cliente@ejemplo.com">
-            <mat-icon matPrefix class="field-icon">email</mat-icon>
-          </mat-form-field>
-        </div>
-      </div>
-    </div>
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Fecha Final</mat-label>
+                            <input matInput [matDatepicker]="picker_fecha_fin" [(ngModel)]="form.fecha_fin"
+                                (dateChange)="onFechaChange()" name="fecha_fin" required>
+                            <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin"></mat-datepicker-toggle>
+                            <mat-datepicker #picker_fecha_fin></mat-datepicker>
+                        </mat-form-field>
 
-    <!-- Section 3: Observaciones / Requerimientos -->
-    <div class="form-section mb-0">
-      <div class="section-title">
-        <mat-icon>notes</mat-icon>
-        <span>Notas y Requerimientos Especiales</span>
-      </div>
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Cantidad Adulto</mat-label>
+                            <input type="number" matInput placeholder="1" [(ngModel)]="form.cantidad_adulto"
+                                name="cantidad_adulto" min="1">
+                            <mat-icon matSuffix class="text-secondary">person</mat-icon>
+                        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Observaciones para el hotel (hora estimada de llegada, preferencias, etc.)</mat-label>
-        <textarea matInput rows="2" [(ngModel)]="form.detalle" name="detalle" placeholder="Ej: Llegada por la noche, cama adicional, etc."></textarea>
-      </mat-form-field>
-    </div>
+                        <mat-form-field appearance="outline" class="col-12 col-md-6">
+                            <mat-label>Cantidad Niño</mat-label>
+                            <input type="number" matInput placeholder="0" [(ngModel)]="form.cantidad_ninio"
+                                name="cantidad_ninio" min="0">
+                            <mat-icon matSuffix class="text-secondary">child_care</mat-icon>
+                        </mat-form-field>
+                    </div>
+                </div>
 
-    <!-- Modal Actions Footer -->
-    <div class="modal-footer-actions">
-      <button mat-button type="button" class="btn-cancel" (click)="cerrar()" [disabled]="guardando">
-        Cancelar
-      </button>
+                <!-- CARD 3: OBSERVACIONES -->
+                <div class="form-section-card">
+                    <div class="section-header">
+                        <mat-icon class="section-icon">notes</mat-icon>
+                        <span class="section-title">Observaciones</span>
+                    </div>
+                    <div class="row g-2">
+                        <mat-form-field appearance="outline" class="col-12">
+                            <mat-label>Notas o requerimientos especiales</mat-label>
+                            <textarea matInput rows="2" [(ngModel)]="form.detalle" name="detalle"
+                                placeholder="Ej: Hora estimada de llegada, cama adicional, etc."></textarea>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </mat-dialog-content>
 
-      <button mat-flat-button class="btn-confirm-reserve" type="submit" [disabled]="guardando || formReserva.invalid">
-        @if (guardando) {
-          <mat-spinner diameter="20" class="me-2 spinner-light"></mat-spinner>
-          <span>Guardando...</span>
-        } @else {
-          <ng-container>
-            <mat-icon class="me-1">check_circle</mat-icon>
-            <span>Confirmar Reserva</span>
-          </ng-container>
-        }
-      </button>
-    </div>
-  </form>
-</div>
+            <mat-dialog-actions class="d-flex justify-content-around bg-light py-2">
+                <button mat-raised-button class="bg-primary text-white" (click)="cerrar()" type="button">
+                    Cancelar
+                </button>
+                <button mat-raised-button type="submit" class="bg-success text-black"
+                    [disabled]="guardando || formReserva.invalid">
+                    @if (guardando) {
+                    <mat-spinner diameter="18" class="me-1 d-inline-block"></mat-spinner>
+                    }
+                    Guardar
+                </button>
+            </mat-dialog-actions>
+        </form>
+    </mat-tab>
+</mat-tab-group>

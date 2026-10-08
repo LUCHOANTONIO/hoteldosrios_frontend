@@ -428,14 +428,17 @@ export class ReservaExternaComponent implements OnInit {
   abrirModalCotizacion(hab?: HabitacionDisponibleCard): void {
     const dialogRef = this.dialog.open(ReservaExternaCotizacionModalComponent, {
       width: '95vw',
-      maxWidth: '720px',
+      maxWidth: '780px',
       maxHeight: '92vh',
       disableClose: true,
       data: {
         habitacionSeleccionada: hab || null,
+        habitacionesDisponibles: this.habitacionesDisponibles,
         fecha_ini: this.fechaLlegada,
         fecha_fin: this.fechaSalida,
-        tipoDocumentos: this.tipoDocumentos
+        tipoDocumentos: this.tipoDocumentos,
+        paises: this.paises,
+        canalReservas: this.canalReservas
       }
     });
 

@@ -112,17 +112,6 @@
             </div>
 
             <div class="room-body">
-              <div class="room-info-lines">
-                <div class="info-line" *ngIf="hab.capacidadTexto">
-                  <span class="label">CAPACIDAD:</span>
-                  <span class="val">{{ hab.capacidadTexto }}</span>
-                </div>
-                <div class="info-line" *ngIf="hab.piso">
-                  <span class="label">UBICACIÓN:</span>
-                  <span class="val">{{ hab.piso === '0' ? 'Planta Baja' : 'Piso ' + hab.piso }}</span>
-                </div>
-              </div>
-
               <div class="status-footer">
                 <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar">
                   <mat-icon>event</mat-icon>
@@ -155,17 +144,6 @@
             </div>
 
             <div class="room-body">
-              <div class="room-info-lines">
-                <div class="info-line" *ngIf="hab.capacidadTexto">
-                  <span class="label">CAPACIDAD:</span>
-                  <span class="val">{{ hab.capacidadTexto }}</span>
-                </div>
-                <div class="info-line">
-                  <span class="label">SERVICIO:</span>
-                  <span class="val">Pasadía / Full Day</span>
-                </div>
-              </div>
-
               <div class="status-footer">
                 <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar Full Day">
                   <mat-icon>event</mat-icon>
@@ -198,17 +176,6 @@
             </div>
 
             <div class="room-body">
-              <div class="room-info-lines">
-                <div class="info-line" *ngIf="hab.capacidadTexto">
-                  <span class="label">CAPACIDAD:</span>
-                  <span class="val">{{ hab.capacidadTexto }}</span>
-                </div>
-                <div class="info-line">
-                  <span class="label">SERVICIO:</span>
-                  <span class="val">Zona de Camping</span>
-                </div>
-              </div>
-
               <div class="status-footer">
                 <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar Camping">
                   <mat-icon>event</mat-icon>
