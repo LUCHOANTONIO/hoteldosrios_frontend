@@ -1,0 +1,438 @@
+<div class="reserva-externa-portal-container">
+  <!-- FILA 1: Barra de Navegación y Acciones Globales -->
+  <nav class="portal-nav-bar">
+    <div class="hotel-brand">
+      <span class="hotel-title">HOTEL DOS RÍOS</span>
+      <span class="portal-tag">RESERVA EXTERNA</span>
+    </div>
+
+    <div class="nav-right-actions">
+      <div class="view-switcher-pills">
+        <button class="pill-btn" [class.active]="vistaActiva === 'catalogo'" (click)="cambiarVista('catalogo')">
+          <mat-icon>meeting_room</mat-icon>
+          <span>Habitaciones Disponibles</span>
+        </button>
+
+        <button class="pill-btn" [class.active]="vistaActiva === 'reservas'" (click)="cambiarVista('reservas')">
+          <mat-icon>event_available</mat-icon>
+          <span>Mis Reservas</span>
+        </button>
+
+        <button class="pill-btn" [class.active]="vistaActiva === 'cotizaciones'" (click)="cambiarVista('cotizaciones')">
+          <mat-icon>request_quote</mat-icon>
+          <span>Mis Cotizaciones</span>
+        </button>
+      </div>
+
+      <button type="button" class="btn-top-cotizar" (click)="abrirModalCotizacion()"
+        matTooltip="Solicitar Cotización General (Habitaciones, Full Day, Camping)">
+        <mat-icon>request_quote</mat-icon>
+        <span>Cotizar</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- VISTA 1: HABITACIONES DISPONIBLES         -->
+  <!-- ========================================== -->
+  @if (vistaActiva === 'catalogo') {
+  <div class="catalog-view-content">
+    <!-- FILA 2: Cabecera con Título y Búsqueda de Habitaciones -->
+    <header class="page-header">
+      <div class="header-title-container">
+        <div class="header-icon">
+          <mat-icon color="primary">grid_on</mat-icon>
+        </div>
+        <div>
+          <h1 class="page-title">Disponibilidad de Habitaciones</h1>
+          <div class="page-subtitle">Consulta de habitaciones libres por fecha y tipo para reserva inmediata</div>
+        </div>
+      </div>
+
+      <div class="date-controls">
+        <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 155px;">
+          <mat-label>Llegada</mat-label>
+          <input matInput [matDatepicker]="pickerLlegada" [(ngModel)]="fechaLlegada"
+            (dateChange)="buscarDisponibilidad()" readonly>
+          <mat-datepicker-toggle matIconSuffix [for]="pickerLlegada"></mat-datepicker-toggle>
+          <mat-datepicker #pickerLlegada></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 155px;">
+          <mat-label>Salida</mat-label>
+          <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida"
+            (dateChange)="buscarDisponibilidad()" readonly>
+          <mat-datepicker-toggle matIconSuffix [for]="pickerSalida"></mat-datepicker-toggle>
+          <mat-datepicker #pickerSalida></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" class="btn-search"
+          (click)="buscarDisponibilidad()" [disabled]="buscando" matTooltip="Buscar habitaciones disponibles">
+          @if (buscando) {
+          <mat-spinner diameter="16" class="spinner-white me-1"></mat-spinner>
+          } @else {
+          <mat-icon>search</mat-icon>
+          }
+          <span>Buscar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Empty State (Only shown when not loading and empty) -->
+    @if (!cargando && habitacionesFiltradas.length === 0) {
+    <div class="empty-state-box">
+      <div class="empty-icon-circle">
+        <mat-icon>hotel</mat-icon>
+      </div>
+      <h3 class="empty-title">No hay habitaciones disponibles</h3>
+      <p class="empty-subtitle">
+        Para el rango de fechas seleccionado o los filtros aplicados, todas las habitaciones se encuentran ocupadas.
+        Intente seleccionando otras fechas.
+      </p>
+    </div>
+    } @else {
+    <!-- Categorized Catalog Content (Matching Disponibilidad Design & Colors) -->
+    <div class="catalog-categories-container">
+      <!-- 1. HABITACIONES -->
+      @if (habitacionesHotel.length > 0) {
+      <div class="category-section">
+        <div class="section-header">
+          <div class="header-icon">
+            <mat-icon color="primary">meeting_room</mat-icon>
+          </div>
+          <h2 class="section-title">Habitaciones</h2>
+          <span class="section-badge">{{ habitacionesHotel.length }} disponibles</span>
+        </div>
+
+        <div class="matrix-grid">
+          @for (hab of habitacionesHotel; track hab.id) {
+          <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
+            <div class="room-header">
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'ESTÁNDAR') | uppercase }}</span>
+            </div>
+
+            <div class="room-body">
+              <div class="room-info-lines">
+                <div class="info-line" *ngIf="hab.capacidadTexto">
+                  <span class="label">CAPACIDAD:</span>
+                  <span class="val">{{ hab.capacidadTexto }}</span>
+                </div>
+                <div class="info-line" *ngIf="hab.piso">
+                  <span class="label">UBICACIÓN:</span>
+                  <span class="val">{{ hab.piso === '0' ? 'Planta Baja' : 'Piso ' + hab.piso }}</span>
+                </div>
+              </div>
+
+              <div class="status-footer">
+                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar">
+                  <mat-icon>event</mat-icon>
+                  <span>Reservar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- 2. FULL DAY -->
+      @if (habitacionesFullDay.length > 0) {
+      <div class="category-section">
+        <div class="section-header">
+          <div class="header-icon">
+            <mat-icon color="primary">wb_sunny</mat-icon>
+          </div>
+          <h2 class="section-title">Full Day</h2>
+          <span class="section-badge">{{ habitacionesFullDay.length }} disponibles</span>
+        </div>
+
+        <div class="matrix-grid">
+          @for (hab of habitacionesFullDay; track hab.id) {
+          <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
+            <div class="room-header">
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'FULL DAY') | uppercase }}</span>
+            </div>
+
+            <div class="room-body">
+              <div class="room-info-lines">
+                <div class="info-line" *ngIf="hab.capacidadTexto">
+                  <span class="label">CAPACIDAD:</span>
+                  <span class="val">{{ hab.capacidadTexto }}</span>
+                </div>
+                <div class="info-line">
+                  <span class="label">SERVICIO:</span>
+                  <span class="val">Pasadía / Full Day</span>
+                </div>
+              </div>
+
+              <div class="status-footer">
+                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar Full Day">
+                  <mat-icon>event</mat-icon>
+                  <span>Reservar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- 3. CAMPING -->
+      @if (habitacionesCamping.length > 0) {
+      <div class="category-section">
+        <div class="section-header">
+          <div class="header-icon">
+            <mat-icon color="primary">forest</mat-icon>
+          </div>
+          <h2 class="section-title">Camping</h2>
+          <span class="section-badge">{{ habitacionesCamping.length }} disponibles</span>
+        </div>
+
+        <div class="matrix-grid">
+          @for (hab of habitacionesCamping; track hab.id) {
+          <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
+            <div class="room-header">
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'CAMPING') | uppercase }}</span>
+            </div>
+
+            <div class="room-body">
+              <div class="room-info-lines">
+                <div class="info-line" *ngIf="hab.capacidadTexto">
+                  <span class="label">CAPACIDAD:</span>
+                  <span class="val">{{ hab.capacidadTexto }}</span>
+                </div>
+                <div class="info-line">
+                  <span class="label">SERVICIO:</span>
+                  <span class="val">Zona de Camping</span>
+                </div>
+              </div>
+
+              <div class="status-footer">
+                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar Camping">
+                  <mat-icon>event</mat-icon>
+                  <span>Reservar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- VISTA 2: MIS RESERVAS REGISTRADAS          -->
+  <!-- ========================================== -->
+  @if (vistaActiva === 'reservas') {
+  <div class="table-view-content">
+    <div class="table-header-bar">
+      <div>
+        <h2 class="table-title">Mis Reservas Registradas</h2>
+        <p class="table-subtitle">Listado de reservas gestionadas por el canal de Reservas Externas (sin visualización
+          de tarifas internas)</p>
+      </div>
+
+      <div class="search-input-wrapper">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar por cliente, documento o habitación..."
+          (keyup)="filtrarReservas($any($event.target).value)">
+      </div>
+    </div>
+
+    <div class="table-card-wrapper mat-elevation-z1">
+      <table mat-table [dataSource]="dataSourceReservas" class="w-100 custom-table">
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 80px;">Acción</th>
+          <td mat-cell *matCellDef="let r" class="text-center">
+            <button mat-icon-button color="primary" (click)="verVoucherReserva(r.id)"
+              matTooltip="Ver Comprobante / Voucher">
+              <mat-icon>picture_as_pdf</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Correlativo -->
+        <ng-container matColumnDef="correlativo">
+          <th mat-header-cell *matHeaderCellDef>Nro.</th>
+          <td mat-cell *matCellDef="let r" class="fw-bold">
+            #{{ r.correlativo || r.id }}
+          </td>
+        </ng-container>
+
+        <!-- Fecha -->
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Registro</th>
+          <td mat-cell *matCellDef="let r">
+            {{ r.created_at ? (r.created_at | date:'dd/MM/yyyy') : (r.fecha_ini | date:'dd/MM/yyyy') }}
+          </td>
+        </ng-container>
+
+        <!-- Cliente -->
+        <ng-container matColumnDef="cliente">
+          <th mat-header-cell *matHeaderCellDef>Huésped / Titular</th>
+          <td mat-cell *matCellDef="let r">
+            <div class="fw-semibold">{{ r.cliente }}</div>
+            <small class="text-muted">{{ r.nro_documento }}</small>
+          </td>
+        </ng-container>
+
+        <!-- Teléfono -->
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef>Contacto</th>
+          <td mat-cell *matCellDef="let r">{{ r.telefono || '—' }}</td>
+        </ng-container>
+
+        <!-- Habitación -->
+        <ng-container matColumnDef="habitacion">
+          <th mat-header-cell *matHeaderCellDef>Habitación</th>
+          <td mat-cell *matCellDef="let r">
+            <span class="room-pill">{{ obtenerNombreHabitacion(r.habitacion_id) }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Fechas Estadía -->
+        <ng-container matColumnDef="fechas_estadia">
+          <th mat-header-cell *matHeaderCellDef>Estadía</th>
+          <td mat-cell *matCellDef="let r">
+            <div class="dates-range">
+              <span>{{ r.fecha_ini | date:'dd/MM/yyyy' }}</span>
+              <span class="mx-1 text-muted">→</span>
+              <span>{{ r.fecha_fin | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let r">
+            @let badge = obtenerEstadoBadge(r.estado_reserva_id);
+            <span class="status-pill {{ badge.clase }}">{{ badge.texto }}</span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsReservas"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsReservas;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell text-center py-4 text-muted" colspan="8">
+            No se encontraron reservas registradas
+          </td>
+        </tr>
+      </table>
+
+      <mat-paginator #paginatorReservas [pageSize]="10" [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- VISTA 3: MIS COTIZACIONES                  -->
+  <!-- ========================================== -->
+  @if (vistaActiva === 'cotizaciones') {
+  <div class="table-view-content">
+    <div class="table-header-bar">
+      <div>
+        <h2 class="table-title">Mis Cotizaciones</h2>
+        <p class="table-subtitle">Consultas y cotizaciones elaboradas para clientes potenciales</p>
+      </div>
+
+      <div class="search-input-wrapper">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Buscar por cliente o teléfono..."
+          (keyup)="filtrarCotizaciones($any($event.target).value)">
+      </div>
+    </div>
+
+    <div class="table-card-wrapper mat-elevation-z1">
+      <table mat-table [dataSource]="dataSourceCotizaciones" class="w-100 custom-table">
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 80px;">Acción</th>
+          <td mat-cell *matCellDef="let c" class="text-center">
+            <button mat-icon-button color="primary" (click)="verVoucherCotizacion(c.id)"
+              matTooltip="Ver Cotización PDF">
+              <mat-icon>picture_as_pdf</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Correlativo -->
+        <ng-container matColumnDef="correlativo">
+          <th mat-header-cell *matHeaderCellDef>Nro.</th>
+          <td mat-cell *matCellDef="let c" class="fw-bold">
+            #{{ c.correlativo || c.id }}
+          </td>
+        </ng-container>
+
+        <!-- Fecha -->
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+          <td mat-cell *matCellDef="let c">
+            {{ c.fecha ? (c.fecha | date:'dd/MM/yyyy') : (c.created_at | date:'dd/MM/yyyy') }}
+          </td>
+        </ng-container>
+
+        <!-- Cliente -->
+        <ng-container matColumnDef="cliente">
+          <th mat-header-cell *matHeaderCellDef>Cliente</th>
+          <td mat-cell *matCellDef="let c">
+            <div class="fw-semibold">{{ c.cliente || (c.nombre + ' ' + c.primer_apellido) }}</div>
+            <small class="text-muted">{{ c.dni }}</small>
+          </td>
+        </ng-container>
+
+        <!-- Teléfono -->
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+          <td mat-cell *matCellDef="let c">{{ c.telefono || '—' }}</td>
+        </ng-container>
+
+        <!-- Fechas Estadía -->
+        <ng-container matColumnDef="fechas_estadia">
+          <th mat-header-cell *matHeaderCellDef>Fechas Cotizadas</th>
+          <td mat-cell *matCellDef="let c">
+            @if (c.fecha_ini && c.fecha_fin) {
+            <div class="dates-range">
+              <span>{{ c.fecha_ini | date:'dd/MM/yyyy' }}</span>
+              <span class="mx-1 text-muted">→</span>
+              <span>{{ c.fecha_fin | date:'dd/MM/yyyy' }}</span>
+            </div>
+            } @else {
+            <span class="text-muted">No especificado</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Detalle -->
+        <ng-container matColumnDef="detalle">
+          <th mat-header-cell *matHeaderCellDef>Detalle</th>
+          <td mat-cell *matCellDef="let c" class="text-truncate" style="max-width: 280px;">
+            {{ c.detalle || 'Cotización de Hospedaje' }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsCotizaciones"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsCotizaciones;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell text-center py-4 text-muted" colspan="7">
+            No se encontraron cotizaciones registradas
+          </td>
+        </tr>
+      </table>
+
+      <mat-paginator #paginatorCotizaciones [pageSize]="10" [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+  }
+</div>

@@ -5,4 +5,4 @@ import { LOGIC_ROUTES } from './logic/logic.routes';
 export const routes: Routes = [
     ...BASE_ROUTES,
     ...LOGIC_ROUTES
-];
+];

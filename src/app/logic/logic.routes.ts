@@ -30,6 +30,7 @@ import { InventarioComponent } from './views/inventario/inventario';
 import { ReporteCuentasCobrarComponent } from './views/reporte/cuenta_cobrar/cuenta_cobrar';
 import { CotizacionComponent } from './views/cotizacion/cotizacion';
 import { TarifaComponent } from './views/tarifa/tarifa';
+import { ReservaExternaComponent } from './views/reserva_externa/reserva_externa';
 
 export const LOGIC_ROUTES: Routes = [
     { path: 'timeline', component: TimelineComponent, canActivate: [authGuard] },
@@ -61,5 +62,6 @@ export const LOGIC_ROUTES: Routes = [
     { path: 'reporte_cuentas_cobrar', component: ReporteCuentasCobrarComponent, canActivate: [authGuard] },
     { path: 'inventarios', component: InventarioComponent, canActivate: [authGuard] },
     { path: 'cotizaciones', component: CotizacionComponent, canActivate: [authGuard] },
-    { path: 'tarifas', component: TarifaComponent, canActivate: [authGuard] }
+    { path: 'tarifas', component: TarifaComponent, canActivate: [authGuard] },
+    { path: 'reserva_externa', component: ReservaExternaComponent, canActivate: [authGuard] }
 ];

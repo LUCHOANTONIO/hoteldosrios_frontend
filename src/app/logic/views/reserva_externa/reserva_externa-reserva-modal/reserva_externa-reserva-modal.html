@@ -1,0 +1,227 @@
+<div class="reserva-externa-modal-container">
+  <!-- Modal Header -->
+  <div class="modal-header">
+    <div class="header-left">
+      <div class="badge-icon">
+        <mat-icon>meeting_room</mat-icon>
+      </div>
+      <div>
+        <h2 class="modal-title">
+          @if (habitacionSeleccionada) {
+            Reservar Habitación {{ habitacionSeleccionada.nro_habitacion }} • {{ habitacionSeleccionada.tipo_habitacion }}
+          } @else {
+            Reservar Habitación
+          }
+        </h2>
+        <div class="modal-subtitle">
+          <span>Estadía de {{ noches }} {{ noches === 1 ? 'noche' : 'noches' }}</span>
+          <span class="dot-separator">•</span>
+          <span class="dates-tag">{{ form.fecha_ini | date:'dd/MM/yyyy' }} al {{ form.fecha_fin | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button class="btn-close-modal" (click)="cerrar()" matTooltip="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Modal Body Form -->
+  <form #formReserva="ngForm" (ngSubmit)="guardarReserva(formReserva)" class="modal-body-form" novalidate>
+    <!-- Section 1: Selección de Habitación y Fechas -->
+    <div class="form-section">
+      <div class="section-title">
+        <mat-icon>meeting_room</mat-icon>
+        <span>Habitación y Fechas de Estadía</span>
+      </div>
+
+      <div class="row g-3">
+        <!-- Habitación Asignada -->
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Seleccionar Habitación Disponible</mat-label>
+            <mat-select [(ngModel)]="form.habitacion_id" name="habitacion_id" required #habSelect="ngModel">
+              @for (hab of habitacionesDisponibles; track hab.id) {
+                <mat-option [value]="hab.id">
+                  Habitación {{ hab.nro_habitacion }} {{ hab.piso ? '(Piso ' + hab.piso + ')' : '' }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matPrefix class="field-icon">vpn_key</mat-icon>
+            @if (habSelect.invalid && (habSelect.dirty || habSelect.touched)) {
+              <mat-error>Debe seleccionar una habitación</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Huéspedes: Adultos y Niños -->
+        <div class="col-6 col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Adultos</mat-label>
+            <input matInput type="number" min="1" max="10" [(ngModel)]="form.cantidad_adulto" name="cantidad_adulto" required>
+            <mat-icon matPrefix class="field-icon">person</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Niños</mat-label>
+            <input matInput type="number" min="0" max="10" [(ngModel)]="form.cantidad_ninio" name="cantidad_ninio">
+            <mat-icon matPrefix class="field-icon">child_care</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Fecha Llegada -->
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Fecha Llegada</mat-label>
+            <input matInput [matDatepicker]="pickerIni" [(ngModel)]="form.fecha_ini" (dateChange)="onFechaChange()" name="fecha_ini" required readonly>
+            <mat-datepicker-toggle matIconSuffix [for]="pickerIni"></mat-datepicker-toggle>
+            <mat-datepicker #pickerIni></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Fecha Salida -->
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Fecha Salida</mat-label>
+            <input matInput [matDatepicker]="pickerFin" [(ngModel)]="form.fecha_fin" (dateChange)="onFechaChange()" name="fecha_fin" required readonly>
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFin></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Datos del Huésped -->
+    <div class="form-section">
+      <div class="section-title">
+        <mat-icon>badge</mat-icon>
+        <span>Datos del Huésped / Titular</span>
+      </div>
+
+      <div class="row g-3">
+        <!-- DNI / CI con búsqueda automática -->
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nro. Documento / CI</mat-label>
+            <input matInput [(ngModel)]="form.dni" name="dni" (blur)="buscarPersonaPorDni()" (keydown.enter)="buscarPersonaPorDni(); $event.preventDefault()" placeholder="Ingrese CI y presione Enter">
+            <mat-icon matPrefix class="field-icon">credit_card</mat-icon>
+            <button mat-icon-button matSuffix type="button" (click)="buscarPersonaPorDni()" matTooltip="Buscar persona" [disabled]="buscandoPersona">
+              @if (buscandoPersona) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <mat-icon>search</mat-icon>
+              }
+            </button>
+          </mat-form-field>
+        </div>
+
+        <!-- Tipo Documento -->
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tipo Documento</mat-label>
+            <mat-select [(ngModel)]="form.tipo_doc_id" name="tipo_doc_id" required>
+              @for (tipo of tipoDocumentos; track tipo.id) {
+                <mat-option [value]="tipo.id">{{ tipo.tipo_documento }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- País de Procedencia -->
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>País</mat-label>
+            <mat-select [(ngModel)]="form.pais_id" name="pais_id">
+              @for (pais of paises; track pais.id) {
+                <mat-option [value]="pais.id">{{ pais.descripcion }}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matPrefix class="field-icon">public</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Nombres -->
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nombres</mat-label>
+            <input matInput [(ngModel)]="form.nombre" name="nombre" required #nombreField="ngModel">
+            <mat-icon matPrefix class="field-icon">person_outline</mat-icon>
+            @if (nombreField.invalid && (nombreField.dirty || nombreField.touched)) {
+              <mat-error>El nombre es obligatorio</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Primer Apellido -->
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Primer Apellido</mat-label>
+            <input matInput [(ngModel)]="form.primer_apellido" name="primer_apellido" required #apellidoField="ngModel">
+            @if (apellidoField.invalid && (apellidoField.dirty || apellidoField.touched)) {
+              <mat-error>El apellido es obligatorio</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Segundo Apellido -->
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Segundo Apellido</mat-label>
+            <input matInput [(ngModel)]="form.segundo_apellido" name="segundo_apellido">
+          </mat-form-field>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Teléfono / WhatsApp</mat-label>
+            <input matInput [(ngModel)]="form.telefono" name="telefono" placeholder="Ej: 77712345">
+            <mat-icon matPrefix class="field-icon">phone</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Correo Electrónico -->
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Correo Electrónico (Opcional)</mat-label>
+            <input matInput type="email" [(ngModel)]="form.correo" name="correo" placeholder="cliente@ejemplo.com">
+            <mat-icon matPrefix class="field-icon">email</mat-icon>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Observaciones / Requerimientos -->
+    <div class="form-section mb-0">
+      <div class="section-title">
+        <mat-icon>notes</mat-icon>
+        <span>Notas y Requerimientos Especiales</span>
+      </div>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Observaciones para el hotel (hora estimada de llegada, preferencias, etc.)</mat-label>
+        <textarea matInput rows="2" [(ngModel)]="form.detalle" name="detalle" placeholder="Ej: Llegada por la noche, cama adicional, etc."></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Modal Actions Footer -->
+    <div class="modal-footer-actions">
+      <button mat-button type="button" class="btn-cancel" (click)="cerrar()" [disabled]="guardando">
+        Cancelar
+      </button>
+
+      <button mat-flat-button class="btn-confirm-reserve" type="submit" [disabled]="guardando || formReserva.invalid">
+        @if (guardando) {
+          <mat-spinner diameter="20" class="me-2 spinner-light"></mat-spinner>
+          <span>Guardando...</span>
+        } @else {
+          <ng-container>
+            <mat-icon class="me-1">check_circle</mat-icon>
+            <span>Confirmar Reserva</span>
+          </ng-container>
+        }
+      </button>
+    </div>
+  </form>
+</div>
