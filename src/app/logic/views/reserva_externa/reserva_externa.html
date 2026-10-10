@@ -261,221 +261,273 @@
   <!-- VISTA 2: MIS RESERVAS REGISTRADAS          -->
   <!-- ========================================== -->
   @if (vistaActiva === 'reservas') {
-  <div class="table-view-content">
-    <div class="table-header-bar">
-      <div>
-        <h2 class="table-title">Mis Reservas Registradas</h2>
-        <p class="table-subtitle">Listado de reservas gestionadas por el canal de Reservas Externas (sin visualización
-          de tarifas internas)</p>
+  <mat-card class="my-1" appearance="outlined">
+    <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; align-items: center;">
+        <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
+          <mat-icon style="vertical-align: middle; margin-right: 6px;" class="text-primary">event_available</mat-icon>
+          MIS RESERVAS
+        </mat-card-title>
       </div>
 
-      <div class="search-input-wrapper">
-        <mat-icon>search</mat-icon>
-        <input type="text" placeholder="Buscar por cliente, documento o habitación..."
-          (keyup)="filtrarReservas($any($event.target).value)">
+      <!-- Filtros rápidos por Categoría (Habitaciones / Full Day / Camping) -->
+      <div class="d-inline-flex align-items-center gap-1 ms-2">
+        <button type="button" class="btn btn-sm py-1 px-2"
+          [ngClass]="filtroCategoriaReserva === 'TODOS' ? 'btn-dark' : 'btn-outline-secondary'"
+          (click)="cambiarFiltroCategoriaReserva('TODOS')">
+          Todos ({{ totalReservas }})
+        </button>
+        <button type="button" class="btn btn-sm py-1 px-2"
+          [ngClass]="filtroCategoriaReserva === 'HABITACION' ? 'btn-primary' : 'btn-outline-primary'"
+          (click)="cambiarFiltroCategoriaReserva('HABITACION')">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle;">meeting_room</mat-icon>
+          Habitaciones ({{ totalReservasHotel }})
+        </button>
+        <button type="button" class="btn btn-sm py-1 px-2"
+          [ngClass]="filtroCategoriaReserva === 'FULL_DAY' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark'"
+          (click)="cambiarFiltroCategoriaReserva('FULL_DAY')">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle;">wb_sunny</mat-icon>
+          Full Day ({{ totalReservasFullDay }})
+        </button>
+        <button type="button" class="btn btn-sm py-1 px-2"
+          [ngClass]="filtroCategoriaReserva === 'CAMPING' ? 'btn-success' : 'btn-outline-success'"
+          (click)="cambiarFiltroCategoriaReserva('CAMPING')">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle;">forest</mat-icon>
+          Camping ({{ totalReservasCamping }})
+        </button>
       </div>
-    </div>
 
-    <div class="table-card-wrapper mat-elevation-z1">
-      <table mat-table [dataSource]="dataSourceReservas" class="w-100 custom-table">
-        <!-- Acciones -->
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 100px;">Acción</th>
-          <td mat-cell *matCellDef="let r" class="text-center">
-            <div class="d-flex justify-content-center align-items-center gap-1">
-              <button mat-icon-button color="primary" (click)="verVoucherReserva(r.id)"
-                matTooltip="Ver Comprobante / Voucher">
-                <mat-icon>picture_as_pdf</mat-icon>
-              </button>
-              <button mat-icon-button color="accent" (click)="editarReserva(r.id)"
-                matTooltip="Editar / Ver Reserva">
-                <mat-icon>edit</mat-icon>
-              </button>
-            </div>
-          </td>
-        </ng-container>
+      <!-- Campo de búsqueda alineado a la derecha -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto;">
+        <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
+        <input matInput type="search" class="text-bg-light" placeholder="Buscar reserva..."
+          (keydown.enter)="busqueda(txtBusquedaRes.value)" (keyup)="busqueda(txtBusquedaRes.value)" #txtBusquedaRes>
+        <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusquedaRes.value)" style="padding: 0;">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+    </mat-card-header>
 
-        <!-- Correlativo -->
-        <ng-container matColumnDef="correlativo">
-          <th mat-header-cell *matHeaderCellDef>Nro.</th>
-          <td mat-cell *matCellDef="let r" class="fw-bold">
-            #{{ r.correlativo || r.id }}
-          </td>
-        </ng-container>
+    <mat-card-content class="bg-white p-0">
+      <div class="mat-elevation-z8">
+        <div class="table-responsive">
+          <table mat-table [dataSource]="dataSourceReservas">
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef style="text-align: left; vertical-align: middle; width: 110px;">
+                <div style="display: flex; align-items: center;">
+                  <span style="margin-left: 8px;">Acciones</span>
+                </div>
+              </th>
+              <td mat-cell *matCellDef="let r">
+                <button mat-icon-button (click)="verVoucherReserva(r.id)" class="text-danger" matTooltip="Ver Comprobante PDF">
+                  <mat-icon style="color: #d32f2f;">picture_as_pdf</mat-icon>
+                </button>
+                <button mat-icon-button (click)="editarReserva(r.id)" class="text-primary" matTooltip="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </td>
+            </ng-container>
 
-        <!-- Fecha -->
-        <ng-container matColumnDef="fecha">
-          <th mat-header-cell *matHeaderCellDef>Registro</th>
-          <td mat-cell *matCellDef="let r">
-            {{ r.created_at ? (r.created_at | date:'dd/MM/yyyy') : (r.fecha_ini | date:'dd/MM/yyyy') }}
-          </td>
-        </ng-container>
+            <!-- Correlativo -->
+            <ng-container matColumnDef="correlativo">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap text-start">N° Reserva</th>
+              <td mat-cell *matCellDef="let r" class="text-nowrap text-start">
+                <span>#{{ r.correlativo || r.id }}</span>
+              </td>
+            </ng-container>
 
-        <!-- Cliente -->
-        <ng-container matColumnDef="cliente">
-          <th mat-header-cell *matHeaderCellDef>Huésped / Titular</th>
-          <td mat-cell *matCellDef="let r">
-            <div class="fw-semibold">{{ r.cliente }}</div>
-            <small class="text-muted">{{ r.nro_documento }}</small>
-          </td>
-        </ng-container>
+            <!-- Fecha -->
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap">Fecha Registro</th>
+              <td mat-cell *matCellDef="let r" class="text-nowrap">
+                <span>{{ formatearFecha(r.created_at || r.fecha_ini) }}</span>
+              </td>
+            </ng-container>
 
-        <!-- Teléfono -->
-        <ng-container matColumnDef="telefono">
-          <th mat-header-cell *matHeaderCellDef>Contacto</th>
-          <td mat-cell *matCellDef="let r">{{ r.telefono || '—' }}</td>
-        </ng-container>
+            <!-- Cliente -->
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Huésped / Titular</th>
+              <td mat-cell *matCellDef="let r">
+                <div>{{ r.cliente }}</div>
+                @if (r.nro_documento) {
+                <small class="text-muted">{{ r.nro_documento }}</small>
+                }
+              </td>
+            </ng-container>
 
-        <!-- Habitación -->
-        <ng-container matColumnDef="habitacion">
-          <th mat-header-cell *matHeaderCellDef>Habitación</th>
-          <td mat-cell *matCellDef="let r">
-            <span class="room-pill">{{ obtenerNombreHabitacion(r.habitacion_id) }}</span>
-          </td>
-        </ng-container>
+            <!-- Teléfono -->
+            <ng-container matColumnDef="telefono">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap">Teléfono</th>
+              <td mat-cell *matCellDef="let r" class="text-nowrap">{{ r.telefono || '-' }}</td>
+            </ng-container>
 
-        <!-- Fechas Estadía -->
-        <ng-container matColumnDef="fechas_estadia">
-          <th mat-header-cell *matHeaderCellDef>Estadía</th>
-          <td mat-cell *matCellDef="let r">
-            <div class="dates-range">
-              <span>{{ r.fecha_ini | date:'dd/MM/yyyy' }}</span>
-              <span class="mx-1 text-muted">→</span>
-              <span>{{ r.fecha_fin | date:'dd/MM/yyyy' }}</span>
-            </div>
-          </td>
-        </ng-container>
+            <!-- Habitación / Servicio -->
+            <ng-container matColumnDef="habitacion">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap">Habitación / Servicio</th>
+              <td mat-cell *matCellDef="let r" class="text-nowrap">
+                @let info = obtenerInfoHabitacion(r);
+                <span>{{ info.tipo }} - {{ info.detalle }}</span>
+              </td>
+            </ng-container>
 
-        <!-- Estado -->
-        <ng-container matColumnDef="estado">
-          <th mat-header-cell *matHeaderCellDef>Estado</th>
-          <td mat-cell *matCellDef="let r">
-            @let badge = obtenerEstadoBadge(r.estado_reserva_id);
-            <span class="status-pill {{ badge.clase }}">{{ badge.texto }}</span>
-          </td>
-        </ng-container>
+            <!-- Fechas Estadía -->
+            <ng-container matColumnDef="fechas_estadia">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap">Estadía</th>
+              <td mat-cell *matCellDef="let r" class="text-nowrap">
+                <span>{{ formatearRangoFechas(r.fecha_ini, r.fecha_fin) }}</span>
+              </td>
+            </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumnsReservas"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumnsReservas;"></tr>
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef class="text-center">Estado</th>
+              <td mat-cell *matCellDef="let r" class="text-center">
+                @let badge = obtenerEstadoBadge(r.estado_reserva_id);
+                <span class="badge" [ngClass]="{
+                  'bg-warning text-dark': r.estado_reserva_id === 1,
+                  'bg-success text-white': r.estado_reserva_id === 2,
+                  'bg-danger text-white': r.estado_reserva_id === 3,
+                  'bg-secondary text-white': r.estado_reserva_id > 3
+                }">{{ badge.texto }}</span>
+              </td>
+            </ng-container>
 
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell text-center py-4 text-muted" colspan="8">
-            No se encontraron reservas registradas
-          </td>
-        </tr>
-      </table>
+            <!-- Fila para mostrar "No hay datos disponibles" -->
+            <tr *matNoDataRow>
+              <td [attr.colspan]="displayedColumnsReservas.length" class="text-center" style="font-size: 18px;">
+                No hay datos disponibles
+              </td>
+            </tr>
 
-      <mat-paginator #paginatorReservas [pageSize]="10" [pageSizeOptions]="[5, 10, 20]"
-        showFirstLastButtons></mat-paginator>
-    </div>
-  </div>
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsReservas" class="bg-dark text-white"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsReservas;" id="fila{{row.id}}"></tr>
+          </table>
+        </div>
+
+        <mat-divider></mat-divider>
+        <mat-paginator #paginatorReservas [pageSizeOptions]="[5, 10, 20]" [pageSize]="10" showFirstLastButtons
+          class="bg-light"></mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
   }
 
   <!-- ========================================== -->
   <!-- VISTA 3: MIS COTIZACIONES                  -->
   <!-- ========================================== -->
   @if (vistaActiva === 'cotizaciones') {
-  <div class="table-view-content">
-    <div class="table-header-bar">
-      <div>
-        <h2 class="table-title">Mis Cotizaciones</h2>
-        <p class="table-subtitle">Consultas y cotizaciones elaboradas para clientes potenciales</p>
+  <mat-card class="my-1" appearance="outlined">
+    <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center;">
+      <div style="display: flex; align-items: center; flex: 1;">
+        <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
+          <mat-icon style="vertical-align: middle; margin-right: 6px;" class="text-primary">request_quote</mat-icon>
+          MIS COTIZACIONES
+        </mat-card-title>
       </div>
 
-      <div class="search-input-wrapper">
-        <mat-icon>search</mat-icon>
-        <input type="text" placeholder="Buscar por cliente o teléfono..."
-          (keyup)="filtrarCotizaciones($any($event.target).value)">
+      <!-- Campo de búsqueda alineado a la derecha -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto;">
+        <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
+        <input matInput type="search" class="text-bg-light" placeholder="Buscar cotización..."
+          (keydown.enter)="busquedaCot(txtBusquedaCot.value)" (keyup)="busquedaCot(txtBusquedaCot.value)" #txtBusquedaCot>
+        <button mat-icon-button matSuffix class="text-info" (click)="busquedaCot(txtBusquedaCot.value)" style="padding: 0;">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+    </mat-card-header>
+
+    <mat-card-content class="bg-white p-0">
+      <div class="mat-elevation-z8">
+        <div class="table-responsive">
+          <table mat-table [dataSource]="dataSourceCotizaciones">
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef style="text-align: left; vertical-align: middle; width: 110px;">
+                <div style="display: flex; align-items: center;">
+                  <button mat-icon-button (click)="abrirModalCotizacion()" class="bg-success text-black"
+                    matTooltip="Nueva Cotización">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                  <span style="margin-left: 8px;">Acciones</span>
+                </div>
+              </th>
+              <td mat-cell *matCellDef="let c">
+                <button mat-icon-button (click)="verVoucherCotizacion(c.id)" class="text-danger" matTooltip="Ver Comprobante PDF">
+                  <mat-icon style="color: #d32f2f;">picture_as_pdf</mat-icon>
+                </button>
+                <button mat-icon-button (click)="editarCotizacion(c.id)" class="text-primary" matTooltip="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <!-- Correlativo -->
+            <ng-container matColumnDef="correlativo">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap text-start">N° Cotiz.</th>
+              <td mat-cell *matCellDef="let c" class="text-nowrap text-start">
+                <span>#{{ c.correlativo || c.id }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Fecha -->
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap">Fecha Registro</th>
+              <td mat-cell *matCellDef="let c" class="text-nowrap">
+                <span>{{ formatearFecha(c.fecha || c.created_at) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Cliente -->
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let c">
+                <div>{{ c.cliente || (c.nombre + ' ' + (c.primer_apellido || '')) }}</div>
+                @if (c.dni) {
+                <small class="text-muted">{{ c.dni }}</small>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Teléfono -->
+            <ng-container matColumnDef="telefono">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap">Teléfono</th>
+              <td mat-cell *matCellDef="let c" class="text-nowrap">{{ c.telefono || '-' }}</td>
+            </ng-container>
+
+            <!-- Fechas Estadía -->
+            <ng-container matColumnDef="fechas_estadia">
+              <th mat-header-cell *matHeaderCellDef class="text-nowrap">Fechas Cotizadas</th>
+              <td mat-cell *matCellDef="let c" class="text-nowrap">
+                <span>{{ formatearRangoFechas(c.fecha_ini, c.fecha_fin) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Detalle -->
+            <ng-container matColumnDef="detalle">
+              <th mat-header-cell *matHeaderCellDef>Observaciones</th>
+              <td mat-cell *matCellDef="let c">
+                <span class="text-truncate d-inline-block" style="max-width: 250px;">{{ c.detalle || '-' }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Fila para mostrar "No hay datos disponibles" -->
+            <tr *matNoDataRow>
+              <td [attr.colspan]="displayedColumnsCotizaciones.length" class="text-center" style="font-size: 18px;">
+                No hay datos disponibles
+              </td>
+            </tr>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsCotizaciones" class="bg-dark text-white"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsCotizaciones;" id="fila{{row.id}}"></tr>
+          </table>
+        </div>
+
+        <mat-divider></mat-divider>
+        <mat-paginator #paginatorCotizaciones [pageSizeOptions]="[5, 10, 20]" [pageSize]="10" showFirstLastButtons
+          class="bg-light"></mat-paginator>
       </div>
-    </div>
-
-    <div class="table-card-wrapper mat-elevation-z1">
-      <table mat-table [dataSource]="dataSourceCotizaciones" class="w-100 custom-table">
-        <!-- Acciones -->
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 100px;">Acción</th>
-          <td mat-cell *matCellDef="let c" class="text-center">
-            <div class="d-flex justify-content-center align-items-center gap-1">
-              <button mat-icon-button color="primary" (click)="verVoucherCotizacion(c.id)"
-                matTooltip="Ver Cotización PDF">
-                <mat-icon>picture_as_pdf</mat-icon>
-              </button>
-              <button mat-icon-button color="accent" (click)="abrirModalCotizacion(undefined, c)"
-                matTooltip="Editar / Ver Cotización">
-                <mat-icon>edit</mat-icon>
-              </button>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Correlativo -->
-        <ng-container matColumnDef="correlativo">
-          <th mat-header-cell *matHeaderCellDef>Nro.</th>
-          <td mat-cell *matCellDef="let c" class="fw-bold">
-            #{{ c.correlativo || c.id }}
-          </td>
-        </ng-container>
-
-        <!-- Fecha -->
-        <ng-container matColumnDef="fecha">
-          <th mat-header-cell *matHeaderCellDef>Fecha</th>
-          <td mat-cell *matCellDef="let c">
-            {{ c.fecha ? (c.fecha | date:'dd/MM/yyyy') : (c.created_at | date:'dd/MM/yyyy') }}
-          </td>
-        </ng-container>
-
-        <!-- Cliente -->
-        <ng-container matColumnDef="cliente">
-          <th mat-header-cell *matHeaderCellDef>Cliente</th>
-          <td mat-cell *matCellDef="let c">
-            <div class="fw-semibold">{{ c.cliente || (c.nombre + ' ' + c.primer_apellido) }}</div>
-            <small class="text-muted">{{ c.dni }}</small>
-          </td>
-        </ng-container>
-
-        <!-- Teléfono -->
-        <ng-container matColumnDef="telefono">
-          <th mat-header-cell *matHeaderCellDef>Teléfono</th>
-          <td mat-cell *matCellDef="let c">{{ c.telefono || '—' }}</td>
-        </ng-container>
-
-        <!-- Fechas Estadía -->
-        <ng-container matColumnDef="fechas_estadia">
-          <th mat-header-cell *matHeaderCellDef>Fechas Cotizadas</th>
-          <td mat-cell *matCellDef="let c">
-            @if (c.fecha_ini && c.fecha_fin) {
-            <div class="dates-range">
-              <span>{{ c.fecha_ini | date:'dd/MM/yyyy' }}</span>
-              <span class="mx-1 text-muted">→</span>
-              <span>{{ c.fecha_fin | date:'dd/MM/yyyy' }}</span>
-            </div>
-            } @else {
-            <span class="text-muted">No especificado</span>
-            }
-          </td>
-        </ng-container>
-
-        <!-- Detalle -->
-        <ng-container matColumnDef="detalle">
-          <th mat-header-cell *matHeaderCellDef>Detalle</th>
-          <td mat-cell *matCellDef="let c" class="text-truncate" style="max-width: 280px;">
-            {{ c.detalle || 'Cotización de Hospedaje' }}
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumnsCotizaciones"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumnsCotizaciones;"></tr>
-
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell text-center py-4 text-muted" colspan="7">
-            No se encontraron cotizaciones registradas
-          </td>
-        </tr>
-      </table>
-
-      <mat-paginator #paginatorCotizaciones [pageSize]="10" [pageSizeOptions]="[5, 10, 20]"
-        showFirstLastButtons></mat-paginator>
-    </div>
-  </div>
+    </mat-card-content>
+  </mat-card>
   }
 </div>

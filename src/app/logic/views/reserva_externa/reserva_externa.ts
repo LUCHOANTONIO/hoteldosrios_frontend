@@ -10,8 +10,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatPaginator, MatPaginatorIntl, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SpanishPaginatorIntl } from '../../../base/utils/spanish-paginator-intl';
 import { forkJoin } from 'rxjs';
 import moment from 'moment';
 
@@ -78,6 +81,8 @@ export interface HabitacionDisponibleCard {
   imports: [
     CommonModule,
     FormsModule,
+    MatCardModule,
+    MatDividerModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -90,6 +95,7 @@ export interface HabitacionDisponibleCard {
     MatPaginatorModule,
     MatProgressSpinnerModule
   ],
+  providers: [{ provide: MatPaginatorIntl, useClass: SpanishPaginatorIntl }],
   templateUrl: './reserva_externa.html',
   styleUrls: ['./reserva_externa.scss']
 })
@@ -148,6 +154,25 @@ export class ReservaExternaComponent implements OnInit {
     return this.habitacionesCamping.length;
   }
 
+  // Filtro por categoría en Mis Reservas
+  filtroCategoriaReserva: 'TODOS' | 'HABITACION' | 'FULL_DAY' | 'CAMPING' = 'TODOS';
+  textoBusquedaReserva: string = '';
+
+  get totalReservas(): number {
+    return this.reservas.length;
+  }
+
+  get totalReservasHotel(): number {
+    return this.reservas.filter(r => this.obtenerInfoHabitacion(r).categoriaKey === 'HABITACION').length;
+  }
+
+  get totalReservasFullDay(): number {
+    return this.reservas.filter(r => this.obtenerInfoHabitacion(r).categoriaKey === 'FULL_DAY').length;
+  }
+
+  get totalReservasCamping(): number {
+    return this.reservas.filter(r => this.obtenerInfoHabitacion(r).categoriaKey === 'CAMPING').length;
+  }
 
   // Reservas Externas (Sin montos)
   dataSourceReservas = new MatTableDataSource<ReservaModel>([]);
@@ -193,7 +218,15 @@ export class ReservaExternaComponent implements OnInit {
     private estadoCivilService: EstadoCivilService,
     private comunicacionService: ComunicacionService,
     private dialog: MatDialog
-  ) { }
+  ) {
+    effect(() => {
+      const cots = this.cotizacionesSignal();
+      if (cots) {
+        this.cotizaciones = cots;
+        this.actualizarTablas();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.cargarDatosGenerales();
@@ -296,10 +329,6 @@ export class ReservaExternaComponent implements OnInit {
         this.alertService.show("Error al consultar disponibilidad", { duration: 3000, type: 'error' });
       }
     });
-  }
-
-  formatearFecha(f: any): string {
-    return f ? moment(f).format('DD/MM/YYYY') : '';
   }
 
   procesarDisponibilidad(data: any[]): void {
@@ -433,11 +462,32 @@ export class ReservaExternaComponent implements OnInit {
   actualizarTablas(): void {
     const reservasExternas = this.reservas;
     this.dataSourceReservas = new MatTableDataSource<ReservaModel>(reservasExternas);
+    this.dataSourceReservas.filterPredicate = (r: ReservaModel, filter: string) => {
+      const info = this.obtenerInfoHabitacion(r);
+      const tipoServicio = info.tipo.toLowerCase();
+      const detalleServicio = info.detalle.toLowerCase();
+      const cliente = (r.cliente || '').toLowerCase();
+      const doc = (r.nro_documento || '').toLowerCase();
+      const correlativo = String(r.correlativo || r.id || '').toLowerCase();
+      const tel = (r.telefono || '').toLowerCase();
+      const searchStr = `${cliente} ${doc} ${correlativo} ${tel} ${tipoServicio} ${detalleServicio}`;
+      return searchStr.includes(filter);
+    };
     if (this.paginatorReservas) {
       this.dataSourceReservas.paginator = this.paginatorReservas;
     }
+    this.aplicarFiltroCompletoReservas();
 
     this.dataSourceCotizaciones = new MatTableDataSource<CotizacionModel>(this.cotizaciones);
+    this.dataSourceCotizaciones.filterPredicate = (c: CotizacionModel, filter: string) => {
+      const cliente = (c.cliente || (c.nombre + ' ' + (c.primer_apellido || '')) || '').toLowerCase();
+      const doc = (c.dni || '').toLowerCase();
+      const correlativo = String(c.correlativo || c.id || '').toLowerCase();
+      const tel = (c.telefono || '').toLowerCase();
+      const detalle = (c.detalle || '').toLowerCase();
+      const searchStr = `${cliente} ${doc} ${correlativo} ${tel} ${detalle}`;
+      return searchStr.includes(filter);
+    };
     if (this.paginatorCotizaciones) {
       this.dataSourceCotizaciones.paginator = this.paginatorCotizaciones;
     }
@@ -557,6 +607,32 @@ export class ReservaExternaComponent implements OnInit {
     });
   }
 
+  editarCotizacion(id: number): void {
+    this.cotizacionService.getById(id).subscribe({
+      next: (cot) => {
+        this.abrirModalCotizacion(undefined, cot);
+      },
+      error: () => {
+        this.alertService.show("Error al cargar la cotización", { duration: 3000, type: 'error' });
+      }
+    });
+  }
+
+  formatearFecha(fecha: any): string {
+    if (!fecha) return '-';
+    if (typeof fecha === 'string' && fecha.includes('/')) return fecha;
+    const m = moment(fecha);
+    return m.isValid() ? m.format('DD/MM/YYYY') : String(fecha);
+  }
+
+  formatearRangoFechas(fIni: any, fFin: any): string {
+    if (!fIni && !fFin) return '-';
+    const ini = this.formatearFecha(fIni);
+    const fin = this.formatearFecha(fFin);
+    if (ini !== '-' && fin !== '-') return `${ini} - ${fin}`;
+    return ini !== '-' ? ini : fin;
+  }
+
   verVoucherReserva(reservaId: number): void {
     this.documentoService.obtenerVoucherReserva(reservaId).subscribe({
       next: (pdfBase64: string) => {
@@ -603,17 +679,90 @@ export class ReservaExternaComponent implements OnInit {
     });
   }
 
-  filtrarReservas(texto: string): void {
-    this.dataSourceReservas.filter = texto.trim().toLowerCase();
+  busqueda(texto: string): void {
+    this.textoBusquedaReserva = texto.trim().toLowerCase();
+    this.aplicarFiltroCompletoReservas();
   }
 
-  filtrarCotizaciones(texto: string): void {
+  filtrarReservas(texto: string): void {
+    this.busqueda(texto);
+  }
+
+  cambiarFiltroCategoriaReserva(cat: 'TODOS' | 'HABITACION' | 'FULL_DAY' | 'CAMPING'): void {
+    this.filtroCategoriaReserva = cat;
+    this.aplicarFiltroCompletoReservas();
+  }
+
+  aplicarFiltroCompletoReservas(): void {
+    let filtradas = this.reservas;
+    if (this.filtroCategoriaReserva !== 'TODOS') {
+      filtradas = filtradas.filter(r => {
+        const info = this.obtenerInfoHabitacion(r);
+        return info.categoriaKey === this.filtroCategoriaReserva;
+      });
+    }
+    this.dataSourceReservas.data = filtradas;
+    this.dataSourceReservas.filter = this.textoBusquedaReserva;
+  }
+
+  busquedaCot(texto: string): void {
     this.dataSourceCotizaciones.filter = texto.trim().toLowerCase();
   }
 
-  obtenerNombreHabitacion(habId: number): string {
+  filtrarCotizaciones(texto: string): void {
+    this.busquedaCot(texto);
+  }
+
+  obtenerInfoHabitacion(r: ReservaModel | any): {
+    tipo: string;
+    icono: string;
+    detalle: string;
+    claseBadge: string;
+    categoriaKey: 'HABITACION' | 'FULL_DAY' | 'CAMPING';
+  } {
+    const habId = Number(r.habitacion_id);
     const hab = this.habitaciones.find(h => h.id === habId);
-    return hab ? `Hab. ${hab.nro_habitacion} (${hab.tipo_habitacion || ''})` : `Hab. #${habId}`;
+    const tipo = (hab?.tipo_habitacion || (r as any)?.tipo_habitacion || (hab as any)?.categoria || '').toUpperCase();
+    const desc = (hab?.descripcion || '').toUpperCase();
+    const nro = (hab?.nro_habitacion || r.nro_habitacion || '').toString();
+
+    const isCamping = tipo.includes('CAMPING') || desc.includes('CAMPING') || nro.includes('CAMPING');
+    const isFullDay = !isCamping && (r.is_full_day === 1 || tipo.includes('FULL') || desc.includes('FULL') || nro.includes('FULL'));
+
+    if (isCamping) {
+      return {
+        tipo: 'Camping',
+        icono: 'forest',
+        detalle: `Espacio #${nro || habId}`,
+        claseBadge: 'bg-success text-white',
+        categoriaKey: 'CAMPING'
+      };
+    }
+
+    if (isFullDay) {
+      return {
+        tipo: 'Full Day',
+        icono: 'wb_sunny',
+        detalle: `Pase #${nro || habId}`,
+        claseBadge: 'bg-warning text-dark',
+        categoriaKey: 'FULL_DAY'
+      };
+    }
+
+    // Por defecto es Habitación de hotel
+    const tipoTexto = hab?.tipo_habitacion ? ` (${hab.tipo_habitacion})` : (r.tipo_habitacion ? ` (${r.tipo_habitacion})` : '');
+    return {
+      tipo: 'Habitación',
+      icono: 'meeting_room',
+      detalle: `Hab. ${nro || habId}${tipoTexto}`,
+      claseBadge: 'bg-primary text-white',
+      categoriaKey: 'HABITACION'
+    };
+  }
+
+  obtenerNombreHabitacion(habId: number): string {
+    const info = this.obtenerInfoHabitacion({ habitacion_id: habId });
+    return `${info.tipo}: ${info.detalle}`;
   }
 
   obtenerEstadoBadge(estadoId: number): { texto: string; clase: string } {
