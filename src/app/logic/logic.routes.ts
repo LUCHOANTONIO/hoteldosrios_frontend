@@ -59,6 +59,8 @@ export const LOGIC_ROUTES: Routes = [
     { path: 'reporte_ingreso_habitacion', component: ReporteIngresoHabitacionComponent, canActivate: [authGuard] },
     { path: 'reporte_ingreso_formapago', component: ReporteIngresoFormaPagoComponent, canActivate: [authGuard] },
     { path: 'reporte_egreso_cuenta', component: ReporteEgresoCuentaComponent, canActivate: [authGuard] },
+    { path: 'reporte_siat', component: ReporteSiatComponent, canActivate: [authGuard] },
+    { path: 'reporte_cuentas_cobrar', component: ReporteCuentasCobrarComponent, canActivate: [authGuard] },
     { path: 'reporte_alimentos', component: ReporteAlimentoComponent, canActivate: [authGuard] },
     { path: 'inventarios', component: InventarioComponent, canActivate: [authGuard] },
     { path: 'cotizaciones', component: CotizacionComponent, canActivate: [authGuard] },
