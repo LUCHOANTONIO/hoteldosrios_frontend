@@ -75,7 +75,7 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
   titulo_documento: string = '';
 
   displayedColumns: string[] = [
-    'correlativo',
+    'nro_reserva',
     'habitacion',
     'cliente',
     'fecha_ingreso',
@@ -104,7 +104,7 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
       this.dataSource = new MatTableDataSource<ReporteAlmuerzoModel>(this.reporteAlmuerzo());
       this.dataSource.paginator = this.paginator;
       this.dataSource.filterPredicate = (data: ReporteAlmuerzoModel, filter: string) => {
-        const str = `${data.correlativo} ${data.cliente} ${data.habitacion} ${data.notas} ${data.estado} ${data.nro_documento}`.toLowerCase();
+        const str = `${data.nro_reserva} ${data.correlativo} ${data.cliente} ${data.habitacion} ${data.notas} ${data.estado} ${data.nro_documento}`.toLowerCase();
         return str.includes(filter);
       };
     });

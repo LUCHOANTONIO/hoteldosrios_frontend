@@ -1,5 +1,6 @@
 export class ReporteAlmuerzoModel {
   reserva_id: number = 0;
+  nro_reserva: number = 0;
   correlativo: number = 0;
   habitacion: string = '';
   nro_habitacion: string = '';

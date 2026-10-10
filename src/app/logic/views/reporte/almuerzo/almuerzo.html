@@ -151,10 +151,10 @@
           </tr>
 
           <!-- Nro. Reserva -->
-          <ng-container matColumnDef="correlativo">
-            <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 75px;">Nro. Reserva</th>
+          <ng-container matColumnDef="nro_reserva">
+            <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 85px;">Nro. Reserva</th>
             <td mat-cell *matCellDef="let x" class="text-center">
-              <span class="badge-reserva">#{{ x.correlativo }}</span>
+              <span class="badge-reserva">{{ x.nro_reserva || x.correlativo }}</span>
             </td>
           </ng-container>
 
