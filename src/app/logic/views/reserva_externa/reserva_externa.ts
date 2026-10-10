@@ -46,10 +46,15 @@ export interface HabitacionDisponibleCard {
   precio: number | string;
   cantidad_disponible: number;
   id: number;
+  habitacion_id?: number;
   tipo_habitacion_id?: number;
   tipo_habitacion: string;
   nro_habitacion?: string;
   descripcion?: string;
+  piso?: any;
+  color?: string;
+  color_estado?: string;
+  estado_habitacion?: string;
   capacidad: number;
   capacidadTexto: string;
   esFullDay?: boolean;
@@ -104,22 +109,46 @@ export class ReservaExternaComponent implements OnInit {
   habitacionesCamping: HabitacionDisponibleCard[] = [];
 
   // Filtros de visualización
+  categoriaFiltro: 'TODOS' | 'HOTEL' | 'FULL_DAY' | 'CAMPING' = 'TODOS';
   tiposFiltro: string[] = ['TODOS'];
   tipoFiltroSeleccionado: string = 'TODOS';
   pisoFiltroSeleccionado: string = 'TODOS';
+  pisosDisponibles: string[] = ['TODOS'];
   busquedaTexto: string = '';
 
-  // Getters para totales de disponibilidad
+  // Getters para totales de disponibilidad y estadía
+  get nochesEstadia(): number {
+    if (!this.fechaLlegada || !this.fechaSalida) return 1;
+    const diff = moment(this.fechaSalida).startOf('day').diff(moment(this.fechaLlegada).startOf('day'), 'days');
+    return diff > 0 ? diff : 1;
+  }
+
+  get totalDisponibles(): number {
+    return this.habitacionesDisponibles.length;
+  }
+
+  get countHotelTotal(): number {
+    return this.habitacionesDisponibles.filter(h => !h.esCamping && !h.esFullDay).length;
+  }
+
+  get countFullDayTotal(): number {
+    return this.habitacionesDisponibles.filter(h => h.esFullDay).length;
+  }
+
+  get countCampingTotal(): number {
+    return this.habitacionesDisponibles.filter(h => h.esCamping).length;
+  }
+
   get totalHotelDisponibles(): number {
-    return this.habitacionesHotel.reduce((acc, h) => acc + (Number(h.cantidad_disponible) || 0), 0);
+    return this.habitacionesHotel.length;
   }
 
   get totalFullDayDisponibles(): number {
-    return this.habitacionesFullDay.reduce((acc, h) => acc + (Number(h.cantidad_disponible) || 0), 0);
+    return this.habitacionesFullDay.length;
   }
 
   get totalCampingDisponibles(): number {
-    return this.habitacionesCamping.reduce((acc, h) => acc + (Number(h.cantidad_disponible) || 0), 0);
+    return this.habitacionesCamping.length;
   }
 
   // Reservas Externas (Sin montos)
@@ -259,10 +288,31 @@ export class ReservaExternaComponent implements OnInit {
     this.habitacionesDisponibles = rawList.map(item => {
       const tipo = item.tipo_habitacion || item.categoria || '';
       const tipoUpper = tipo.toUpperCase();
+      const descUpper = (item.descripcion || '').toUpperCase();
+      const nroUpper = (item.nro_habitacion || '').toString().toUpperCase();
+
+      const isCamping = tipoUpper.includes('CAMPING') || descUpper.includes('CAMPING') || nroUpper.includes('CAMPING');
+      const isFullDay = !isCamping && (tipoUpper.includes('FULL') || descUpper.includes('FULL') || nroUpper.includes('FULL'));
+
       let cap = 2;
-      if (tipoUpper.includes('TRIPLE')) cap = 3;
-      else if (tipoUpper.includes('SIMPLE') || tipoUpper.includes('INDIVIDUAL')) cap = 1;
-      else if (tipoUpper.includes('SUITE') || tipoUpper.includes('FAMILIAR')) cap = 4;
+      if (isCamping) {
+        cap = 4;
+      } else if (isFullDay) {
+        cap = 1;
+      } else if (tipoUpper.includes('TRIPLE')) {
+        cap = 3;
+      } else if (tipoUpper.includes('SIMPLE') || tipoUpper.includes('INDIVIDUAL')) {
+        cap = 1;
+      } else if (tipoUpper.includes('SUITE') || tipoUpper.includes('FAMILIAR')) {
+        cap = 4;
+      }
+
+      let capTexto = `${cap} ${cap === 1 ? 'Huésped' : 'Huéspedes'}`;
+      if (isFullDay) {
+        capTexto = '1 Pase Individual';
+      } else if (isCamping) {
+        capTexto = 'Hasta 4 Personas';
+      }
 
       return {
         id: Number(item.id || item.habitacion_id),
@@ -280,24 +330,35 @@ export class ReservaExternaComponent implements OnInit {
         color_estado: item.color_estado,
         estado_habitacion: item.estado_habitacion,
         capacidad: cap,
-        capacidadTexto: `${cap} ${cap === 1 ? 'Huésped' : 'Huéspedes'}`
+        capacidadTexto: capTexto,
+        esFullDay: isFullDay,
+        esCamping: isCamping
       };
     });
 
-    // Extraer lista de tipos únicos para filtros
+    // Extraer lista de tipos únicos y pisos para filtros
     const tiposSet = new Set<string>();
+    const pisosSet = new Set<string>();
     this.habitacionesDisponibles.forEach(h => {
       if (h.categoria && h.categoria.trim()) {
         tiposSet.add(h.categoria.trim().toUpperCase());
       }
+      if (h.piso !== undefined && h.piso !== null && String(h.piso).trim() !== '' && String(h.piso) !== '0') {
+        pisosSet.add(String(h.piso));
+      }
     });
     this.tiposFiltro = ['TODOS', ...Array.from(tiposSet).sort()];
+    this.pisosDisponibles = ['TODOS', ...Array.from(pisosSet).sort()];
 
     this.aplicarFiltros();
   }
 
   aplicarFiltros(): void {
     let lista = [...this.habitacionesDisponibles];
+
+    if (this.pisoFiltroSeleccionado !== 'TODOS') {
+      lista = lista.filter(h => String(h.piso) === String(this.pisoFiltroSeleccionado));
+    }
 
     if (this.tipoFiltroSeleccionado !== 'TODOS') {
       lista = lista.filter(h => (h.categoria || '').toUpperCase() === this.tipoFiltroSeleccionado.toUpperCase());
@@ -313,28 +374,22 @@ export class ReservaExternaComponent implements OnInit {
     }
 
     // Clasificar en las 3 categorías: Habitaciones, Full Day, Camping
-    this.habitacionesHotel = [];
-    this.habitacionesFullDay = [];
-    this.habitacionesCamping = [];
+    const hotel: HabitacionDisponibleCard[] = [];
+    const fullDay: HabitacionDisponibleCard[] = [];
+    const camping: HabitacionDisponibleCard[] = [];
 
     lista.forEach(h => {
-      const tipo = (h.tipo_habitacion || h.categoria || '').toUpperCase();
-      const desc = (h.descripcion || '').toUpperCase();
-      const nro = (h.nro_habitacion || '').toString().toUpperCase();
-
-      if (tipo.includes('CAMPING') || desc.includes('CAMPING') || nro.includes('CAMPING')) {
-        h.esCamping = true;
-        this.habitacionesCamping.push(h);
-      } else if (tipo.includes('FULL') || desc.includes('FULL') || nro.includes('FULL')) {
-        h.esFullDay = true;
-        this.habitacionesFullDay.push(h);
+      if (h.esCamping) {
+        camping.push(h);
+      } else if (h.esFullDay) {
+        fullDay.push(h);
       } else {
-        this.habitacionesHotel.push(h);
+        hotel.push(h);
       }
     });
 
     // Ordenar habitaciones de hotel numéricamente (1, 2, 3...)
-    this.habitacionesHotel.sort((a, b) => {
+    hotel.sort((a, b) => {
       const nroA = parseInt(a.nro_habitacion || '', 10);
       const nroB = parseInt(b.nro_habitacion || '', 10);
       const aEsNum = !isNaN(nroA) && nroA > 0;
@@ -351,14 +406,38 @@ export class ReservaExternaComponent implements OnInit {
       if (!isNaN(nroA) && !isNaN(nroB) && nroA !== nroB) return nroA - nroB;
       return (a.tipo_habitacion || '').localeCompare(b.tipo_habitacion || '');
     };
-    this.habitacionesFullDay.sort(sortEspecial);
-    this.habitacionesCamping.sort(sortEspecial);
+    fullDay.sort(sortEspecial);
+    camping.sort(sortEspecial);
+
+    // Respetar filtro de categoría seleccionado en pestaña
+    if (this.categoriaFiltro === 'HOTEL') {
+      this.habitacionesHotel = hotel;
+      this.habitacionesFullDay = [];
+      this.habitacionesCamping = [];
+    } else if (this.categoriaFiltro === 'FULL_DAY') {
+      this.habitacionesHotel = [];
+      this.habitacionesFullDay = fullDay;
+      this.habitacionesCamping = [];
+    } else if (this.categoriaFiltro === 'CAMPING') {
+      this.habitacionesHotel = [];
+      this.habitacionesFullDay = [];
+      this.habitacionesCamping = camping;
+    } else {
+      this.habitacionesHotel = hotel;
+      this.habitacionesFullDay = fullDay;
+      this.habitacionesCamping = camping;
+    }
 
     this.habitacionesFiltradas = [
       ...this.habitacionesHotel,
       ...this.habitacionesFullDay,
       ...this.habitacionesCamping
     ];
+  }
+
+  seleccionarCategoriaFiltro(cat: 'TODOS' | 'HOTEL' | 'FULL_DAY' | 'CAMPING'): void {
+    this.categoriaFiltro = cat;
+    this.aplicarFiltros();
   }
 
   filtrarPorTipo(tipo: string): void {
@@ -369,6 +448,30 @@ export class ReservaExternaComponent implements OnInit {
   filtrarPorPiso(piso: string): void {
     this.pisoFiltroSeleccionado = piso;
     this.aplicarFiltros();
+  }
+
+  formatearNombreTipo(hab: HabitacionDisponibleCard): string {
+    const raw = (hab.tipo_habitacion || hab.categoria || '').trim();
+    if (!raw) return 'Estándar';
+    const upper = raw.toUpperCase();
+    if (upper.includes('DOBLE FAMILIAR')) return 'Doble Familiar';
+    if (upper.includes('MATRIMONIAL')) return 'Matrimonial Confort';
+    if (upper.includes('SUITE')) return 'Suite Presidencial';
+    if (upper.includes('TRIPLE')) return 'Habitación Triple';
+    if (upper.includes('SIMPLE')) return 'Habitación Simple';
+    if (upper.includes('FULL DAY') || upper.includes('FULLDAY')) return 'Pase Full Day';
+    if (upper.includes('CAMPING')) return 'Zona de Camping';
+    return raw.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  getUnidadPrecio(hab: HabitacionDisponibleCard): string {
+    if (hab.esFullDay) return '/ persona';
+    if (hab.esCamping) return '/ espacio';
+    return '/ noche';
+  }
+
+  calcularTotalEstadia(hab: HabitacionDisponibleCard): number {
+    return (Number(hab.precio) || 0) * this.nochesEstadia;
   }
 
   onBusquedaChange(texto: string): void {

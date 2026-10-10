@@ -37,20 +37,25 @@
   <!-- ========================================== -->
   @if (vistaActiva === 'catalogo') {
   <div class="catalog-view-content">
-    <!-- FILA 2: Cabecera con Título y Búsqueda de Habitaciones -->
+    <!-- FILA 2: Cabecera con Título, Duración y Búsqueda de Fechas -->
     <header class="page-header">
       <div class="header-title-container">
         <div class="header-icon">
-          <mat-icon color="primary">grid_on</mat-icon>
+          <mat-icon color="primary">hotel</mat-icon>
         </div>
         <div>
           <h1 class="page-title">Disponibilidad de Habitaciones</h1>
-          <div class="page-subtitle">Consulta de habitaciones libres por fecha y tipo para reserva inmediata</div>
+          <div class="page-subtitle">Consulta de disponibilidad inmediata para tu estadía en Hotel Dos Ríos</div>
         </div>
       </div>
 
       <div class="date-controls">
-        <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 155px;">
+        <div class="stay-duration-pill" matTooltip="Duración estimada de estadía">
+          <mat-icon>nights_stay</mat-icon>
+          <span>{{ nochesEstadia }} {{ nochesEstadia === 1 ? 'noche' : 'noches' }}</span>
+        </div>
+
+        <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Llegada</mat-label>
           <input matInput [matDatepicker]="pickerLlegada" [(ngModel)]="fechaLlegada"
             (dateChange)="buscarDisponibilidad()" (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
@@ -58,7 +63,7 @@
           <mat-datepicker #pickerLlegada></mat-datepicker>
         </mat-form-field>
 
-        <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 155px;">
+        <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Salida</mat-label>
           <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida" (dateChange)="buscarDisponibilidad()"
             (click)="pickerSalida.open()" readonly style="cursor: pointer;">
@@ -78,43 +83,145 @@
       </div>
     </header>
 
-    <!-- Empty State (Only shown when not loading and empty) -->
+    <!-- FILA 3: Barra de Filtros Rápidos (Categorías, Pisos y Búsqueda en vivo) -->
+    <div class="quick-filters-bar">
+      <div class="category-tabs">
+        <button class="tab-pill" [class.active]="categoriaFiltro === 'TODOS'" (click)="seleccionarCategoriaFiltro('TODOS')">
+          <mat-icon>grid_view</mat-icon>
+          <span>Todas</span>
+          <span class="count-badge">{{ countHotelTotal + countFullDayTotal + countCampingTotal }}</span>
+        </button>
+
+        <button class="tab-pill" [class.active]="categoriaFiltro === 'HOTEL'" (click)="seleccionarCategoriaFiltro('HOTEL')">
+          <mat-icon>bed</mat-icon>
+          <span>Habitaciones</span>
+          <span class="count-badge">{{ countHotelTotal }}</span>
+        </button>
+
+        <button class="tab-pill" [class.active]="categoriaFiltro === 'FULL_DAY'" (click)="seleccionarCategoriaFiltro('FULL_DAY')">
+          <mat-icon>wb_sunny</mat-icon>
+          <span>Full Day</span>
+          <span class="count-badge">{{ countFullDayTotal }}</span>
+        </button>
+
+        <button class="tab-pill" [class.active]="categoriaFiltro === 'CAMPING'" (click)="seleccionarCategoriaFiltro('CAMPING')">
+          <mat-icon>forest</mat-icon>
+          <span>Camping</span>
+          <span class="count-badge">{{ countCampingTotal }}</span>
+        </button>
+      </div>
+
+      <div class="filter-controls-right">
+        @if (pisosDisponibles.length > 2) {
+        <div class="floor-selector-wrapper">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="floor-select">
+            <mat-label>Piso</mat-label>
+            <mat-select [(ngModel)]="pisoFiltroSeleccionado" (selectionChange)="aplicarFiltros()">
+              @for (p of pisosDisponibles; track p) {
+              <mat-option [value]="p">{{ p === 'TODOS' ? 'Todos los pisos' : 'Piso ' + p }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        }
+
+        <div class="search-input-box">
+          <mat-icon class="search-ico">search</mat-icon>
+          <input type="text" [(ngModel)]="busquedaTexto" (ngModelChange)="aplicarFiltros()"
+            placeholder="Buscar por número o tipo...">
+          @if (busquedaTexto) {
+          <button type="button" class="btn-clear" (click)="busquedaTexto = ''; aplicarFiltros()" matTooltip="Limpiar filtro">
+            <mat-icon>close</mat-icon>
+          </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
     @if (!cargando && habitacionesFiltradas.length === 0) {
     <div class="empty-state-box">
       <div class="empty-icon-circle">
         <mat-icon>hotel</mat-icon>
       </div>
-      <h3 class="empty-title">No hay habitaciones disponibles</h3>
+      <h3 class="empty-title">No hay unidades disponibles</h3>
       <p class="empty-subtitle">
-        Para el rango de fechas seleccionado o los filtros aplicados, todas las habitaciones se encuentran ocupadas.
-        Intente seleccionando otras fechas.
+        No se encontraron habitaciones o espacios libres para el rango de fechas seleccionado o los filtros aplicados.
+        Intente cambiando las fechas o limpiando los filtros de búsqueda.
       </p>
     </div>
     } @else {
-    <!-- Categorized Catalog Content (Matching Disponibilidad Design & Colors) -->
+    <!-- Catálogo de Habitaciones y Espacios -->
     <div class="catalog-categories-container">
-      <!-- 1. HABITACIONES -->
+      <!-- 1. HABITACIONES DE HOTEL -->
       @if (habitacionesHotel.length > 0) {
       <div class="category-section">
         <div class="section-header">
-          <div class="header-icon">
-            <mat-icon color="primary">meeting_room</mat-icon>
+          <div class="header-icon theme-hotel">
+            <mat-icon>king_bed</mat-icon>
           </div>
-          <h2 class="section-title">Habitaciones</h2>
-          <span class="section-badge">{{ totalHotelDisponibles }} disponibles</span>
+          <div class="section-title-wrap">
+            <h2 class="section-title">Habitaciones de Hotel</h2>
+            <span class="section-desc">Estadías con confort, baño privado y servicio completo</span>
+          </div>
+          <span class="section-badge theme-hotel">{{ totalHotelDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
           @for (hab of habitacionesHotel; track hab.id) {
-          <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
-            <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'ESTÁNDAR') | uppercase }}</span>
+          <div class="room-pro-card theme-hotel" (click)="abrirModalReserva(hab)">
+            <!-- Top Identifier Bar -->
+            <div class="card-top-bar">
+              <div class="identifier-pill">
+                <mat-icon>meeting_room</mat-icon>
+                <span>Hab. {{ hab.nro_habitacion }}</span>
+              </div>
+
+              @if (hab.piso && hab.piso != '0') {
+              <div class="floor-pill" matTooltip="Ubicada en el Piso {{ hab.piso }}">
+                <mat-icon>layers</mat-icon>
+                <span>Piso {{ hab.piso }}</span>
+              </div>
+              }
+
+              <div class="availability-pill">
+                <span class="pulse-dot"></span>
+                <span>Libre</span>
+              </div>
             </div>
 
-            <div class="room-body">
-              <div class="status-footer">
-                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()" matTooltip="Reservar">
-                  <mat-icon>event</mat-icon>
+            <!-- Card Hero Section -->
+            <div class="card-hero-block">
+              <div class="hero-icon-circle">
+                <mat-icon>hotel</mat-icon>
+              </div>
+              <div class="hero-details">
+                <h3 class="room-title">{{ formatearNombreTipo(hab) }}</h3>
+              </div>
+            </div>
+
+
+            <!-- Card Footer: Pricing & Action Button -->
+            <div class="card-footer-box">
+              <div class="price-block">
+                <span class="price-label">Tarifa {{ getUnidadPrecio(hab) }}</span>
+                @if (hab.precio && +hab.precio > 0) {
+                <div class="price-value-row">
+                  <span class="curr">Bs.</span>
+                  <span class="val">{{ hab.precio | number:'1.2-2' }}</span>
+                </div>
+                @if (nochesEstadia > 1) {
+                <span class="price-sub">Estadía: Bs. {{ calcularTotalEstadia(hab) | number:'1.2-2' }}</span>
+                }
+                } @else {
+                <span class="price-quote">A cotizar</span>
+                }
+              </div>
+
+              <div class="action-block">
+                <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
+                  matTooltip="Reservar esta habitación">
+                  <mat-icon>event_available</mat-icon>
                   <span>Reservar</span>
                 </button>
               </div>
@@ -129,25 +236,61 @@
       @if (habitacionesFullDay.length > 0) {
       <div class="category-section">
         <div class="section-header">
-          <div class="header-icon">
-            <mat-icon color="primary">wb_sunny</mat-icon>
+          <div class="header-icon theme-fullday">
+            <mat-icon>wb_sunny</mat-icon>
           </div>
-          <h2 class="section-title">Full Day</h2>
-          <span class="section-badge">{{ totalFullDayDisponibles }} disponibles</span>
+          <div class="section-title-wrap">
+            <h2 class="section-title">Pases Full Day</h2>
+            <span class="section-desc">Acceso diario completo a piscinas y áreas recreativas sin pernocte</span>
+          </div>
+          <span class="section-badge theme-fullday">{{ totalFullDayDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
           @for (hab of habitacionesFullDay; track hab.id) {
-          <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
-            <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'FULL DAY') | uppercase }}</span>
+          <div class="room-pro-card theme-fullday" (click)="abrirModalReserva(hab)">
+            <!-- Top Identifier Bar -->
+            <div class="card-top-bar">
+              <div class="identifier-pill">
+                <mat-icon>wb_sunny</mat-icon>
+                <span>Pase #{{ hab.nro_habitacion }}</span>
+              </div>
+
+              <div class="availability-pill">
+                <span class="pulse-dot"></span>
+                <span>Libre</span>
+              </div>
             </div>
 
-            <div class="room-body">
-              <div class="status-footer">
-                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
-                  matTooltip="Reservar Full Day">
-                  <mat-icon>event</mat-icon>
+            <!-- Card Hero Section -->
+            <div class="card-hero-block">
+              <div class="hero-icon-circle">
+                <mat-icon>pool</mat-icon>
+              </div>
+              <div class="hero-details">
+                <h3 class="room-title">{{ formatearNombreTipo(hab) }}</h3>
+              </div>
+            </div>
+
+
+            <!-- Card Footer: Pricing & Action Button -->
+            <div class="card-footer-box">
+              <div class="price-block">
+                <span class="price-label">Tarifa {{ getUnidadPrecio(hab) }}</span>
+                @if (hab.precio && +hab.precio > 0) {
+                <div class="price-value-row">
+                  <span class="curr">Bs.</span>
+                  <span class="val">{{ hab.precio | number:'1.2-2' }}</span>
+                </div>
+                } @else {
+                <span class="price-quote">A cotizar</span>
+                }
+              </div>
+
+              <div class="action-block">
+                <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
+                  matTooltip="Reservar Pase Full Day">
+                  <mat-icon>event_available</mat-icon>
                   <span>Reservar</span>
                 </button>
               </div>
@@ -162,25 +305,64 @@
       @if (habitacionesCamping.length > 0) {
       <div class="category-section">
         <div class="section-header">
-          <div class="header-icon">
-            <mat-icon color="primary">forest</mat-icon>
+          <div class="header-icon theme-camping">
+            <mat-icon>forest</mat-icon>
           </div>
-          <h2 class="section-title">Camping</h2>
-          <span class="section-badge">{{ totalCampingDisponibles }} disponibles</span>
+          <div class="section-title-wrap">
+            <h2 class="section-title">Zona de Camping</h2>
+            <span class="section-desc">Experiencia al aire libre en contacto con la naturaleza y áreas verdes</span>
+          </div>
+          <span class="section-badge theme-camping">{{ totalCampingDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
           @for (hab of habitacionesCamping; track hab.id) {
-          <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
-            <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'CAMPING') | uppercase }}</span>
+          <div class="room-pro-card theme-camping" (click)="abrirModalReserva(hab)">
+            <!-- Top Identifier Bar -->
+            <div class="card-top-bar">
+              <div class="identifier-pill">
+                <mat-icon>forest</mat-icon>
+                <span>Espacio #{{ hab.nro_habitacion }}</span>
+              </div>
+
+              <div class="availability-pill">
+                <span class="pulse-dot"></span>
+                <span>Libre</span>
+              </div>
             </div>
 
-            <div class="room-body">
-              <div class="status-footer">
-                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
-                  matTooltip="Reservar Camping">
-                  <mat-icon>event</mat-icon>
+            <!-- Card Hero Section -->
+            <div class="card-hero-block">
+              <div class="hero-icon-circle">
+                <mat-icon>cabin</mat-icon>
+              </div>
+              <div class="hero-details">
+                <h3 class="room-title">{{ formatearNombreTipo(hab) }}</h3>
+              </div>
+            </div>
+
+
+            <!-- Card Footer: Pricing & Action Button -->
+            <div class="card-footer-box">
+              <div class="price-block">
+                <span class="price-label">Tarifa {{ getUnidadPrecio(hab) }}</span>
+                @if (hab.precio && +hab.precio > 0) {
+                <div class="price-value-row">
+                  <span class="curr">Bs.</span>
+                  <span class="val">{{ hab.precio | number:'1.2-2' }}</span>
+                </div>
+                @if (nochesEstadia > 1) {
+                <span class="price-sub">Estadía: Bs. {{ calcularTotalEstadia(hab) | number:'1.2-2' }}</span>
+                }
+                } @else {
+                <span class="price-quote">A cotizar</span>
+                }
+              </div>
+
+              <div class="action-block">
+                <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
+                  matTooltip="Reservar Espacio de Camping">
+                  <mat-icon>event_available</mat-icon>
                   <span>Reservar</span>
                 </button>
               </div>
