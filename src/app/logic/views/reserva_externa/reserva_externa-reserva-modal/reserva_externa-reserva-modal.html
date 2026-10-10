@@ -93,13 +93,13 @@
 
                     <div class="row g-2">
                         <mat-form-field appearance="outline" class="col-12">
-                            <mat-label>Habitación</mat-label>
+                            <mat-label>Categoría / Habitación</mat-label>
                             <mat-select [(ngModel)]="form.habitacion_id" name="habitacion_id" required>
                                 @for (hab of habitacionesDisponibles; track hab.id) {
-                                <mat-option [value]="hab.id">
-                                    {{ hab.nro_habitacion }} {{ hab.tipo_habitacion ? (hab.tipo_habitacion | uppercase) : '' }} {{ hab.piso ? '(Piso ' + hab.piso + ')' : '' }}
-                                </mat-option>
-                                }
+                                  <mat-option [value]="hab.id">
+                                      {{ (hab.nro_habitacion ? ('Hab. ' + hab.nro_habitacion + ' - ') : '') + ((hab.tipo_habitacion || hab.categoria || '') | uppercase) }}
+                                  </mat-option>
+                                  }
                             </mat-select>
                         </mat-form-field>
 
@@ -124,7 +124,7 @@
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Fecha Inicial</mat-label>
                             <input matInput [matDatepicker]="picker_fecha_ini" [(ngModel)]="form.fecha_ini"
-                                (dateChange)="onFechaChange()" name="fecha_ini" required>
+                                (dateChange)="onFechaChange()" (click)="picker_fecha_ini.open()" name="fecha_ini" required style="cursor: pointer;">
                             <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_ini"></mat-datepicker-toggle>
                             <mat-datepicker #picker_fecha_ini></mat-datepicker>
                         </mat-form-field>
@@ -132,7 +132,7 @@
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
                             <mat-label>Fecha Final</mat-label>
                             <input matInput [matDatepicker]="picker_fecha_fin" [(ngModel)]="form.fecha_fin"
-                                (dateChange)="onFechaChange()" name="fecha_fin" required>
+                                (dateChange)="onFechaChange()" (click)="picker_fecha_fin.open()" name="fecha_fin" required style="cursor: pointer;">
                             <mat-datepicker-toggle matIconSuffix [for]="picker_fecha_fin"></mat-datepicker-toggle>
                             <mat-datepicker #picker_fecha_fin></mat-datepicker>
                         </mat-form-field>

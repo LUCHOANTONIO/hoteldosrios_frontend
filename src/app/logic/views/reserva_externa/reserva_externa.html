@@ -53,7 +53,7 @@
         <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 155px;">
           <mat-label>Llegada</mat-label>
           <input matInput [matDatepicker]="pickerLlegada" [(ngModel)]="fechaLlegada"
-            (dateChange)="buscarDisponibilidad()" readonly>
+            (dateChange)="buscarDisponibilidad()" (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerLlegada"></mat-datepicker-toggle>
           <mat-datepicker #pickerLlegada></mat-datepicker>
         </mat-form-field>
@@ -61,7 +61,7 @@
         <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 155px;">
           <mat-label>Salida</mat-label>
           <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida" (dateChange)="buscarDisponibilidad()"
-            readonly>
+            (click)="pickerSalida.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerSalida"></mat-datepicker-toggle>
           <mat-datepicker #pickerSalida></mat-datepicker>
         </mat-form-field>
@@ -101,20 +101,19 @@
             <mat-icon color="primary">meeting_room</mat-icon>
           </div>
           <h2 class="section-title">Habitaciones</h2>
-          <span class="section-badge">{{ habitacionesHotel.length }} disponibles</span>
+          <span class="section-badge">{{ totalHotelDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
           @for (hab of habitacionesHotel; track hab.id) {
           <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
             <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'ESTÁNDAR') | uppercase
-                }}</span>
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'ESTÁNDAR') | uppercase }}</span>
             </div>
 
             <div class="room-body">
               <div class="status-footer">
-                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)" matTooltip="Reservar">
+                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()" matTooltip="Reservar">
                   <mat-icon>event</mat-icon>
                   <span>Reservar</span>
                 </button>
@@ -134,20 +133,19 @@
             <mat-icon color="primary">wb_sunny</mat-icon>
           </div>
           <h2 class="section-title">Full Day</h2>
-          <span class="section-badge">{{ habitacionesFullDay.length }} disponibles</span>
+          <span class="section-badge">{{ totalFullDayDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
           @for (hab of habitacionesFullDay; track hab.id) {
           <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
             <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'FULL DAY') | uppercase
-                }}</span>
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'FULL DAY') | uppercase }}</span>
             </div>
 
             <div class="room-body">
               <div class="status-footer">
-                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)"
+                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
                   matTooltip="Reservar Full Day">
                   <mat-icon>event</mat-icon>
                   <span>Reservar</span>
@@ -168,20 +166,19 @@
             <mat-icon color="primary">forest</mat-icon>
           </div>
           <h2 class="section-title">Camping</h2>
-          <span class="section-badge">{{ habitacionesCamping.length }} disponibles</span>
+          <span class="section-badge">{{ totalCampingDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
           @for (hab of habitacionesCamping; track hab.id) {
           <div class="room-card status-disponible" (click)="abrirModalReserva(hab)">
             <div class="room-header">
-              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'CAMPING') | uppercase
-                }}</span>
+              <span class="room-num">{{ hab.nro_habitacion }} {{ (hab.tipo_habitacion || 'CAMPING') | uppercase }}</span>
             </div>
 
             <div class="room-body">
               <div class="status-footer">
-                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab)"
+                <button type="button" class="btn-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
                   matTooltip="Reservar Camping">
                   <mat-icon>event</mat-icon>
                   <span>Reservar</span>

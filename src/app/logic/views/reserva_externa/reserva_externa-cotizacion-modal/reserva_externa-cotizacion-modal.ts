@@ -50,8 +50,8 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
   guardando: boolean = false;
   buscandoPersona: boolean = false;
 
-  habitacionSeleccionada: HabitacionModel | null = null;
-  habitacionesDisponibles: HabitacionModel[] = [];
+  habitacionSeleccionada: any = null;
+  habitacionesDisponibles: any[] = [];
   tipoDocumentos: TipoDocumentoModel[] = [];
   paises: PaisModel[] = [];
 
@@ -119,7 +119,7 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
     }
 
     if (this.habitacionSeleccionada) {
-      this.form.habitacion_id = this.habitacionSeleccionada.id;
+      this.form.habitacion_id = (this.habitacionSeleccionada as any).categoria_id || this.habitacionSeleccionada.id;
     }
 
     const tipoUpper = (this.habitacionSeleccionada?.tipo_habitacion || '').toUpperCase();
@@ -190,8 +190,8 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
 
     this.guardando = true;
 
-    // Habitación seleccionada
-    const habObj = this.habitacionesDisponibles.find(h => h.id === Number(this.form.habitacion_id)) || this.habitacionSeleccionada;
+    // Habitación/Categoría seleccionada
+    const habObj = this.habitacionesDisponibles.find(h => ((h as any).categoria_id || h.id) === Number(this.form.habitacion_id)) || this.habitacionSeleccionada;
 
     const cotizacion = new CotizacionModel();
     cotizacion.dni = (this.form.dni || '').trim();
@@ -205,9 +205,9 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
     cotizacion.fecha_fin = fFin.format('YYYY-MM-DD');
 
     const nomHab = habObj
-      ? `Hab. ${habObj.nro_habitacion} (${habObj.tipo_habitacion || ''})`
+      ? `${(habObj as any).categoria || habObj.tipo_habitacion || (habObj.nro_habitacion ? 'Hab. ' + habObj.nro_habitacion : 'Hospedaje')}`
       : 'Hospedaje General';
-    const tipoHosp = habObj?.tipo_habitacion || 'Hospedaje General';
+    const tipoHosp = (habObj as any)?.categoria || habObj?.tipo_habitacion || 'Hospedaje General';
 
     cotizacion.detalle = `[Cotización Externa - ${nomHab}] ${this.form.detalle || ''}`.trim();
 

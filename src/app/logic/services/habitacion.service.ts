@@ -27,6 +27,10 @@ export class HabitacionService{
     disponibilidad(fecha: Date): Observable<any[]> {
        return this.http.post<any[]>(`${this.URL_API_BASE}/disponibilidad`,{fecha:fecha});
     }
+
+    disponibilidadHabitacionExterno(fecha_ini: string | Date, fecha_fin: string | Date): Observable<any[]> {
+       return this.http.post<any[]>(`${this.URL_API_BASE}/list_externo`, { fecha_ini, fecha_fin });
+    }
   
     crear(Habitacion:HabitacionModel):Observable<HabitacionModel>{
         return this.http.post<HabitacionModel>(this.URL_API_BASE,Habitacion);

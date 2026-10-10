@@ -260,7 +260,7 @@
   flex-direction: column;
   transition: all 0.2s ease;
   cursor: pointer;
-  height: 98px;
+  height: 106px;
 
   &:hover {
     transform: translateY(-2px);
@@ -278,7 +278,7 @@
 
   .room-header {
     background-color: transparent;
-    padding: 12px 14px 6px 14px;
+    padding: 10px 14px 4px 14px;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -286,13 +286,26 @@
 
     .room-num {
       font-weight: 800;
-      font-size: 14.5px;
+      font-size: 14px;
       color: #1e293b;
       line-height: 1.2;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       text-transform: uppercase;
+    }
+
+    .room-avail-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: #15803d;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 1px 7px;
+      border-radius: 10px;
+      display: inline-block;
+      width: fit-content;
+      margin-top: 2px;
     }
   }
 

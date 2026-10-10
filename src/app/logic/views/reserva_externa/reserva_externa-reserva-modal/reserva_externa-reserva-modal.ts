@@ -51,8 +51,8 @@ export class ReservaExternaModalComponent implements OnInit {
   guardando: boolean = false;
   buscandoPersona: boolean = false;
 
-  habitacionSeleccionada: HabitacionModel | null = null;
-  habitacionesDisponibles: HabitacionModel[] = [];
+  habitacionSeleccionada: any = null;
+  habitacionesDisponibles: any[] = [];
   tipoDocumentos: TipoDocumentoModel[] = [];
   paises: PaisModel[] = [];
   canalReservas: CanalReservaModel[] = [];
@@ -117,13 +117,12 @@ export class ReservaExternaModalComponent implements OnInit {
     }
 
     if (this.habitacionSeleccionada) {
-      this.form.habitacion_id = this.habitacionSeleccionada.id;
-      // Si la habitación seleccionada no está en la lista disponible, agregarla
-      if (!this.habitacionesDisponibles.some(h => h.id === this.habitacionSeleccionada!.id)) {
+      this.form.habitacion_id = Number(this.habitacionSeleccionada.id);
+      if (!this.habitacionesDisponibles.some(h => Number(h.id) === this.form.habitacion_id)) {
         this.habitacionesDisponibles = [this.habitacionSeleccionada, ...this.habitacionesDisponibles];
       }
     } else if (this.habitacionesDisponibles.length > 0) {
-      this.form.habitacion_id = this.habitacionesDisponibles[0].id;
+      this.form.habitacion_id = Number(this.habitacionesDisponibles[0].id);
     }
 
     if (this.paises.length > 0) {
@@ -227,7 +226,8 @@ export class ReservaExternaModalComponent implements OnInit {
     }
 
     // Habitación seleccionada
-    const habSeleccionada = this.habitacionesDisponibles.find(h => h.id === Number(this.form.habitacion_id));
+    const habId = Number(this.form.habitacion_id);
+    const habSeleccionada = this.habitacionesDisponibles.find(h => Number(h.id) === habId);
     const precioBaseHabitacion = habSeleccionada && habSeleccionada.precio ? Number(habSeleccionada.precio) : 0;
     const totalInterno = precioBaseHabitacion * this.noches;
 
@@ -236,8 +236,8 @@ export class ReservaExternaModalComponent implements OnInit {
       ...new ReservaModel(),
       is_externo: 1, // Indica registro realizado como Reserva Externa
       estado_reserva_id: 1, // 1 = Estado Reserva
-      habitacion_id: Number(this.form.habitacion_id),
-      habitacion_ids: [Number(this.form.habitacion_id)],
+      habitacion_id: habId,
+      habitacion_ids: [habId],
       nro_documento: (this.form.dni || '').trim(),
       tipo_doc_id: this.form.tipo_doc_id ? Number(this.form.tipo_doc_id) : 1,
       nombre: (this.form.nombre || '').trim(),
@@ -271,8 +271,13 @@ export class ReservaExternaModalComponent implements OnInit {
       next: (res: any) => {
         this.guardando = false;
         if (res && res.correcto) {
-          const dataRes = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
-          const reservaCreada = dataRes?.reserva;
+          let reservaCreada = null;
+          if (res.dato) {
+            try {
+              const dataRes = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
+              reservaCreada = dataRes?.reserva || dataRes;
+            } catch { }
+          }
           this.alertService.show("¡Reserva realizada con éxito!", { duration: 5000, type: 'success' });
 
           // Ofrecer ver el voucher de confirmación
@@ -287,7 +292,8 @@ export class ReservaExternaModalComponent implements OnInit {
       error: (err) => {
         this.guardando = false;
         console.error("Error al crear reserva externa:", err);
-        this.alertService.show("Ocurrió un error al guardar la reserva. Verifique los datos ingresados.", { duration: 5000, type: 'error' });
+        const errorMsg = err?.error?.mensaje || (err?.error?.errors ? Object.values(err.error.errors).flat().join(', ') : "Ocurrió un error al guardar la reserva. Verifique los datos ingresados.");
+        this.alertService.show(errorMsg, { duration: 5000, type: 'error' });
       }
     });
   }

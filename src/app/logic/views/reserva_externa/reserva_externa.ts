@@ -40,7 +40,16 @@ import { ReservaExternaModalComponent } from './reserva_externa-reserva-modal/re
 import { ReservaExternaCotizacionModalComponent } from './reserva_externa-cotizacion-modal/reserva_externa-cotizacion-modal';
 import { PdfViewerComponent } from '../../shared/views/pdf-viewer/pdf-viewer';
 
-export interface HabitacionDisponibleCard extends HabitacionModel {
+export interface HabitacionDisponibleCard {
+  categoria_id: number;
+  categoria: string;
+  precio: number | string;
+  cantidad_disponible: number;
+  id: number;
+  tipo_habitacion_id?: number;
+  tipo_habitacion: string;
+  nro_habitacion?: string;
+  descripcion?: string;
   capacidad: number;
   capacidadTexto: string;
   esFullDay?: boolean;
@@ -93,14 +102,25 @@ export class ReservaExternaComponent implements OnInit {
   habitacionesHotel: HabitacionDisponibleCard[] = [];
   habitacionesFullDay: HabitacionDisponibleCard[] = [];
   habitacionesCamping: HabitacionDisponibleCard[] = [];
-  pisosDisponibles: number[] = [];
-  habitacionesPorPiso: { [piso: number]: HabitacionDisponibleCard[] } = {};
 
   // Filtros de visualización
   tiposFiltro: string[] = ['TODOS'];
   tipoFiltroSeleccionado: string = 'TODOS';
   pisoFiltroSeleccionado: string = 'TODOS';
   busquedaTexto: string = '';
+
+  // Getters para totales de disponibilidad
+  get totalHotelDisponibles(): number {
+    return this.habitacionesHotel.reduce((acc, h) => acc + (Number(h.cantidad_disponible) || 0), 0);
+  }
+
+  get totalFullDayDisponibles(): number {
+    return this.habitacionesFullDay.reduce((acc, h) => acc + (Number(h.cantidad_disponible) || 0), 0);
+  }
+
+  get totalCampingDisponibles(): number {
+    return this.habitacionesCamping.reduce((acc, h) => acc + (Number(h.cantidad_disponible) || 0), 0);
+  }
 
   // Reservas Externas (Sin montos)
   dataSourceReservas = new MatTableDataSource<ReservaModel>([]);
@@ -140,7 +160,7 @@ export class ReservaExternaComponent implements OnInit {
     private documentoService: DocumentoService,
     private alertService: AlertService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarDatosGenerales();
@@ -148,7 +168,11 @@ export class ReservaExternaComponent implements OnInit {
 
   cargarDatosGenerales(): void {
     this.cargando = true;
+    const fIni = moment(this.fechaLlegada).format('YYYY-MM-DD');
+    const fFin = moment(this.fechaSalida).format('YYYY-MM-DD');
+
     forkJoin({
+      disponibilidad: this.habitacionService.disponibilidadHabitacionExterno(fIni, fFin),
       habitaciones: this.habitacionService.listar(),
       tipoHabitaciones: this.tipoHabitacionService.listar(),
       reservasRes: this.reservaService.listar(),
@@ -180,17 +204,8 @@ export class ReservaExternaComponent implements OnInit {
         // Cotizaciones
         this.cotizaciones = Array.isArray(res.cotizaciones) ? res.cotizaciones : [];
 
-        // Extraer lista de tipos únicos para filtros
-        const tiposSet = new Set<string>();
-        this.habitaciones.forEach(h => {
-          if (h.tipo_habitacion && h.tipo_habitacion.trim()) {
-            tiposSet.add(h.tipo_habitacion.trim().toUpperCase());
-          }
-        });
-        this.tiposFiltro = ['TODOS', ...Array.from(tiposSet).sort()];
-
-        // Calcular disponibilidad de cada habitación individual
-        this.recalcularDisponibilidad();
+        // Procesar datos cargados desde HabitacionRepository metodo disponibilidadHabitacionExterno
+        this.procesarDisponibilidad(res.disponibilidad);
         this.actualizarTablas();
         this.cargando = false;
       },
@@ -217,20 +232,20 @@ export class ReservaExternaComponent implements OnInit {
     }
 
     this.buscando = true;
-    this.reservaService.listar().subscribe({
+    const fIniStr = fIni.format('YYYY-MM-DD');
+    const fFinStr = fFin.format('YYYY-MM-DD');
+
+    this.habitacionService.disponibilidadHabitacionExterno(fIniStr, fFinStr).subscribe({
       next: (res) => {
-        if (res && res.dato) {
-          try {
-            this.reservas = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
-          } catch { }
-        }
-        this.recalcularDisponibilidad();
+        this.procesarDisponibilidad(res);
         this.buscando = false;
-        this.alertService.show(`Disponibilidad actualizada: ${this.habitacionesDisponibles.length} habitaciones disponibles`, { duration: 2500, type: 'success' });
+        const totalDisp = this.habitacionesDisponibles.reduce((acc, h) => acc + (Number(h.cantidad_disponible) || 0), 0);
+        this.alertService.show(`Disponibilidad actualizada: ${totalDisp} unidades disponibles`, { duration: 2500, type: 'success' });
       },
-      error: () => {
-        this.recalcularDisponibilidad();
+      error: (err) => {
+        console.error("Error al consultar disponibilidad:", err);
         this.buscando = false;
+        this.alertService.show("Error al consultar disponibilidad", { duration: 3000, type: 'error' });
       }
     });
   }
@@ -239,35 +254,44 @@ export class ReservaExternaComponent implements OnInit {
     return f ? moment(f).format('DD/MM/YYYY') : '';
   }
 
-  recalcularDisponibilidad(): void {
-    const fIni = moment(this.fechaLlegada).startOf('day');
-    const fFin = moment(this.fechaSalida).startOf('day');
+  procesarDisponibilidad(data: any[]): void {
+    const rawList = Array.isArray(data) ? data : [];
+    this.habitacionesDisponibles = rawList.map(item => {
+      const tipo = item.tipo_habitacion || item.categoria || '';
+      const tipoUpper = tipo.toUpperCase();
+      let cap = 2;
+      if (tipoUpper.includes('TRIPLE')) cap = 3;
+      else if (tipoUpper.includes('SIMPLE') || tipoUpper.includes('INDIVIDUAL')) cap = 1;
+      else if (tipoUpper.includes('SUITE') || tipoUpper.includes('FAMILIAR')) cap = 4;
 
-    // Cada habitación individual se evalúa contra las reservas existentes
-    this.habitacionesDisponibles = this.habitaciones
-      .filter(h => {
-        const solapa = this.reservas.some(r => {
-          if (Number(r.habitacion_id) !== h.id) return false;
-          if (r.estado_reserva_id === 4) return false; // 4 = Cancelado
-          const rIni = moment(r.fecha_ini).startOf('day');
-          const rFin = moment(r.fecha_fin).startOf('day');
-          return rIni.isBefore(fFin) && rFin.isAfter(fIni);
-        });
-        return !solapa;
-      })
-      .map(h => {
-        const tipoUpper = (h.tipo_habitacion || '').toUpperCase();
-        let cap = 2;
-        if (tipoUpper.includes('TRIPLE')) cap = 3;
-        else if (tipoUpper.includes('SIMPLE') || tipoUpper.includes('INDIVIDUAL')) cap = 1;
-        else if (tipoUpper.includes('SUITE') || tipoUpper.includes('FAMILIAR')) cap = 4;
+      return {
+        id: Number(item.id || item.habitacion_id),
+        habitacion_id: Number(item.id || item.habitacion_id),
+        categoria_id: Number(item.categoria_id || item.tipo_habitacion_id),
+        tipo_habitacion_id: Number(item.tipo_habitacion_id || item.categoria_id),
+        categoria: tipo,
+        tipo_habitacion: tipo,
+        precio: Number(item.precio) || 0,
+        cantidad_disponible: 1,
+        nro_habitacion: item.nro_habitacion || '',
+        descripcion: item.descripcion || '',
+        piso: item.piso,
+        color: item.color,
+        color_estado: item.color_estado,
+        estado_habitacion: item.estado_habitacion,
+        capacidad: cap,
+        capacidadTexto: `${cap} ${cap === 1 ? 'Huésped' : 'Huéspedes'}`
+      };
+    });
 
-        return {
-          ...h,
-          capacidad: cap,
-          capacidadTexto: `${cap} ${cap === 1 ? 'Huésped' : 'Huéspedes'}`
-        };
-      });
+    // Extraer lista de tipos únicos para filtros
+    const tiposSet = new Set<string>();
+    this.habitacionesDisponibles.forEach(h => {
+      if (h.categoria && h.categoria.trim()) {
+        tiposSet.add(h.categoria.trim().toUpperCase());
+      }
+    });
+    this.tiposFiltro = ['TODOS', ...Array.from(tiposSet).sort()];
 
     this.aplicarFiltros();
   }
@@ -276,11 +300,7 @@ export class ReservaExternaComponent implements OnInit {
     let lista = [...this.habitacionesDisponibles];
 
     if (this.tipoFiltroSeleccionado !== 'TODOS') {
-      lista = lista.filter(h => (h.tipo_habitacion || '').toUpperCase() === this.tipoFiltroSeleccionado.toUpperCase());
-    }
-
-    if (this.pisoFiltroSeleccionado !== 'TODOS') {
-      lista = lista.filter(h => (h.piso || '').toString() === this.pisoFiltroSeleccionado.toString());
+      lista = lista.filter(h => (h.categoria || '').toUpperCase() === this.tipoFiltroSeleccionado.toUpperCase());
     }
 
     if (this.busquedaTexto.trim() !== '') {
@@ -298,7 +318,7 @@ export class ReservaExternaComponent implements OnInit {
     this.habitacionesCamping = [];
 
     lista.forEach(h => {
-      const tipo = (h.tipo_habitacion || '').toUpperCase();
+      const tipo = (h.tipo_habitacion || h.categoria || '').toUpperCase();
       const desc = (h.descripcion || '').toUpperCase();
       const nro = (h.nro_habitacion || '').toString().toUpperCase();
 
@@ -315,8 +335,8 @@ export class ReservaExternaComponent implements OnInit {
 
     // Ordenar habitaciones de hotel numéricamente (1, 2, 3...)
     this.habitacionesHotel.sort((a, b) => {
-      const nroA = parseInt(a.nro_habitacion, 10);
-      const nroB = parseInt(b.nro_habitacion, 10);
+      const nroA = parseInt(a.nro_habitacion || '', 10);
+      const nroB = parseInt(b.nro_habitacion || '', 10);
       const aEsNum = !isNaN(nroA) && nroA > 0;
       const bEsNum = !isNaN(nroB) && nroB > 0;
       if (aEsNum && bEsNum) return nroA - nroB;
@@ -326,8 +346,8 @@ export class ReservaExternaComponent implements OnInit {
     });
 
     const sortEspecial = (a: HabitacionDisponibleCard, b: HabitacionDisponibleCard) => {
-      const nroA = parseInt(a.nro_habitacion, 10);
-      const nroB = parseInt(b.nro_habitacion, 10);
+      const nroA = parseInt(a.nro_habitacion || '', 10);
+      const nroB = parseInt(b.nro_habitacion || '', 10);
       if (!isNaN(nroA) && !isNaN(nroB) && nroA !== nroB) return nroA - nroB;
       return (a.tipo_habitacion || '').localeCompare(b.tipo_habitacion || '');
     };
@@ -339,26 +359,6 @@ export class ReservaExternaComponent implements OnInit {
       ...this.habitacionesFullDay,
       ...this.habitacionesCamping
     ];
-
-    // Agrupar por pisos
-    this.habitacionesPorPiso = {};
-    const pisosSet = new Set<number>();
-    this.habitacionesFiltradas.forEach(h => {
-      let p = 0;
-      if (h.piso) {
-        p = parseInt(h.piso, 10) || 0;
-      } else {
-        const nro = parseInt(h.nro_habitacion, 10) || 0;
-        p = Math.floor(nro / 100);
-      }
-      if (!this.habitacionesPorPiso[p]) {
-        this.habitacionesPorPiso[p] = [];
-      }
-      this.habitacionesPorPiso[p].push(h);
-      pisosSet.add(p);
-    });
-
-    this.pisosDisponibles = Array.from(pisosSet).sort((a, b) => a - b);
   }
 
   filtrarPorTipo(tipo: string): void {
