@@ -1,8 +1,18 @@
+// TABLA BASE
 table {
   width: 100%;
 }
 
+.report-card {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+// HEADER Y FILTROS RÁPIDOS
 .quick-filters {
+  display: flex;
+  align-items: center;
+
   .pill-btn {
     border-radius: 20px;
     padding: 3px 12px;
@@ -15,6 +25,7 @@ table {
     line-height: 30px;
     display: inline-flex;
     align-items: center;
+    white-space: nowrap;
     transition: all 0.2s ease;
 
     mat-icon {
@@ -35,9 +46,15 @@ table {
   }
 }
 
+// BARRA DE FILTROS
 .filter-bar {
   .filter-field {
     font-size: 13px;
+  }
+
+  .btn-filtrar {
+    height: 48px;
+    font-weight: 600;
   }
 }
 
@@ -48,7 +65,7 @@ table {
   .kpi-card {
     background: white;
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 10px 10px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     border: 1px solid #e2e8f0;
     display: flex;
@@ -56,6 +73,7 @@ table {
     align-items: center;
     justify-content: center;
     text-align: center;
+    height: 100%;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 
     .kpi-icon {
@@ -70,6 +88,7 @@ table {
       font-size: 18px;
       font-weight: 700;
       margin: 1px 0;
+      white-space: nowrap;
     }
 
     .kpi-label {
@@ -77,6 +96,7 @@ table {
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.3px;
+      line-height: 1.2;
     }
 
     &.kpi-reservas {
@@ -132,6 +152,30 @@ table {
   }
 }
 
+// CONTENEDOR DE TABLA CON SCROLL HORIZONTAL
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  .tabla-almuerzo {
+    min-width: 1100px;
+    width: 100%;
+
+    th.mat-header-cell {
+      white-space: nowrap;
+      font-size: 12px;
+      padding: 10px 8px;
+    }
+
+    td.mat-cell {
+      padding: 6px 8px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+  }
+}
+
 // BADGES DE LA TABLA
 .badge-reserva {
   display: inline-block;
@@ -141,6 +185,7 @@ table {
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .badge-habitacion {
@@ -151,6 +196,7 @@ table {
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .badge-fullday {
@@ -161,6 +207,7 @@ table {
   border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .badge-incluidos {
@@ -170,6 +217,7 @@ table {
   color: #0f5132;
   border-radius: 10px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .badge-extras {
@@ -180,6 +228,7 @@ table {
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .badge-total-almuerzo {
@@ -192,6 +241,7 @@ table {
   border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .notas-box {
@@ -222,6 +272,7 @@ table {
   border-radius: 10px;
   font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
 
   &.badge-confirmada {
     background-color: #cfe2ff;
@@ -238,5 +289,101 @@ table {
   &.badge-default {
     background-color: #e9ecef;
     color: #495057;
+  }
+}
+
+// ADAPTACIONES RESPONSIVAS (TABLETS Y MÓVILES)
+@media (max-width: 768px) {
+  mat-card-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 8px;
+
+    .quick-filters {
+      width: 100%;
+      justify-content: space-between;
+
+      .pill-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 2px 6px;
+        font-size: 11px;
+      }
+    }
+
+    .d-flex.gap-2.my-1 {
+      width: 100%;
+      justify-content: stretch;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+
+  .kpi-container {
+    padding: 6px 8px !important;
+
+    .kpi-card {
+      padding: 6px 4px;
+
+      .kpi-icon mat-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+      }
+
+      .kpi-value {
+        font-size: 15px;
+      }
+
+      .kpi-label {
+        font-size: 8.5px;
+      }
+
+      &.kpi-total {
+        .kpi-total-val {
+          font-size: 18px;
+        }
+        .kpi-total-lbl {
+          font-size: 9.5px;
+        }
+      }
+    }
+  }
+
+  .filter-bar {
+    padding: 8px !important;
+
+    .btn-filtrar {
+      height: 42px;
+      font-size: 13px;
+    }
+  }
+
+  // Paginador en pantallas pequeñas
+  ::ng-deep .mat-mdc-paginator-container {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    padding: 4px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-filters {
+    gap: 4px !important;
+
+    .pill-btn {
+      font-size: 10px;
+      padding: 1px 4px;
+      height: 28px;
+      line-height: 26px;
+
+      mat-icon {
+        font-size: 13px;
+        width: 13px;
+        height: 13px;
+      }
+    }
   }
 }

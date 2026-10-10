@@ -2,6 +2,7 @@ import { Component, AfterViewInit, ViewChild, inject, signal, effect } from '@an
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { Router } from '@angular/router';
 import moment from 'moment';
 
 // MODELS
@@ -92,6 +93,11 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
   dataSource = new MatTableDataSource<ReporteAlmuerzoModel>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly dialog = inject(MatDialog);
+  readonly router = inject(Router);
+
+  volverCalendario() {
+    this.router.navigate(['/timeline']);
+  }
 
   constructor(
     private reporteService: ReporteService,

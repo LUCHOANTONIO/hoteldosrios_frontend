@@ -33,6 +33,7 @@ import { IrFechaModalComponent } from './ir-fecha-modal/ir-fecha-modal';
 
 //VARIOS
 import { Component, ElementRef, inject, effect, ViewChild, AfterViewInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Timeline } from 'vis-timeline';
 import { DataSet } from 'vis-data';
@@ -703,6 +704,11 @@ export class TimelineComponent implements AfterViewInit {
         this.timeLine.moveTo(result); //result es la fecha seleccionada
       }
     });
+  }
+
+  readonly router = inject(Router);
+  irAlmuerzos() {
+    this.router.navigate(['/reporte_almuerzo']);
   }
 
 }

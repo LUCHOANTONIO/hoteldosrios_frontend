@@ -1,8 +1,11 @@
-<mat-card class="my-1" appearance="outlined">
+<mat-card class="my-1 report-card" appearance="outlined">
 
   <!-- CABECERA PRINCIPAL UNIFORME -->
   <mat-card-header class="bg-light d-flex justify-content-between align-items-center flex-wrap pt-2 pb-2 px-3">
     <div class="d-flex align-items-center gap-2 my-1">
+      <button mat-icon-button (click)="volverCalendario()" matTooltip="Volver al Calendario" class="text-secondary">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
       <mat-icon class="text-primary" style="font-size: 22px; width: 22px; height: 22px;">restaurant</mat-icon>
       <mat-card-title class="text-bg-white m-0" style="font-size: 16px;">
         <strong>REPORTE DE ALMUERZOS</strong>
@@ -38,54 +41,64 @@
 
   <mat-divider></mat-divider>
 
-  <!-- BARRA DE FILTROS EN REJILLA -->
-  <div class="filter-bar bg-white px-3 py-2 d-flex flex-wrap align-items-center gap-2">
-    <mat-form-field class="filter-field col-12 col-md-2" subscriptSizing="dynamic">
-      <mat-label>Desde</mat-label>
-      <input matInput [matDatepicker]="picker_ini" [(ngModel)]="fecha_ini" (dateChange)="onRangoChange()" required>
-      <mat-datepicker-toggle matIconSuffix [for]="picker_ini"></mat-datepicker-toggle>
-      <mat-datepicker #picker_ini></mat-datepicker>
-    </mat-form-field>
+  <!-- BARRA DE FILTROS EN REJILLA RESPONSIVA -->
+  <div class="filter-bar bg-white px-3 py-2">
+    <div class="row g-2 align-items-center">
+      <div class="col-6 col-sm-6 col-md-2">
+        <mat-form-field class="filter-field w-100" subscriptSizing="dynamic">
+          <mat-label>Desde</mat-label>
+          <input matInput [matDatepicker]="picker_ini" [(ngModel)]="fecha_ini" (dateChange)="onRangoChange()" required>
+          <mat-datepicker-toggle matIconSuffix [for]="picker_ini"></mat-datepicker-toggle>
+          <mat-datepicker #picker_ini></mat-datepicker>
+        </mat-form-field>
+      </div>
 
-    <mat-form-field class="filter-field col-12 col-md-2" subscriptSizing="dynamic">
-      <mat-label>Hasta</mat-label>
-      <input matInput [matDatepicker]="picker_fin" [(ngModel)]="fecha_fin" (dateChange)="onRangoChange()" required>
-      <mat-datepicker-toggle matIconSuffix [for]="picker_fin"></mat-datepicker-toggle>
-      <mat-datepicker #picker_fin></mat-datepicker>
-    </mat-form-field>
+      <div class="col-6 col-sm-6 col-md-2">
+        <mat-form-field class="filter-field w-100" subscriptSizing="dynamic">
+          <mat-label>Hasta</mat-label>
+          <input matInput [matDatepicker]="picker_fin" [(ngModel)]="fecha_fin" (dateChange)="onRangoChange()" required>
+          <mat-datepicker-toggle matIconSuffix [for]="picker_fin"></mat-datepicker-toggle>
+          <mat-datepicker #picker_fin></mat-datepicker>
+        </mat-form-field>
+      </div>
 
-    <mat-form-field class="filter-field col-12 col-md-2" subscriptSizing="dynamic">
-      <mat-label>Habitación</mat-label>
-      <mat-select [(ngModel)]="habitacion_id" (selectionChange)="cargarDatos()">
-        <mat-option [value]="null">Todo</mat-option>
-        @for (hab of habitaciones; track hab.id) {
-          <mat-option [value]="hab.id">
-            {{ hab.nro_habitacion ? 'Hab. ' + hab.nro_habitacion + ' - ' : '' }}{{ hab.descripcion }}
-          </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+      <div class="col-12 col-sm-6 col-md-2">
+        <mat-form-field class="filter-field w-100" subscriptSizing="dynamic">
+          <mat-label>Habitación</mat-label>
+          <mat-select [(ngModel)]="habitacion_id" (selectionChange)="cargarDatos()">
+            <mat-option [value]="null">Todo</mat-option>
+            @for (hab of habitaciones; track hab.id) {
+              <mat-option [value]="hab.id">
+                {{ hab.nro_habitacion ? 'Hab. ' + hab.nro_habitacion + ' - ' : '' }}{{ hab.descripcion }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
 
-    <mat-form-field class="filter-field col-12 col-md-4 flex-grow-1" subscriptSizing="dynamic">
-      <mat-label>Filtrar por cliente, habitación o notas</mat-label>
-      <input matInput type="search" placeholder="" (keydown.enter)="busqueda(txtBusqueda.value)" #txtBusqueda
-        (keyup)="busqueda(txtBusqueda.value)">
-      <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusqueda.value)">
-        <mat-icon>search</mat-icon>
-      </button>
-    </mat-form-field>
+      <div class="col-12 col-sm-6 col-md-5">
+        <mat-form-field class="filter-field w-100" subscriptSizing="dynamic">
+          <mat-label>Filtrar por cliente, habitación o notas</mat-label>
+          <input matInput type="search" placeholder="" (keydown.enter)="busqueda(txtBusqueda.value)" #txtBusqueda
+            (keyup)="busqueda(txtBusqueda.value)">
+          <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusqueda.value)">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
 
-    <div class="col-12 col-md-1 ms-auto">
-      <button mat-button (click)="cargarDatos()" class="bg-primary rounded-button text-white w-100">
-        Filtrar
-      </button>
+      <div class="col-12 col-md-1">
+        <button mat-button (click)="cargarDatos()" class="bg-primary rounded-button text-white w-100 btn-filtrar">
+          Filtrar
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- TARJETAS KPIS DE RESUMEN DE ALMUERZOS -->
+  <!-- TARJETAS KPIS DE RESUMEN DE ALMUERZOS RESPONSIVAS -->
   <div class="kpi-container px-3 py-2 bg-light">
     <div class="row g-2">
-      <div class="col-6 col-md-2">
+      <div class="col-6 col-sm-4 col-md-2">
         <div class="kpi-card kpi-reservas">
           <div class="kpi-icon"><mat-icon>meeting_room</mat-icon></div>
           <div class="kpi-value">{{ resumen().total_reservas }}</div>
@@ -93,7 +106,7 @@
         </div>
       </div>
 
-      <div class="col-6 col-md-2">
+      <div class="col-6 col-sm-4 col-md-2">
         <div class="kpi-card kpi-adultos">
           <div class="kpi-icon"><mat-icon>person</mat-icon></div>
           <div class="kpi-value">{{ resumen().total_adultos }}</div>
@@ -101,7 +114,7 @@
         </div>
       </div>
 
-      <div class="col-6 col-md-2">
+      <div class="col-6 col-sm-4 col-md-2">
         <div class="kpi-card kpi-ninios">
           <div class="kpi-icon"><mat-icon>child_care</mat-icon></div>
           <div class="kpi-value">{{ resumen().total_ninios }}</div>
@@ -109,7 +122,7 @@
         </div>
       </div>
 
-      <div class="col-6 col-md-2">
+      <div class="col-6 col-sm-4 col-md-2">
         <div class="kpi-card kpi-incluidos">
           <div class="kpi-icon"><mat-icon>fact_check</mat-icon></div>
           <div class="kpi-value">{{ resumen().total_incluidos }}</div>
@@ -117,7 +130,7 @@
         </div>
       </div>
 
-      <div class="col-6 col-md-2">
+      <div class="col-6 col-sm-4 col-md-2">
         <div class="kpi-card kpi-extras">
           <div class="kpi-icon"><mat-icon>add_circle_outline</mat-icon></div>
           <div class="kpi-value">{{ resumen().total_extras }}</div>
@@ -125,7 +138,7 @@
         </div>
       </div>
 
-      <div class="col-12 col-md-2">
+      <div class="col-12 col-sm-4 col-md-2">
         <div class="kpi-card kpi-total">
           <div class="kpi-icon"><mat-icon>restaurant_menu</mat-icon></div>
           <div class="kpi-value kpi-total-val">{{ resumen().gran_total_almuerzos }}</div>
@@ -141,7 +154,7 @@
   <mat-card-content class="bg-white p-0">
     <div class="mat-elevation-z8">
       <div class="table-responsive">
-        <table mat-table [dataSource]="dataSource">
+        <table mat-table [dataSource]="dataSource" class="tabla-almuerzo">
 
           <!-- Fila sin datos -->
           <tr *matNoDataRow>

@@ -245,6 +245,27 @@
         background: #1565c0;
       }
     }
+
+    &.btn-almuerzos {
+      background: #fff7ed;
+      border-color: #fed7aa;
+      color: #c2410c;
+      font-weight: 600;
+
+      mat-icon {
+        color: #ea580c;
+      }
+
+      &:hover {
+        background: #ea580c;
+        border-color: #c2410c;
+        color: #ffffff;
+
+        mat-icon {
+          color: #ffffff;
+        }
+      }
+    }
   }
 }
 
