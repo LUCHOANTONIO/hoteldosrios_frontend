@@ -36,6 +36,7 @@ export class ReservaModel {
     precio_unit_ninio: number = 0;
     tiene_mensaje: boolean = false;
     is_externo: number = 0;
+    usuario_alta_id: number | null = null;
     saldo: number = 0;
     total: number = 0;
     anticipo: number = 0;

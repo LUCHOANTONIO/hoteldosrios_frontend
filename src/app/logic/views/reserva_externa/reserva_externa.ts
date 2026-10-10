@@ -208,7 +208,7 @@ export class ReservaExternaComponent implements OnInit {
       disponibilidad: this.habitacionService.disponibilidadHabitacionExterno(fIni, fFin),
       habitaciones: this.habitacionService.listar(),
       tipoHabitaciones: this.tipoHabitacionService.listar(),
-      reservasRes: this.reservaService.listar(),
+      reservasRes: this.reservaService.listar({ mis_reservas: true }),
       cotizaciones: this.cotizacionService.listar(),
       tipoDocumentos: this.tipoDocumentoService.listar(),
       paises: this.paisService.listar(),
@@ -431,7 +431,7 @@ export class ReservaExternaComponent implements OnInit {
   }
 
   actualizarTablas(): void {
-    const reservasExternas = this.reservas.filter(r => r.is_externo == 1 || r.id > 0);
+    const reservasExternas = this.reservas;
     this.dataSourceReservas = new MatTableDataSource<ReservaModel>(reservasExternas);
     if (this.paginatorReservas) {
       this.dataSourceReservas.paginator = this.paginatorReservas;

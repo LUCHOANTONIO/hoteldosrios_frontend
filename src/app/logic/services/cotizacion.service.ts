@@ -13,8 +13,8 @@ export class CotizacionService {
 
     constructor(private http: HttpClient) { }
 
-    listar(): Observable<CotizacionModel[]> {
-        return this.http.get<CotizacionModel[]>(this.URL_API_BASE);
+    listar(params?: any): Observable<CotizacionModel[]> {
+        return this.http.get<CotizacionModel[]>(this.URL_API_BASE, { params });
     }
 
     getById(id: number): Observable<CotizacionModel> {

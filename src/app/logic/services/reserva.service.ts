@@ -15,8 +15,12 @@ export class ReservaService{
     constructor(private http:HttpClient){
     }
 
-    listar(): Observable<RespuestaRequest<any>> {
-       return this.http.get<RespuestaRequest<any>>(this.URL_API_BASE);
+    listar(params?: any): Observable<RespuestaRequest<any>> {
+       return this.http.get<RespuestaRequest<any>>(this.URL_API_BASE, { params });
+    }
+
+    listarMisReservas(): Observable<RespuestaRequest<any>> {
+       return this.http.get<RespuestaRequest<any>>(`${this.URL_API_BASE}/mis_reservas`);
     }
 
     mostrar(reserva_id:number): Observable<any> {
