@@ -3,7 +3,7 @@
   <nav class="portal-nav-bar">
     <div class="hotel-brand">
       <span class="hotel-title">HOTEL DOS RÍOS</span>
-      <span class="portal-tag">RESERVA EXTERNA</span>
+      <span class="portal-tag">Reservas</span>
     </div>
 
     <div class="nav-right-actions">
@@ -37,44 +37,32 @@
   <!-- ========================================== -->
   @if (vistaActiva === 'catalogo') {
   <div class="catalog-view-content">
-    <!-- FILA 2: Cabecera con Título, Duración y Búsqueda de Fechas -->
-    <header class="page-header">
-      <div class="header-title-container">
-        <div class="header-icon">
-          <mat-icon color="primary">hotel</mat-icon>
-        </div>
-        <div>
-          <h1 class="page-title">Disponibilidad de Habitaciones</h1>
-          <div class="page-subtitle">Consulta de disponibilidad inmediata para tu estadía en Hotel Dos Ríos</div>
-        </div>
-      </div>
-
-      <div class="date-controls">
-        <div class="stay-duration-pill" matTooltip="Duración estimada de estadía">
-          <mat-icon>nights_stay</mat-icon>
-          <span>{{ nochesEstadia }} {{ nochesEstadia === 1 ? 'noche' : 'noches' }}</span>
-        </div>
-
-        <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Llegada</mat-label>
+    <!-- FILA 2: Barra de Búsqueda de Fechas Centrada -->
+    <header class="page-header centered-search-header">
+      <div class="booking-search-bar">
+        <!-- Llegada -->
+        <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Fecha de Llegada</mat-label>
           <input matInput [matDatepicker]="pickerLlegada" [(ngModel)]="fechaLlegada"
             (dateChange)="buscarDisponibilidad()" (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerLlegada"></mat-datepicker-toggle>
           <mat-datepicker #pickerLlegada></mat-datepicker>
         </mat-form-field>
 
-        <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Salida</mat-label>
+        <!-- Salida -->
+        <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Fecha de Salida</mat-label>
           <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida" (dateChange)="buscarDisponibilidad()"
             (click)="pickerSalida.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerSalida"></mat-datepicker-toggle>
           <mat-datepicker #pickerSalida></mat-datepicker>
         </mat-form-field>
 
-        <button mat-flat-button color="primary" class="btn-search" (click)="buscarDisponibilidad()"
+        <!-- Botón Buscar -->
+        <button mat-flat-button color="primary" class="btn-search-capsule" (click)="buscarDisponibilidad()"
           [disabled]="buscando" matTooltip="Buscar habitaciones disponibles">
           @if (buscando) {
-          <mat-spinner diameter="16" class="spinner-white me-1"></mat-spinner>
+          <mat-spinner diameter="18" class="spinner-white me-1"></mat-spinner>
           } @else {
           <mat-icon>search</mat-icon>
           }
