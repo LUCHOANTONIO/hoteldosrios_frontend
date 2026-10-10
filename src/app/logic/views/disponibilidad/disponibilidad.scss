@@ -42,10 +42,71 @@
     }
   }
 
+  .category-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    .cat-filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+      .cat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #2563eb;
+      }
+
+      .cat-badge {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 2px 7px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      &:hover {
+        border-color: #93c5fd;
+        background: #f8fafc;
+        transform: translateY(-1px);
+      }
+
+      &.active {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
+
+        .cat-icon {
+          color: #ffffff;
+        }
+      }
+    }
+  }
+
   .date-controls {
     display: flex;
     align-items: center;
     gap: 12px;
+
+    .btn-refrescar {
+      border-radius: 6px;
+      height: 44px;
+    }
   }
 }
 
@@ -54,8 +115,40 @@
   flex-direction: column;
 }
 
-.floor-section {
-  margin-bottom: 24px;
+.category-section {
+  margin-bottom: 32px;
+
+  .category-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+
+    .section-title-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .section-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+        color: #2563eb;
+      }
+
+      .section-title {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.2px;
+      }
+    }
+  }
 }
 
 .matrix-grid {

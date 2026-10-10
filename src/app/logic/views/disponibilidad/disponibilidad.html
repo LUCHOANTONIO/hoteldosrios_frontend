@@ -9,29 +9,48 @@
       </div>
     </div>
 
+    <!-- Filtros de categoría: Habitaciones, Full Day, Camping -->
+    <div class="category-filters">
+      @for (g of grupos; track g.key) {
+      <button type="button" class="cat-filter-btn" [class.active]="categoriaFiltro === g.key"
+        (click)="filtrarPorCategoria(g.key)" [matTooltip]="'Filtrar por ' + g.titulo">
+        <mat-icon class="cat-icon">{{ g.icono }}</mat-icon>
+        <span class="cat-name">{{ g.titulo }}</span>
+      </button>
+      }
+    </div>
+
     <div class="date-controls">
-      <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 160px;">
+      <mat-form-field class="datepicker-field" appearance="outline" subscriptSizing="dynamic" style="width: 155px;">
         <mat-label>Fecha</mat-label>
         <input matInput [matDatepicker]="picker" [(ngModel)]="fecha_filter" (dateChange)="cargarDatos()" readonly>
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
 
-      <button mat-flat-button color="primary" style="border-radius: 6px; height: 44px; margin-left: 8px;"
-        (click)="cargarDatos()" matTooltip="Refrescar">
+      <button mat-flat-button color="primary" class="btn-refrescar" (click)="cargarDatos()" matTooltip="Refrescar">
         <mat-icon>refresh</mat-icon> Refrescar
       </button>
     </div>
   </header>
 
   <main class="rooms-container">
-    @for (piso of pisos; track piso) {
-    <div class="floor-section">
+    @for (grupo of gruposVisibles; track grupo.key) {
+    @if (grupo.items.length > 0) {
+    <section class="category-section">
+      <div class="category-section-header">
+        <div class="section-title-box">
+          <mat-icon class="section-icon">{{ grupo.icono }}</mat-icon>
+          <h2 class="section-title">{{ grupo.titulo }}</h2>
+        </div>
+      </div>
+
       <div class="matrix-grid">
-        @for (habitacion of habitacionesPorPiso[piso]; track habitacion.habitacion_id) {
+        @for (habitacion of grupo.items; track habitacion.habitacion_id) {
         <div class="room-card" [class.is-occupied]="habitacion.cliente"
           [class.status-disponible]="habitacion.estado === 'Disponible'"
-          [class.status-reserva]="habitacion.estado === 'Reserva'" [class.status-checkin]="habitacion.estado === 'Check In'"
+          [class.status-reserva]="habitacion.estado === 'Reserva'"
+          [class.status-checkin]="habitacion.estado === 'Check In'"
           [class.status-permanencia]="habitacion.estado === 'Permanencia'">
 
           <div class="room-header">
@@ -43,10 +62,8 @@
             <div class="guest-info">
               <div class="guest-name">{{ habitacion.cliente }}</div>
               <div class="dates">
-                <div class="date-line"><span class="label">ENTRADA:</span> {{ formatFechaSimple(habitacion.fecha_ini) }}
-                </div>
-                <div class="date-line"><span class="label">SALIDA:</span> {{ formatFechaSimple(habitacion.fecha_fin) }}
-                </div>
+                <div class="date-line"><span class="label">ENTRADA:</span> {{ formatFechaSimple(habitacion.fecha_ini) }}</div>
+                <div class="date-line"><span class="label">SALIDA:</span> {{ formatFechaSimple(habitacion.fecha_fin) }}</div>
               </div>
             </div>
             <div class="status-footer">
@@ -71,7 +88,8 @@
         </div>
         }
       </div>
-    </div>
+    </section>
+    }
     }
   </main>
 </div>
