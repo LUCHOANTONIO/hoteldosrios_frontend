@@ -1,331 +1,242 @@
-.reporte-almuerzo-container {
-  padding: 8px;
+table {
+  width: 100%;
+}
 
-  .reporte-header {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fbfd 100%);
-    border-bottom: 1px solid #edf2f7;
-
-    .icon-circle {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
-      color: white;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 10px rgba(255, 126, 95, 0.25);
-
-      mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-      }
-    }
-  }
-
-  .quick-filters {
-    .pill-btn {
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #4a5568;
-      border: 1px solid #e2e8f0;
-      background: white;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: #edf2f7;
-      }
-
-      &.active {
-        background: #2b6cb0;
-        color: white;
-        border-color: #2b6cb0;
-        box-shadow: 0 2px 6px rgba(43, 108, 176, 0.3);
-      }
-    }
-  }
-
-  .btn-export-pdf {
-    background-color: #e53e3e !important;
-    color: white !important;
-    font-weight: 600;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(229, 62, 62, 0.3);
-  }
-
-  .btn-export-excel {
-    background-color: #2f855a !important;
-    color: white !important;
-    font-weight: 600;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(47, 133, 90, 0.3);
-  }
-
-  .filter-bar {
-    border-bottom: 1px solid #e2e8f0;
-
-    .filter-field {
-      min-width: 170px;
-      font-size: 13px;
-    }
-
-    .btn-refresh {
-      color: #4a5568;
-      &:hover {
-        color: #2b6cb0;
-      }
-    }
-  }
-
-  // TARJETAS KPIS
-  .kpi-container {
-    background: #f7fafc;
-    border-bottom: 1px solid #edf2f7;
-
-    .kpi-card {
-      background: white;
-      border-radius: 10px;
-      padding: 12px 14px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
-      border: 1px solid #e2e8f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      }
-
-      .kpi-icon {
-        mat-icon {
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-        }
-      }
-
-      .kpi-value {
-        font-size: 20px;
-        font-weight: 700;
-        margin: 2px 0;
-      }
-
-      .kpi-label {
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      &.kpi-reservas {
-        border-left: 4px solid #3182ce;
-        .kpi-icon { color: #3182ce; }
-        .kpi-value { color: #2c5282; }
-        .kpi-label { color: #718096; }
-      }
-
-      &.kpi-adultos {
-        border-left: 4px solid #dd6b20;
-        .kpi-icon { color: #dd6b20; }
-        .kpi-value { color: #c05621; }
-        .kpi-label { color: #718096; }
-      }
-
-      &.kpi-ninios {
-        border-left: 4px solid #d69e2e;
-        .kpi-icon { color: #d69e2e; }
-        .kpi-value { color: #b7791f; }
-        .kpi-label { color: #718096; }
-      }
-
-      &.kpi-incluidos {
-        border-left: 4px solid #38a169;
-        .kpi-icon { color: #38a169; }
-        .kpi-value { color: #276749; }
-        .kpi-label { color: #718096; }
-      }
-
-      &.kpi-extras {
-        border-left: 4px solid #e53e3e;
-        .kpi-icon { color: #e53e3e; }
-        .kpi-value { color: #9b2c2c; }
-        .kpi-label { color: #718096; }
-      }
-
-      &.kpi-total {
-        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-        border: none;
-        color: white;
-
-        .kpi-icon { color: #feb47b; }
-        .kpi-total-val {
-          font-size: 24px;
-          color: #48bb78;
-        }
-        .kpi-total-lbl {
-          color: #e2e8f0;
-          font-weight: 700;
-        }
-      }
-    }
-  }
-
-  // TABLA
-  .table-wrapper {
+.quick-filters {
+  .pill-btn {
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
     background: white;
-
-    .tabla-almuerzos {
-      .table-header-row {
-        background-color: #2d3748;
-        th {
-          color: #f7fafc;
-          font-weight: 600;
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-      }
-
-      .table-data-row {
-        transition: background-color 0.15s ease;
-        &:hover {
-          background-color: #f8fafc;
-        }
-
-        td {
-          padding: 8px 12px;
-          vertical-align: middle;
-          border-bottom: 1px solid #edf2f7;
-        }
-      }
-    }
-  }
-
-  // BADGES Y CHIPS
-  .badge-reserva {
-    display: inline-block;
-    padding: 3px 7px;
-    background-color: #edf2f7;
-    color: #2d3748;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .badge-habitacion {
-    display: inline-block;
-    padding: 3px 8px;
-    background-color: #ebf8ff;
-    color: #2b6cb0;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    border: 1px solid #bee3f8;
-  }
-
-  .badge-fullday {
-    display: inline-block;
-    padding: 2px 6px;
-    background-color: #fefcbf;
-    color: #744210;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 600;
-  }
-
-  .badge-incluidos {
-    display: inline-block;
-    padding: 2px 8px;
-    background-color: #f0fff4;
-    color: #22543d;
-    border-radius: 12px;
-    font-weight: 600;
-    border: 1px solid #c6f6d5;
-  }
-
-  .badge-extras {
-    display: inline-block;
-    padding: 2px 8px;
-    background-color: #fff5f5;
-    color: #9b2c2c;
-    border-radius: 12px;
-    font-weight: 700;
-    border: 1px solid #fed7d7;
-    cursor: pointer;
-  }
-
-  .badge-total-almuerzo {
+    height: 32px;
+    line-height: 30px;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-    color: white;
-    border-radius: 16px;
+    transition: all 0.2s ease;
+
+    mat-icon {
+      font-size: 15px;
+      width: 15px;
+      height: 15px;
+    }
+
+    &:hover {
+      background: #edf2f7;
+    }
+
+    &.active {
+      background: #0d6efd;
+      color: white;
+      border-color: #0d6efd;
+    }
+  }
+}
+
+.filter-bar {
+  .filter-field {
     font-size: 13px;
-    box-shadow: 0 2px 5px rgba(39, 174, 96, 0.25);
   }
+}
 
-  .notas-box {
+// TARJETAS KPIS DE RESUMEN
+.kpi-container {
+  border-bottom: 1px solid #e2e8f0;
+
+  .kpi-card {
+    background: white;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
     display: flex;
-    align-items: flex-start;
-    gap: 4px;
-    background-color: #fffaf0;
-    border-left: 3px solid #dd6b20;
-    padding: 4px 8px;
-    border-radius: 3px;
-    color: #7b341e;
-    font-size: 11.5px;
-    line-height: 1.3;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 
-    .notas-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-      color: #dd6b20;
-      flex-shrink: 0;
-      margin-top: 1px;
+    .kpi-icon {
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .kpi-value {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 1px 0;
+    }
+
+    .kpi-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    &.kpi-reservas {
+      border-left: 4px solid #0d6efd;
+      .kpi-icon { color: #0d6efd; }
+      .kpi-value { color: #0d6efd; }
+      .kpi-label { color: #6c757d; }
+    }
+
+    &.kpi-adultos {
+      border-left: 4px solid #fd7e14;
+      .kpi-icon { color: #fd7e14; }
+      .kpi-value { color: #fd7e14; }
+      .kpi-label { color: #6c757d; }
+    }
+
+    &.kpi-ninios {
+      border-left: 4px solid #ffc107;
+      .kpi-icon { color: #ffc107; }
+      .kpi-value { color: #b7791f; }
+      .kpi-label { color: #6c757d; }
+    }
+
+    &.kpi-incluidos {
+      border-left: 4px solid #198754;
+      .kpi-icon { color: #198754; }
+      .kpi-value { color: #198754; }
+      .kpi-label { color: #6c757d; }
+    }
+
+    &.kpi-extras {
+      border-left: 4px solid #dc3545;
+      .kpi-icon { color: #dc3545; }
+      .kpi-value { color: #dc3545; }
+      .kpi-label { color: #6c757d; }
+    }
+
+    &.kpi-total {
+      background: #212529;
+      border: 1px solid #212529;
+      color: white;
+
+      .kpi-icon { color: #ffc107; }
+      .kpi-total-val {
+        font-size: 22px;
+        color: #20c997;
+      }
+      .kpi-total-lbl {
+        color: #f8f9fa;
+        font-weight: 700;
+      }
     }
   }
+}
 
-  .status-badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
+// BADGES DE LA TABLA
+.badge-reserva {
+  display: inline-block;
+  padding: 2px 6px;
+  background-color: #e9ecef;
+  color: #212529;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
 
-    &.badge-confirmada {
-      background-color: #ebf8ff;
-      color: #2b6cb0;
-    }
-    &.badge-checkin {
-      background-color: #feebc8;
-      color: #7b341e;
-    }
-    &.badge-checkout {
-      background-color: #e2e8f0;
-      color: #4a5568;
-    }
-    &.badge-default {
-      background-color: #edf2f7;
-      color: #4a5568;
-    }
+.badge-habitacion {
+  display: inline-block;
+  padding: 2px 7px;
+  background-color: #cfe2ff;
+  color: #084298;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-fullday {
+  display: inline-block;
+  padding: 1px 5px;
+  background-color: #fff3cd;
+  color: #664d03;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.badge-incluidos {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.badge-extras {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #f8d7da;
+  color: #842029;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.badge-total-almuerzo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  background: #198754;
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.notas-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  background-color: #fff3cd;
+  border-left: 3px solid #ffc107;
+  padding: 3px 6px;
+  border-radius: 3px;
+  color: #664d03;
+  font-size: 11px;
+  line-height: 1.3;
+
+  .notas-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+    color: #fd7e14;
+    flex-shrink: 0;
+    margin-top: 1px;
   }
+}
 
-  .empty-state {
-    .empty-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      color: #cbd5e0;
-    }
+.status-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+
+  &.badge-confirmada {
+    background-color: #cfe2ff;
+    color: #084298;
+  }
+  &.badge-checkin {
+    background-color: #ffe69c;
+    color: #664d03;
+  }
+  &.badge-checkout {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  &.badge-default {
+    background-color: #e9ecef;
+    color: #495057;
   }
 }

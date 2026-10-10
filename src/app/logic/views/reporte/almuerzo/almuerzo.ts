@@ -26,8 +26,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // COMPONENT
 import { PdfViewerComponent } from '../../../shared/views/pdf-viewer/pdf-viewer';
@@ -49,9 +47,7 @@ import { PdfViewerComponent } from '../../../shared/views/pdf-viewer/pdf-viewer'
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatTooltipModule,
-    MatChipsModule,
-    MatProgressSpinnerModule
+    MatTooltipModule
   ],
   templateUrl: './almuerzo.html',
   styleUrl: './almuerzo.scss',
@@ -73,7 +69,6 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
   fecha_fin: Date = new Date();
   habitacion_id: any = null;
   filtroActivo: 'hoy' | 'manana' | 'semana' | 'personalizado' = 'hoy';
-  cargando: boolean = false;
 
   dialogRef: any;
   pdf_base64: String = '';
@@ -83,7 +78,8 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
     'correlativo',
     'habitacion',
     'cliente',
-    'estadia',
+    'fecha_ingreso',
+    'fecha_salida',
     'cantidad_adulto',
     'cantidad_ninio',
     'almuerzos_incluidos',
@@ -149,13 +145,11 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
   }
 
   cargarDatos() {
-    this.cargando = true;
     const fechaIniStr = moment(this.fecha_ini).format('YYYY-MM-DD');
     const fechaFinStr = moment(this.fecha_fin).format('YYYY-MM-DD');
 
     this.reporteService.list_almuerzo(fechaIniStr, fechaFinStr, this.habitacion_id).subscribe({
       next: (res) => {
-        this.cargando = false;
         if (res && res.dato) {
           const data: ReporteAlmuerzoResponse = JSON.parse(res.dato);
           this.reporteAlmuerzo.set(data.reservas || []);
@@ -175,7 +169,6 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
         }
       },
       error: () => {
-        this.cargando = false;
         this.reporteAlmuerzo.set([]);
       }
     });
