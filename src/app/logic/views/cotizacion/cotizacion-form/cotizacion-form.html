@@ -17,6 +17,7 @@
                 <span class="section-title">Datos del Cliente</span>
             </div>
             <div class="row row-cols-1 row-cols-md-2 g-2">
+                @if (!is_externo) {
                 <!-- 1. N° Documento -->
                 <mat-form-field class="col" appearance="outline">
                     <mat-label>Nro Documento</mat-label>
@@ -44,6 +45,7 @@
                         }
                     </mat-select>
                 </mat-form-field>
+                }
 
                 <!-- 3. Nombre -->
                 <mat-form-field class="col" appearance="outline">

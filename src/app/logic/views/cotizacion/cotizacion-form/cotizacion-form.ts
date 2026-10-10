@@ -83,6 +83,7 @@ export class CotizacionFormComponent {
   @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;
   cotizacion: CotizacionModel;
   cotizaciones: any;
+  is_externo: boolean = false;
 
   tiposDocumento: TipoDocumentoModel[] = [];
   tarifas: TarifaModel[] = [];
@@ -124,6 +125,7 @@ export class CotizacionFormComponent {
   ) {
     this.cotizacion = data.cotizacion;
     this.cotizaciones = data.cotizaciones;
+    this.is_externo = data.is_externo === true;
     this.inicializarPrecioBase();
     this.inicializarNuevoServicio();
     this.normalizarFechasParaFormulario();

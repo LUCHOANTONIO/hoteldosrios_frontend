@@ -69,8 +69,6 @@ export interface HabitacionDisponibleCard {
   color?: string;
   color_estado?: string;
   estado_habitacion?: string;
-  capacidad: number;
-  capacidadTexto: string;
   esFullDay?: boolean;
   esCamping?: boolean;
 }
@@ -130,17 +128,6 @@ export class ReservaExternaComponent implements OnInit {
   habitacionesHotel: HabitacionDisponibleCard[] = [];
   habitacionesFullDay: HabitacionDisponibleCard[] = [];
   habitacionesCamping: HabitacionDisponibleCard[] = [];
-
-  // Getters para totales de disponibilidad y estadía
-  get nochesEstadia(): number {
-    if (!this.fechaLlegada || !this.fechaSalida) return 1;
-    const diff = moment(this.fechaSalida).startOf('day').diff(moment(this.fechaLlegada).startOf('day'), 'days');
-    return diff > 0 ? diff : 1;
-  }
-
-  get totalDisponibles(): number {
-    return this.habitacionesDisponibles.length;
-  }
 
   get totalHotelDisponibles(): number {
     return this.habitacionesHotel.length;
@@ -334,33 +321,13 @@ export class ReservaExternaComponent implements OnInit {
   procesarDisponibilidad(data: any[]): void {
     const rawList = Array.isArray(data) ? data : [];
     this.habitacionesDisponibles = rawList.map(item => {
-      const tipo = item.tipo_habitacion || item.categoria || '';
+      const tipo = (item.tipo_habitacion || item.categoria || '').trim();
       const tipoUpper = tipo.toUpperCase();
       const descUpper = (item.descripcion || '').toUpperCase();
       const nroUpper = (item.nro_habitacion || '').toString().toUpperCase();
 
       const isCamping = tipoUpper.includes('CAMPING') || descUpper.includes('CAMPING') || nroUpper.includes('CAMPING');
       const isFullDay = !isCamping && (tipoUpper.includes('FULL') || descUpper.includes('FULL') || nroUpper.includes('FULL'));
-
-      let cap = 2;
-      if (isCamping) {
-        cap = 4;
-      } else if (isFullDay) {
-        cap = 1;
-      } else if (tipoUpper.includes('TRIPLE')) {
-        cap = 3;
-      } else if (tipoUpper.includes('SIMPLE') || tipoUpper.includes('INDIVIDUAL')) {
-        cap = 1;
-      } else if (tipoUpper.includes('SUITE') || tipoUpper.includes('FAMILIAR')) {
-        cap = 4;
-      }
-
-      let capTexto = `${cap} ${cap === 1 ? 'Huésped' : 'Huéspedes'}`;
-      if (isFullDay) {
-        capTexto = '1 Pase Individual';
-      } else if (isCamping) {
-        capTexto = 'Hasta 4 Personas';
-      }
 
       return {
         id: Number(item.id || item.habitacion_id),
@@ -377,8 +344,6 @@ export class ReservaExternaComponent implements OnInit {
         color: item.color,
         color_estado: item.color_estado,
         estado_habitacion: item.estado_habitacion,
-        capacidad: cap,
-        capacidadTexto: capTexto,
         esFullDay: isFullDay,
         esCamping: isCamping
       };
@@ -436,27 +401,7 @@ export class ReservaExternaComponent implements OnInit {
   }
 
   formatearNombreTipo(hab: HabitacionDisponibleCard): string {
-    const raw = (hab.tipo_habitacion || hab.categoria || '').trim();
-    if (!raw) return 'Estándar';
-    const upper = raw.toUpperCase();
-    if (upper.includes('DOBLE FAMILIAR')) return 'Doble Familiar';
-    if (upper.includes('MATRIMONIAL')) return 'Matrimonial Confort';
-    if (upper.includes('SUITE')) return 'Suite Presidencial';
-    if (upper.includes('TRIPLE')) return 'Habitación Triple';
-    if (upper.includes('SIMPLE')) return 'Habitación Simple';
-    if (upper.includes('FULL DAY') || upper.includes('FULLDAY')) return 'Pase Full Day';
-    if (upper.includes('CAMPING')) return 'Zona de Camping';
-    return raw.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
-  }
-
-  getUnidadPrecio(hab: HabitacionDisponibleCard): string {
-    if (hab.esFullDay) return '/ persona';
-    if (hab.esCamping) return '/ espacio';
-    return '/ noche';
-  }
-
-  calcularTotalEstadia(hab: HabitacionDisponibleCard): number {
-    return (Number(hab.precio) || 0) * this.nochesEstadia;
+    return (hab.tipo_habitacion || hab.categoria || 'Habitación').trim();
   }
 
   actualizarTablas(): void {
@@ -588,7 +533,8 @@ export class ReservaExternaComponent implements OnInit {
     const dialogRef = this.dialog.open(CotizacionFormComponent, {
       data: {
         cotizacion: cotizacionParaForm,
-        cotizaciones: this.cotizacionesSignal
+        cotizaciones: this.cotizacionesSignal,
+        is_externo: true
       },
       width: '98vw',
       maxWidth: '650px',
