@@ -44,8 +44,7 @@
         <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Fecha de Llegada</mat-label>
           <input matInput [matDatepicker]="pickerLlegada" [(ngModel)]="fechaLlegada"
-            (ngModelChange)="onFechaLlegadaChange()"
-            (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
+            (ngModelChange)="onFechaLlegadaChange()" (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerLlegada"></mat-datepicker-toggle>
           <mat-datepicker #pickerLlegada></mat-datepicker>
         </mat-form-field>
@@ -262,7 +261,8 @@
   <!-- ========================================== -->
   @if (vistaActiva === 'reservas') {
   <mat-card class="my-1" appearance="outlined">
-    <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+    <mat-card-header class="bg-light my-1"
+      style="padding: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
       <div style="display: flex; align-items: center;">
         <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
           <mat-icon style="vertical-align: middle; margin-right: 6px;" class="text-primary">event_available</mat-icon>
@@ -272,11 +272,6 @@
 
       <!-- Filtros rápidos por Categoría (Habitaciones / Full Day / Camping) -->
       <div class="d-inline-flex align-items-center gap-1 ms-2">
-        <button type="button" class="btn btn-sm py-1 px-2"
-          [ngClass]="filtroCategoriaReserva === 'TODOS' ? 'btn-dark' : 'btn-outline-secondary'"
-          (click)="cambiarFiltroCategoriaReserva('TODOS')">
-          Todos ({{ totalReservas }})
-        </button>
         <button type="button" class="btn btn-sm py-1 px-2"
           [ngClass]="filtroCategoriaReserva === 'HABITACION' ? 'btn-primary' : 'btn-outline-primary'"
           (click)="cambiarFiltroCategoriaReserva('HABITACION')">
@@ -302,7 +297,8 @@
         <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
         <input matInput type="search" class="text-bg-light" placeholder="Buscar reserva..."
           (keydown.enter)="busqueda(txtBusquedaRes.value)" (keyup)="busqueda(txtBusquedaRes.value)" #txtBusquedaRes>
-        <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusquedaRes.value)" style="padding: 0;">
+        <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusquedaRes.value)"
+          style="padding: 0;">
           <mat-icon>search</mat-icon>
         </button>
       </mat-form-field>
@@ -320,7 +316,8 @@
                 </div>
               </th>
               <td mat-cell *matCellDef="let r">
-                <button mat-icon-button (click)="verVoucherReserva(r.id)" class="text-danger" matTooltip="Ver Comprobante PDF">
+                <button mat-icon-button (click)="verVoucherReserva(r.id)" class="text-danger"
+                  matTooltip="Ver Comprobante PDF">
                   <mat-icon style="color: #d32f2f;">picture_as_pdf</mat-icon>
                 </button>
                 <button mat-icon-button (click)="editarReserva(r.id)" class="text-primary" matTooltip="Editar">
@@ -430,8 +427,10 @@
       <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto;">
         <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
         <input matInput type="search" class="text-bg-light" placeholder="Buscar cotización..."
-          (keydown.enter)="busquedaCot(txtBusquedaCot.value)" (keyup)="busquedaCot(txtBusquedaCot.value)" #txtBusquedaCot>
-        <button mat-icon-button matSuffix class="text-info" (click)="busquedaCot(txtBusquedaCot.value)" style="padding: 0;">
+          (keydown.enter)="busquedaCot(txtBusquedaCot.value)" (keyup)="busquedaCot(txtBusquedaCot.value)"
+          #txtBusquedaCot>
+        <button mat-icon-button matSuffix class="text-info" (click)="busquedaCot(txtBusquedaCot.value)"
+          style="padding: 0;">
           <mat-icon>search</mat-icon>
         </button>
       </mat-form-field>
@@ -453,7 +452,8 @@
                 </div>
               </th>
               <td mat-cell *matCellDef="let c">
-                <button mat-icon-button (click)="verVoucherCotizacion(c.id)" class="text-danger" matTooltip="Ver Comprobante PDF">
+                <button mat-icon-button (click)="verVoucherCotizacion(c.id)" class="text-danger"
+                  matTooltip="Ver Comprobante PDF">
                   <mat-icon style="color: #d32f2f;">picture_as_pdf</mat-icon>
                 </button>
                 <button mat-icon-button (click)="editarCotizacion(c.id)" class="text-primary" matTooltip="Editar">

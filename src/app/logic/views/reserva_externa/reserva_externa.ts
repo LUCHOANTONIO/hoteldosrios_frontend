@@ -525,6 +525,7 @@ export class ReservaExternaComponent implements OnInit {
       reservaParaForm.precio_unit_ninio = 0;
       reservaParaForm.canal_reserva_id = (this.canalReservas && this.canalReservas.length > 0) ? this.canalReservas[0].id : 1;
       reservaParaForm.total = 0;
+      reservaParaForm.is_externo = 1;
     }
 
     this.comunicacionService.executeActionReserva.set(false);
@@ -543,6 +544,7 @@ export class ReservaExternaComponent implements OnInit {
         motivos: this.motivos,
         productos: this.productos,
         tipo_habitaciones: this.tipoHabitaciones,
+        is_externo: true,
         items: { update: () => { }, get: () => [], remove: () => { } },
         updateGroupsSignal: signal<number | null>(null)
       },
@@ -688,8 +690,12 @@ export class ReservaExternaComponent implements OnInit {
     this.busqueda(texto);
   }
 
-  cambiarFiltroCategoriaReserva(cat: 'TODOS' | 'HABITACION' | 'FULL_DAY' | 'CAMPING'): void {
-    this.filtroCategoriaReserva = cat;
+  cambiarFiltroCategoriaReserva(cat: 'HABITACION' | 'FULL_DAY' | 'CAMPING'): void {
+    if (this.filtroCategoriaReserva === cat) {
+      this.filtroCategoriaReserva = 'TODOS';
+    } else {
+      this.filtroCategoriaReserva = cat;
+    }
     this.aplicarFiltroCompletoReservas();
   }
 

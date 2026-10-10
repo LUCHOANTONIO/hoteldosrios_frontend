@@ -162,6 +162,7 @@ export class ReservaFormComponent {
   isEditReserva: boolean = false;
   isVisibleTabs: boolean = false;
   isVisibleServiciosExtra: boolean = false;
+  is_externo: boolean = false;
 
   // Tipo de Reserva: individual o grupal
   tipo_reserva: 'individual' | 'grupal' = 'individual';
@@ -216,6 +217,7 @@ export class ReservaFormComponent {
     this.canal_reservas = data.canal_reservas;
     this.tipo_habitaciones = data.tipo_habitaciones || [];
     this.reservas = data.reservas || [];
+    this.is_externo = data.is_externo === true || Number(this.reserva?.is_externo) === 1;
 
     // Configuración de suscripciones y servicios
     this.dialogRef.backdropClick().subscribe(x => { });
