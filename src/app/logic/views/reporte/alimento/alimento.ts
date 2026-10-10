@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import moment from 'moment';
 
 // MODELS
-import { ReporteAlmuerzoModel, ReporteAlmuerzoResumen, ReporteAlmuerzoResponse } from '../../../models/reporte_almuerzo.model';
+import { ReporteAlimentoModel, ReporteAlimentoResumen, ReporteAlimentoResponse } from '../../../models/reporte_alimento.model';
 import { HabitacionModel } from '../../../models/habitacion.model';
 
 // SERVICES
@@ -32,7 +32,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PdfViewerComponent } from '../../../shared/views/pdf-viewer/pdf-viewer';
 
 @Component({
-  selector: 'app-reporte-almuerzo',
+  selector: 'app-reporte-alimento',
   standalone: true,
   imports: [
     CommonModule,
@@ -50,19 +50,19 @@ import { PdfViewerComponent } from '../../../shared/views/pdf-viewer/pdf-viewer'
     MatDatepickerModule,
     MatTooltipModule
   ],
-  templateUrl: './almuerzo.html',
-  styleUrl: './almuerzo.scss',
+  templateUrl: './alimento.html',
+  styleUrl: './alimento.scss',
   providers: [{ provide: MatPaginatorIntl, useClass: SpanishPaginatorIntl }],
 })
-export class ReporteAlmuerzoComponent implements AfterViewInit {
-  reporteAlmuerzo = signal<ReporteAlmuerzoModel[]>([]);
-  resumen = signal<ReporteAlmuerzoResumen>({
+export class ReporteAlimentoComponent implements AfterViewInit {
+  reporteAlimento = signal<ReporteAlimentoModel[]>([]);
+  resumen = signal<ReporteAlimentoResumen>({
     total_reservas: 0,
     total_adultos: 0,
     total_ninios: 0,
     total_incluidos: 0,
     total_extras: 0,
-    gran_total_almuerzos: 0
+    gran_total_alimentos: 0
   });
 
   habitaciones: HabitacionModel[] = [];
@@ -83,14 +83,14 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
     'fecha_salida',
     'cantidad_adulto',
     'cantidad_ninio',
-    'almuerzos_incluidos',
-    'almuerzos_extras',
-    'total_almuerzos',
+    'alimentos_incluidos',
+    'alimentos_extras',
+    'total_alimentos',
     'notas',
     'estado'
   ];
 
-  dataSource = new MatTableDataSource<ReporteAlmuerzoModel>([]);
+  dataSource = new MatTableDataSource<ReporteAlimentoModel>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly dialog = inject(MatDialog);
   readonly router = inject(Router);
@@ -107,9 +107,9 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
     this.cargarDatos();
 
     effect(() => {
-      this.dataSource = new MatTableDataSource<ReporteAlmuerzoModel>(this.reporteAlmuerzo());
+      this.dataSource = new MatTableDataSource<ReporteAlimentoModel>(this.reporteAlimento());
       this.dataSource.paginator = this.paginator;
-      this.dataSource.filterPredicate = (data: ReporteAlmuerzoModel, filter: string) => {
+      this.dataSource.filterPredicate = (data: ReporteAlimentoModel, filter: string) => {
         const str = `${data.nro_reserva} ${data.correlativo} ${data.cliente} ${data.habitacion} ${data.notas} ${data.estado} ${data.nro_documento}`.toLowerCase();
         return str.includes(filter);
       };
@@ -130,18 +130,20 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
 
   setFiltro(tipo: 'hoy' | 'manana' | 'semana') {
     this.filtroActivo = tipo;
-    const hoy = moment();
+    const hoy = moment().startOf('day');
+
     if (tipo === 'hoy') {
-      this.fecha_ini = hoy.clone().startOf('day').toDate();
-      this.fecha_fin = hoy.clone().endOf('day').toDate();
+      this.fecha_ini = hoy.toDate();
+      this.fecha_fin = hoy.toDate();
     } else if (tipo === 'manana') {
-      const manana = hoy.clone().add(1, 'day');
-      this.fecha_ini = manana.clone().startOf('day').toDate();
-      this.fecha_fin = manana.clone().endOf('day').toDate();
+      const manana = moment().add(1, 'day').startOf('day');
+      this.fecha_ini = manana.toDate();
+      this.fecha_fin = manana.toDate();
     } else if (tipo === 'semana') {
-      this.fecha_ini = hoy.clone().startOf('week').toDate();
-      this.fecha_fin = hoy.clone().endOf('week').toDate();
+      this.fecha_ini = moment().startOf('week').toDate();
+      this.fecha_fin = moment().endOf('week').toDate();
     }
+
     this.cargarDatos();
   }
 
@@ -154,40 +156,45 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
     const fechaIniStr = moment(this.fecha_ini).format('YYYY-MM-DD');
     const fechaFinStr = moment(this.fecha_fin).format('YYYY-MM-DD');
 
-    this.reporteService.list_almuerzo(fechaIniStr, fechaFinStr, this.habitacion_id).subscribe({
+    this.reporteService.list_alimento(fechaIniStr, fechaFinStr, this.habitacion_id).subscribe({
       next: (res) => {
         if (res && res.dato) {
-          const data: ReporteAlmuerzoResponse = JSON.parse(res.dato);
-          this.reporteAlmuerzo.set(data.reservas || []);
-          if (data.resumen) {
-            this.resumen.set(data.resumen);
-          }
+          const data: ReporteAlimentoResponse = JSON.parse(res.dato);
+          this.reporteAlimento.set(data.reservas || []);
+          this.resumen.set(data.resumen || {
+            total_reservas: 0,
+            total_adultos: 0,
+            total_ninios: 0,
+            total_incluidos: 0,
+            total_extras: 0,
+            gran_total_alimentos: 0
+          });
         } else {
-          this.reporteAlmuerzo.set([]);
+          this.reporteAlimento.set([]);
           this.resumen.set({
             total_reservas: 0,
             total_adultos: 0,
             total_ninios: 0,
             total_incluidos: 0,
             total_extras: 0,
-            gran_total_almuerzos: 0
+            gran_total_alimentos: 0
           });
         }
       },
       error: () => {
-        this.reporteAlmuerzo.set([]);
+        this.reporteAlimento.set([]);
       }
     });
   }
 
-  mostrarVisorPdf(enterAnimationDuration: string = '0ms', exitAnimationDuration: string = '0ms') {
+  mostrarVisorPdf(enterAnimationDuration: string, exitAnimationDuration: string) {
     const fechaIniStr = moment(this.fecha_ini).format('YYYY-MM-DD');
     const fechaFinStr = moment(this.fecha_fin).format('YYYY-MM-DD');
 
-    this.reporteService.exportar_list_almuerzo(fechaIniStr, fechaFinStr, this.habitacion_id).subscribe({
+    this.reporteService.exportar_list_alimento(fechaIniStr, fechaFinStr, this.habitacion_id).subscribe({
       next: (res: any) => {
         this.pdf_base64 = res;
-        this.titulo_documento = 'Reporte de Almuerzos';
+        this.titulo_documento = 'Servicio de Alimentos';
         this.dialogRef = this.dialog.open(PdfViewerComponent, {
           width: '80vw',
           maxWidth: '95vw',
@@ -205,9 +212,9 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
     const fechaIniStr = moment(this.fecha_ini).format('YYYY-MM-DD');
     const fechaFinStr = moment(this.fecha_fin).format('YYYY-MM-DD');
 
-    this.reporteService.exportar_almuerzo_excel(fechaIniStr, fechaFinStr, this.habitacion_id).subscribe({
+    this.reporteService.exportar_alimento_excel(fechaIniStr, fechaFinStr, this.habitacion_id).subscribe({
       next: (res) => {
-        const nombreArchivo = `reporte_almuerzos_${fechaIniStr}_al_${fechaFinStr}.xlsx`;
+        const nombreArchivo = `servicio_alimentos_${fechaIniStr}_al_${fechaFinStr}.xlsx`;
         const byteCharacters = atob(res);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -233,10 +240,10 @@ export class ReporteAlmuerzoComponent implements AfterViewInit {
   }
 
   getEstadoClass(estado: string): string {
-    const e = (estado || '').toLowerCase();
-    if (e.includes('check-in') || e.includes('check in')) return 'badge-checkin';
-    if (e.includes('check-out') || e.includes('check out')) return 'badge-checkout';
-    if (e.includes('confirm')) return 'badge-confirmada';
+    const est = (estado || '').toLowerCase();
+    if (est.includes('confir') || est.includes('reserv')) return 'badge-confirmada';
+    if (est.includes('check') || est.includes('ingres') || est.includes('hosped')) return 'badge-checkin';
+    if (est.includes('salid') || est.includes('out')) return 'badge-checkout';
     return 'badge-default';
   }
 }

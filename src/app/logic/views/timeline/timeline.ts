@@ -707,8 +707,8 @@ export class TimelineComponent implements AfterViewInit {
   }
 
   readonly router = inject(Router);
-  irAlmuerzos() {
-    this.router.navigate(['/reporte_almuerzo']);
+  irAlimentos() {
+    this.router.navigate(['/reporte_alimentos']);
   }
 
 }

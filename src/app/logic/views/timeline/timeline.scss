@@ -83,7 +83,11 @@
   &.tab-habitaciones {
     border-color: #dbeafe;
     color: #1e40af;
-    .tab-icon { color: #2563eb; }
+
+    .tab-icon {
+      color: #2563eb;
+    }
+
     .tab-badge {
       background: #eff6ff;
       color: #1d4ed8;
@@ -93,7 +97,10 @@
     &:hover:not(.active) {
       background: #eff6ff;
       border-color: #93c5fd;
-      .tab-icon { transform: scale(1.1); }
+
+      .tab-icon {
+        transform: scale(1.1);
+      }
     }
 
     &.active {
@@ -114,7 +121,11 @@
   &.tab-fullday {
     border-color: #fef3c7;
     color: #92400e;
-    .tab-icon { color: #d97706; }
+
+    .tab-icon {
+      color: #d97706;
+    }
+
     .tab-badge {
       background: #fffbeb;
       color: #b45309;
@@ -124,7 +135,10 @@
     &:hover:not(.active) {
       background: #fffbeb;
       border-color: #fcd34d;
-      .tab-icon { transform: scale(1.1); }
+
+      .tab-icon {
+        transform: scale(1.1);
+      }
     }
 
     &.active {
@@ -145,7 +159,11 @@
   &.tab-camping {
     border-color: #dcfce7;
     color: #166534;
-    .tab-icon { color: #16a34a; }
+
+    .tab-icon {
+      color: #16a34a;
+    }
+
     .tab-badge {
       background: #f0fdf4;
       color: #15803d;
@@ -155,7 +173,10 @@
     &:hover:not(.active) {
       background: #f0fdf4;
       border-color: #86efac;
-      .tab-icon { transform: scale(1.1); }
+
+      .tab-icon {
+        transform: scale(1.1);
+      }
     }
 
     &.active {
@@ -176,7 +197,11 @@
   &.tab-todas {
     border-color: #e2e8f0;
     color: #334155;
-    .tab-icon { color: #64748b; }
+
+    .tab-icon {
+      color: #64748b;
+    }
+
     .tab-badge {
       background: #f1f5f9;
       color: #475569;
@@ -186,7 +211,10 @@
     &:hover:not(.active) {
       background: #f1f5f9;
       border-color: #94a3b8;
-      .tab-icon { transform: scale(1.1); }
+
+      .tab-icon {
+        transform: scale(1.1);
+      }
     }
 
     &.active {
@@ -246,6 +274,7 @@
       }
     }
 
+    &.btn-alimentos,
     &.btn-almuerzos {
       background: #fff7ed;
       border-color: #fed7aa;
@@ -366,7 +395,7 @@
   ::ng-deep .timeline-wrapper {
     .vis-panel.vis-left {
       max-width: 130px !important;
-      
+
       .vis-inner {
         padding: 0 4px !important;
         font-size: 12px !important;

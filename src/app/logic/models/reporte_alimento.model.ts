@@ -1,4 +1,4 @@
-export class ReporteAlmuerzoModel {
+export class ReporteAlimentoModel {
   reserva_id: number = 0;
   nro_reserva: number = 0;
   correlativo: number = 0;
@@ -15,25 +15,29 @@ export class ReporteAlmuerzoModel {
   is_full_day: boolean = false;
   cantidad_adulto: number = 0;
   cantidad_ninio: number = 0;
+  alimentos_incluidos: number = 0;
+  alimentos_extras: number = 0;
   almuerzos_incluidos: number = 0;
   almuerzos_extras: number = 0;
   detalle_extras: string = '';
+  total_alimentos: number = 0;
   total_almuerzos: number = 0;
   notas: string = '';
 }
 
-export interface ReporteAlmuerzoResumen {
+export interface ReporteAlimentoResumen {
   total_reservas: number;
   total_adultos: number;
   total_ninios: number;
   total_incluidos: number;
   total_extras: number;
-  gran_total_almuerzos: number;
+  gran_total_alimentos: number;
+  gran_total_almuerzos?: number;
 }
 
-export interface ReporteAlmuerzoResponse {
-  reservas: ReporteAlmuerzoModel[];
-  resumen: ReporteAlmuerzoResumen;
+export interface ReporteAlimentoResponse {
+  reservas: ReporteAlimentoModel[];
+  resumen: ReporteAlimentoResumen;
   fecha_ini: string;
   fecha_fin: string;
 }

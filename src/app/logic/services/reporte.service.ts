@@ -168,35 +168,35 @@ export class ReporteService{
    } 
    //END:Reporte Cuentas por Cobrar
 
-   //BEGIN:Reporte Almuerzo
-   list_almuerzo(fecha_ini: string, fecha_fin: string, habitacion_id: any = null): Observable<RespuestaRequest<any>> {
+   //BEGIN:Reporte Servicio de Alimentos
+   list_alimento(fecha_ini: string, fecha_fin: string, habitacion_id: any = null): Observable<RespuestaRequest<any>> {
       let params = new HttpParams()
          .set('fecha_ini', fecha_ini)
          .set('fecha_fin', fecha_fin);
       if (habitacion_id) {
          params = params.set('habitacion_id', habitacion_id);
       }
-      return this.http.get<RespuestaRequest<any>>(`${this.URL_API_BASE}/list_almuerzo`, { params });
+      return this.http.get<RespuestaRequest<any>>(`${this.URL_API_BASE}/list_alimento`, { params });
    }
 
-   exportar_list_almuerzo(fecha_ini: string, fecha_fin: string, habitacion_id: any = null): Observable<String> {
+   exportar_list_alimento(fecha_ini: string, fecha_fin: string, habitacion_id: any = null): Observable<String> {
       let params = new HttpParams()
          .set('fecha_ini', fecha_ini)
          .set('fecha_fin', fecha_fin);
       if (habitacion_id) {
          params = params.set('habitacion_id', habitacion_id);
       }
-      return this.http.get<String>(`${this.URL_API_BASE}/export_list_almuerzo`, { params });
+      return this.http.get<String>(`${this.URL_API_BASE}/export_list_alimento`, { params });
    }
 
-   exportar_almuerzo_excel(fecha_ini: string, fecha_fin: string, habitacion_id: any = null): Observable<string> {
-      return this.http.post<string>(`${this.URL_API_BASE}/export_almuerzo_excel`, {
+   exportar_alimento_excel(fecha_ini: string, fecha_fin: string, habitacion_id: any = null): Observable<string> {
+      return this.http.post<string>(`${this.URL_API_BASE}/export_alimento_excel`, {
          fecha_ini: fecha_ini,
          fecha_fin: fecha_fin,
          habitacion_id: habitacion_id
       });
    }
-   //END:Reporte Almuerzo
+   //END:Reporte Servicio de Alimentos
 
 }
    
