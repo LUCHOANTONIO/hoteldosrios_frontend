@@ -83,60 +83,6 @@
       </div>
     </header>
 
-    <!-- FILA 3: Barra de Filtros Rápidos (Categorías, Pisos y Búsqueda en vivo) -->
-    <div class="quick-filters-bar">
-      <div class="category-tabs">
-        <button class="tab-pill" [class.active]="categoriaFiltro === 'TODOS'" (click)="seleccionarCategoriaFiltro('TODOS')">
-          <mat-icon>grid_view</mat-icon>
-          <span>Todas</span>
-          <span class="count-badge">{{ countHotelTotal + countFullDayTotal + countCampingTotal }}</span>
-        </button>
-
-        <button class="tab-pill" [class.active]="categoriaFiltro === 'HOTEL'" (click)="seleccionarCategoriaFiltro('HOTEL')">
-          <mat-icon>bed</mat-icon>
-          <span>Habitaciones</span>
-          <span class="count-badge">{{ countHotelTotal }}</span>
-        </button>
-
-        <button class="tab-pill" [class.active]="categoriaFiltro === 'FULL_DAY'" (click)="seleccionarCategoriaFiltro('FULL_DAY')">
-          <mat-icon>wb_sunny</mat-icon>
-          <span>Full Day</span>
-          <span class="count-badge">{{ countFullDayTotal }}</span>
-        </button>
-
-        <button class="tab-pill" [class.active]="categoriaFiltro === 'CAMPING'" (click)="seleccionarCategoriaFiltro('CAMPING')">
-          <mat-icon>forest</mat-icon>
-          <span>Camping</span>
-          <span class="count-badge">{{ countCampingTotal }}</span>
-        </button>
-      </div>
-
-      <div class="filter-controls-right">
-        @if (pisosDisponibles.length > 2) {
-        <div class="floor-selector-wrapper">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="floor-select">
-            <mat-label>Piso</mat-label>
-            <mat-select [(ngModel)]="pisoFiltroSeleccionado" (selectionChange)="aplicarFiltros()">
-              @for (p of pisosDisponibles; track p) {
-              <mat-option [value]="p">{{ p === 'TODOS' ? 'Todos los pisos' : 'Piso ' + p }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-        }
-
-        <div class="search-input-box">
-          <mat-icon class="search-ico">search</mat-icon>
-          <input type="text" [(ngModel)]="busquedaTexto" (ngModelChange)="aplicarFiltros()"
-            placeholder="Buscar por número o tipo...">
-          @if (busquedaTexto) {
-          <button type="button" class="btn-clear" (click)="busquedaTexto = ''; aplicarFiltros()" matTooltip="Limpiar filtro">
-            <mat-icon>close</mat-icon>
-          </button>
-          }
-        </div>
-      </div>
-    </div>
 
     <!-- Empty State -->
     @if (!cargando && habitacionesFiltradas.length === 0) {
@@ -153,18 +99,15 @@
     } @else {
     <!-- Catálogo de Habitaciones y Espacios -->
     <div class="catalog-categories-container">
-      <!-- 1. HABITACIONES DE HOTEL -->
+      <!-- 1. HABITACIONES -->
       @if (habitacionesHotel.length > 0) {
       <div class="category-section">
         <div class="section-header">
-          <div class="header-icon theme-hotel">
-            <mat-icon>king_bed</mat-icon>
+          <div class="header-icon">
+            <mat-icon color="primary">meeting_room</mat-icon>
           </div>
-          <div class="section-title-wrap">
-            <h2 class="section-title">Habitaciones de Hotel</h2>
-            <span class="section-desc">Estadías con confort, baño privado y servicio completo</span>
-          </div>
-          <span class="section-badge theme-hotel">{{ totalHotelDisponibles }} disponibles</span>
+          <h2 class="section-title">Habitaciones</h2>
+          <span class="section-badge">{{ totalHotelDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
@@ -236,14 +179,11 @@
       @if (habitacionesFullDay.length > 0) {
       <div class="category-section">
         <div class="section-header">
-          <div class="header-icon theme-fullday">
-            <mat-icon>wb_sunny</mat-icon>
+          <div class="header-icon">
+            <mat-icon color="primary">wb_sunny</mat-icon>
           </div>
-          <div class="section-title-wrap">
-            <h2 class="section-title">Pases Full Day</h2>
-            <span class="section-desc">Acceso diario completo a piscinas y áreas recreativas sin pernocte</span>
-          </div>
-          <span class="section-badge theme-fullday">{{ totalFullDayDisponibles }} disponibles</span>
+          <h2 class="section-title">Full Day</h2>
+          <span class="section-badge">{{ totalFullDayDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
@@ -305,14 +245,11 @@
       @if (habitacionesCamping.length > 0) {
       <div class="category-section">
         <div class="section-header">
-          <div class="header-icon theme-camping">
-            <mat-icon>forest</mat-icon>
+          <div class="header-icon">
+            <mat-icon color="primary">forest</mat-icon>
           </div>
-          <div class="section-title-wrap">
-            <h2 class="section-title">Zona de Camping</h2>
-            <span class="section-desc">Experiencia al aire libre en contacto con la naturaleza y áreas verdes</span>
-          </div>
-          <span class="section-badge theme-camping">{{ totalCampingDisponibles }} disponibles</span>
+          <h2 class="section-title">Camping</h2>
+          <span class="section-badge">{{ totalCampingDisponibles }} disponibles</span>
         </div>
 
         <div class="matrix-grid">
