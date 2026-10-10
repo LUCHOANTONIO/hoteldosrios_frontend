@@ -183,8 +183,8 @@ export class ReservaExternaCotizacionModalComponent implements OnInit {
 
     const fIni = moment(this.form.fecha_ini).startOf('day');
     const fFin = moment(this.form.fecha_fin).startOf('day');
-    if (!fIni.isValid() || !fFin.isValid() || fIni.isSameOrAfter(fFin)) {
-      this.alertService.show("La Fecha de Salida debe ser posterior a la Fecha de Llegada", { duration: 4000, type: 'warning' });
+    if (!fIni.isValid() || !fFin.isValid() || fIni.isAfter(fFin)) {
+      this.alertService.show("La Fecha de Salida no puede ser anterior a la Fecha de Llegada", { duration: 4000, type: 'warning' });
       return;
     }
 

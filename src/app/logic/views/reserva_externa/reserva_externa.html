@@ -44,6 +44,7 @@
         <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Fecha de Llegada</mat-label>
           <input matInput [matDatepicker]="pickerLlegada" [(ngModel)]="fechaLlegada"
+            (ngModelChange)="onFechaLlegadaChange()"
             (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerLlegada"></mat-datepicker-toggle>
           <mat-datepicker #pickerLlegada></mat-datepicker>
@@ -52,7 +53,7 @@
         <!-- Salida -->
         <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Fecha de Salida</mat-label>
-          <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida"
+          <input matInput [matDatepicker]="pickerSalida" [min]="fechaLlegada" [(ngModel)]="fechaSalida"
             (click)="pickerSalida.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerSalida"></mat-datepicker-toggle>
           <mat-datepicker #pickerSalida></mat-datepicker>

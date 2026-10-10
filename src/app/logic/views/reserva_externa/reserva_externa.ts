@@ -101,7 +101,7 @@ export class ReservaExternaComponent implements OnInit {
 
   // Filter Dates
   fechaLlegada: Date = new Date();
-  fechaSalida: Date = moment().add(1, 'days').toDate();
+  fechaSalida: Date = new Date();
 
   // Raw data from API
   habitaciones: HabitacionModel[] = [];
@@ -261,6 +261,12 @@ export class ReservaExternaComponent implements OnInit {
     });
   }
 
+  onFechaLlegadaChange(): void {
+    if (this.fechaLlegada && this.fechaSalida && moment(this.fechaLlegada).isAfter(moment(this.fechaSalida))) {
+      this.fechaSalida = new Date(this.fechaLlegada);
+    }
+  }
+
   buscarDisponibilidad(): void {
     const fIni = moment(this.fechaLlegada).startOf('day');
     const fFin = moment(this.fechaSalida).startOf('day');
@@ -270,8 +276,8 @@ export class ReservaExternaComponent implements OnInit {
       return;
     }
 
-    if (fIni.isSameOrAfter(fFin)) {
-      this.alertService.show("La Fecha de Salida debe ser posterior a la Fecha de Llegada", { duration: 3000, type: 'warning' });
+    if (fIni.isAfter(fFin)) {
+      this.alertService.show("La Fecha de Salida no puede ser anterior a la Fecha de Llegada", { duration: 3000, type: 'warning' });
       return;
     }
 
@@ -487,7 +493,7 @@ export class ReservaExternaComponent implements OnInit {
         motivos: this.motivos,
         productos: this.productos,
         tipo_habitaciones: this.tipoHabitaciones,
-        items: { update: () => {}, get: () => [], remove: () => {} },
+        items: { update: () => { }, get: () => [], remove: () => { } },
         updateGroupsSignal: signal<number | null>(null)
       },
       width: '98vw',
