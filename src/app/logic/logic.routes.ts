@@ -31,6 +31,7 @@ import { ReporteCuentasCobrarComponent } from './views/reporte/cuenta_cobrar/cue
 import { CotizacionComponent } from './views/cotizacion/cotizacion';
 import { TarifaComponent } from './views/tarifa/tarifa';
 import { ReservaExternaComponent } from './views/reserva_externa/reserva_externa';
+import { ReporteAlmuerzoComponent } from './views/reporte/almuerzo/almuerzo';
 
 export const LOGIC_ROUTES: Routes = [
     { path: 'timeline', component: TimelineComponent, canActivate: [authGuard] },
@@ -60,6 +61,7 @@ export const LOGIC_ROUTES: Routes = [
     { path: 'reporte_egreso_cuenta', component: ReporteEgresoCuentaComponent, canActivate: [authGuard] },
     { path: 'reporte_siat', component: ReporteSiatComponent, canActivate: [authGuard] },
     { path: 'reporte_cuentas_cobrar', component: ReporteCuentasCobrarComponent, canActivate: [authGuard] },
+    { path: 'reporte_almuerzo', component: ReporteAlmuerzoComponent, canActivate: [authGuard] },
     { path: 'inventarios', component: InventarioComponent, canActivate: [authGuard] },
     { path: 'cotizaciones', component: CotizacionComponent, canActivate: [authGuard] },
     { path: 'tarifas', component: TarifaComponent, canActivate: [authGuard] },

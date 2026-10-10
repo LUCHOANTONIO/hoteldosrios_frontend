@@ -161,15 +161,15 @@ export class TimelineComponent implements AfterViewInit {
   }
 
   get tipoCamping(): TipoHabitacionModel | undefined {
-    return this.tipo_habitaciones.find(th => 
-      th.codigo?.toUpperCase() === 'CAMP' || 
+    return this.tipo_habitaciones.find(th =>
+      th.codigo?.toUpperCase() === 'CAMP' ||
       th.descripcion?.trim().toUpperCase() === 'CAMPING'
     );
   }
 
   get tipoFullDay(): TipoHabitacionModel | undefined {
-    return this.tipo_habitaciones.find(th => 
-      th.codigo?.toUpperCase() === 'FULL' || 
+    return this.tipo_habitaciones.find(th =>
+      th.codigo?.toUpperCase() === 'FULL' ||
       th.descripcion?.trim().toUpperCase() === 'FULL DAY'
     );
   }
@@ -364,7 +364,7 @@ export class TimelineComponent implements AfterViewInit {
         add: true
       },
       margin: { item: 10 },
-      stack: false, //ESTO EVITA EL SALTO DE LÍNEA VERTICAL
+      stack: true, //ESTO EVITA EL SALTO DE LÍNEA VERTICAL
       type: 'range',
       showCurrentTime: true,
       start: inicio.toDate(),

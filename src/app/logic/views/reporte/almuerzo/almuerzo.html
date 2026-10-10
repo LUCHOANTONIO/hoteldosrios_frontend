@@ -1,0 +1,289 @@
+<div class="reporte-almuerzo-container">
+  <mat-card class="my-1 border-0 shadow-sm" appearance="outlined">
+    <!-- CABECERA PRINCIPAL -->
+    <mat-card-header class="reporte-header d-flex justify-content-between align-items-center flex-wrap p-3">
+      <div class="d-flex align-items-center gap-2 mb-2 mb-md-0">
+        <div class="icon-circle">
+          <mat-icon>restaurant</mat-icon>
+        </div>
+        <div>
+          <mat-card-title class="m-0 fs-5 fw-bold text-dark">
+            REPORTE DE ALMUERZOS ASIGNADOS
+          </mat-card-title>
+          <div class="text-muted small">
+            Control y programación de almuerzos para cocina por reserva
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTONES DE ACCIÓN RÁPIDA (Hoy, Mañana, Semana) -->
+      <div class="quick-filters d-flex gap-1 mb-2 mb-md-0">
+        <button mat-button class="pill-btn" [class.active]="filtroActivo === 'hoy'" (click)="setFiltro('hoy')">
+          <mat-icon class="me-1" style="font-size: 16px; width: 16px; height: 16px;">today</mat-icon> Hoy
+        </button>
+        <button mat-button class="pill-btn" [class.active]="filtroActivo === 'manana'" (click)="setFiltro('manana')">
+          <mat-icon class="me-1" style="font-size: 16px; width: 16px; height: 16px;">event</mat-icon> Mañana
+        </button>
+        <button mat-button class="pill-btn" [class.active]="filtroActivo === 'semana'" (click)="setFiltro('semana')">
+          <mat-icon class="me-1" style="font-size: 16px; width: 16px; height: 16px;">date_range</mat-icon> Esta Semana
+        </button>
+      </div>
+
+      <!-- BOTONES DE EXPORTACIÓN -->
+      <div class="d-flex gap-2">
+        <button mat-raised-button color="warn" (click)="mostrarVisorPdf('0ms', '0ms')"
+          class="btn-export-pdf d-flex align-items-center" matTooltip="Exportar a PDF para Cocina">
+          <mat-icon class="me-1">picture_as_pdf</mat-icon> PDF
+        </button>
+        <button mat-raised-button (click)="exportarExcel()"
+          class="btn-export-excel d-flex align-items-center text-white" matTooltip="Exportar reporte a Excel">
+          <mat-icon class="me-1">description</mat-icon> Excel
+        </button>
+      </div>
+    </mat-card-header>
+
+    <mat-divider></mat-divider>
+
+    <!-- BARRA DE FILTROS -->
+    <div class="filter-bar p-3 bg-light d-flex flex-wrap align-items-center gap-3">
+      <!-- Fecha Inicio -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
+        <mat-label>Fecha Inicio</mat-label>
+        <input matInput [matDatepicker]="pickerIni" [(ngModel)]="fecha_ini" (dateChange)="onRangoChange()">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerIni"></mat-datepicker-toggle>
+        <mat-datepicker #pickerIni></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Fecha Fin -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
+        <mat-label>Fecha Fin</mat-label>
+        <input matInput [matDatepicker]="pickerFin" [(ngModel)]="fecha_fin" (dateChange)="onRangoChange()">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFin></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Habitación -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
+        <mat-label>Habitación</mat-label>
+        <mat-select [(ngModel)]="habitacion_id" (selectionChange)="cargarDatos()">
+          <mat-option [value]="null">-- Todas las habitaciones --</mat-option>
+          @for (h of habitaciones; track h.id) {
+            <mat-option [value]="h.id">
+              {{ h.nro_habitacion ? 'Hab. ' + h.nro_habitacion + ' - ' : '' }}{{ h.descripcion }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Buscar en tabla -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field flex-grow-1">
+        <mat-label>Filtrar por cliente, habitación o notas</mat-label>
+        <input matInput type="search" placeholder="Escriba para filtrar..." #txtBusqueda
+          (keyup)="busqueda(txtBusqueda.value)">
+        <mat-icon matSuffix class="text-secondary">search</mat-icon>
+      </mat-form-field>
+
+      <button mat-icon-button class="btn-refresh" (click)="cargarDatos()" matTooltip="Actualizar datos">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <!-- TARJETAS KPIS / RESUMEN DE ALMUERZOS -->
+    <div class="kpi-container p-3">
+      <div class="row g-2">
+        <div class="col-6 col-md-2">
+          <div class="kpi-card kpi-reservas">
+            <div class="kpi-icon"><mat-icon>meeting_room</mat-icon></div>
+            <div class="kpi-value">{{ resumen().total_reservas }}</div>
+            <div class="kpi-label">Reservas</div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-2">
+          <div class="kpi-card kpi-adultos">
+            <div class="kpi-icon"><mat-icon>person</mat-icon></div>
+            <div class="kpi-value">{{ resumen().total_adultos }}</div>
+            <div class="kpi-label">Adultos (Estadía)</div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-2">
+          <div class="kpi-card kpi-ninios">
+            <div class="kpi-icon"><mat-icon>child_care</mat-icon></div>
+            <div class="kpi-value">{{ resumen().total_ninios }}</div>
+            <div class="kpi-label">Niños (Estadía)</div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-2">
+          <div class="kpi-card kpi-incluidos">
+            <div class="kpi-icon"><mat-icon>fact_check</mat-icon></div>
+            <div class="kpi-value">{{ resumen().total_incluidos }}</div>
+            <div class="kpi-label">Subtotal Estadía</div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-2">
+          <div class="kpi-card kpi-extras">
+            <div class="kpi-icon"><mat-icon>add_circle_outline</mat-icon></div>
+            <div class="kpi-value">{{ resumen().total_extras }}</div>
+            <div class="kpi-label">Almuerzos Extras</div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-2">
+          <div class="kpi-card kpi-total">
+            <div class="kpi-icon"><mat-icon>restaurant_menu</mat-icon></div>
+            <div class="kpi-value kpi-total-val">{{ resumen().gran_total_almuerzos }}</div>
+            <div class="kpi-label kpi-total-lbl">TOTAL A PREPARAR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DE DETALLE -->
+    <mat-card-content class="bg-white p-0">
+      <div class="mat-elevation-z1 table-wrapper">
+        <div class="table-responsive">
+          <table mat-table [dataSource]="dataSource" class="w-100 tabla-almuerzos">
+
+            <!-- Fila Sin Datos -->
+            <tr *matNoDataRow>
+              <td [attr.colspan]="displayedColumns.length" class="text-center py-5">
+                <div class="empty-state">
+                  <mat-icon class="empty-icon">no_food</mat-icon>
+                  <h6 class="mt-2 text-secondary">No se encontraron almuerzos asignados</h6>
+                  <p class="text-muted small">No hay reservas activas con almuerzos en el rango seleccionado.</p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Columna Res.# -->
+            <ng-container matColumnDef="correlativo">
+              <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 70px;">Res.#</th>
+              <td mat-cell *matCellDef="let r" class="text-center fw-bold">
+                <span class="badge-reserva">#{{ r.correlativo }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Habitación -->
+            <ng-container matColumnDef="habitacion">
+              <th mat-header-cell *matHeaderCellDef style="width: 110px;">Habitación</th>
+              <td mat-cell *matCellDef="let r">
+                <span class="badge-habitacion">{{ r.habitacion }}</span>
+                @if (r.is_full_day) {
+                  <span class="badge-fullday ms-1">Full Day</span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Columna Cliente -->
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let r">
+                <div class="fw-semibold text-dark">{{ r.cliente }}</div>
+                @if (r.telefono) {
+                  <div class="text-muted small d-flex align-items-center gap-1">
+                    <mat-icon style="font-size: 13px; width: 13px; height: 13px;">call</mat-icon>
+                    <span>{{ r.telefono }}</span>
+                  </div>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Columna Estadía -->
+            <ng-container matColumnDef="estadia">
+              <th mat-header-cell *matHeaderCellDef style="width: 170px;">Estadía</th>
+              <td mat-cell *matCellDef="let r" class="small">
+                <div><span class="text-muted">In:</span> {{ r.fecha_ini_fmt }}</div>
+                <div><span class="text-muted">Out:</span> {{ r.fecha_fin_fmt }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Adultos -->
+            <ng-container matColumnDef="cantidad_adulto">
+              <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 70px;">Adultos</th>
+              <td mat-cell *matCellDef="let r" class="text-center">
+                <span class="fw-semibold">{{ r.cantidad_adulto }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Niños -->
+            <ng-container matColumnDef="cantidad_ninio">
+              <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 65px;">Niños</th>
+              <td mat-cell *matCellDef="let r" class="text-center">
+                <span>{{ r.cantidad_ninio }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Almuerzos Incluidos -->
+            <ng-container matColumnDef="almuerzos_incluidos">
+              <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 90px;">Incluidos</th>
+              <td mat-cell *matCellDef="let r" class="text-center">
+                <span class="badge-incluidos">{{ r.almuerzos_incluidos }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Almuerzos Extras -->
+            <ng-container matColumnDef="almuerzos_extras">
+              <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 100px;">Extras</th>
+              <td mat-cell *matCellDef="let r" class="text-center">
+                @if (r.almuerzos_extras > 0) {
+                  <span class="badge-extras" [matTooltip]="r.detalle_extras">
+                    +{{ r.almuerzos_extras }}
+                  </span>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Columna Total Almuerzos -->
+            <ng-container matColumnDef="total_almuerzos">
+              <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 110px;">Total Alm.</th>
+              <td mat-cell *matCellDef="let r" class="text-center">
+                <div class="badge-total-almuerzo">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">restaurant</mat-icon>
+                  <strong>{{ r.total_almuerzos }}</strong>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Notas -->
+            <ng-container matColumnDef="notas">
+              <th mat-header-cell *matHeaderCellDef>Notas / Cocina</th>
+              <td mat-cell *matCellDef="let r" class="small">
+                @if (r.notas) {
+                  <div class="notas-box">
+                    <mat-icon class="notas-icon">assignment</mat-icon>
+                    <span>{{ r.notas }}</span>
+                  </div>
+                } @else {
+                  <span class="text-muted fst-italic">-</span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Columna Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 100px;">Estado</th>
+              <td mat-cell *matCellDef="let r" class="text-center">
+                <span class="status-badge" [ngClass]="getEstadoClass(r.estado)">
+                  {{ r.estado }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Filas Cabecera y Datos -->
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-header-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-data-row"></tr>
+          </table>
+        </div>
+
+        <mat-divider></mat-divider>
+        <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" [pageSize]="25" showFirstLastButtons
+          class="bg-light"></mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
