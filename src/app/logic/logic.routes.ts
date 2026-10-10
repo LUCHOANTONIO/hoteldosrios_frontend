@@ -25,7 +25,6 @@ import { ReporteIngresoMensualComponent } from './views/reporte/ingreso_mensual/
 import { ReporteIngresoHabitacionComponent } from './views/reporte/ingreso_habitacion/ingreso_habitacion';
 import { ReporteIngresoFormaPagoComponent } from './views/reporte/ingreso_formapago/ingreso_formapago';
 import { ReporteEgresoCuentaComponent } from './views/reporte/egreso_cuenta/egreso_cuenta';
-import { ReporteSiatComponent } from './views/reporte/siat/siat';
 import { InventarioComponent } from './views/inventario/inventario';
 import { ReporteCuentasCobrarComponent } from './views/reporte/cuenta_cobrar/cuenta_cobrar';
 import { CotizacionComponent } from './views/cotizacion/cotizacion';
@@ -59,7 +58,6 @@ export const LOGIC_ROUTES: Routes = [
     { path: 'reporte_ingreso_habitacion', component: ReporteIngresoHabitacionComponent, canActivate: [authGuard] },
     { path: 'reporte_ingreso_formapago', component: ReporteIngresoFormaPagoComponent, canActivate: [authGuard] },
     { path: 'reporte_egreso_cuenta', component: ReporteEgresoCuentaComponent, canActivate: [authGuard] },
-    { path: 'reporte_siat', component: ReporteSiatComponent, canActivate: [authGuard] },
     { path: 'reporte_cuentas_cobrar', component: ReporteCuentasCobrarComponent, canActivate: [authGuard] },
     { path: 'reporte_alimentos', component: ReporteAlimentoComponent, canActivate: [authGuard] },
     { path: 'inventarios', component: InventarioComponent, canActivate: [authGuard] },

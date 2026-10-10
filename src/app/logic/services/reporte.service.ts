@@ -149,16 +149,6 @@ export class ReporteService{
    }
    //END:Reporte Egreso cuenta
 
-
-   //BEGIN:Reporte Siat
-   list_siat(fecha_ini:string,fecha_fin:string): Observable<RespuestaRequest<any>> {        
-      return this.http.post<RespuestaRequest<any>>(`${this.URL_API_BASE}/reporte_siat`, { fecha_ini:fecha_ini, fecha_fin:fecha_fin });
-   }  
-   export_list_siat_excel(fecha_ini:string,fecha_fin:string): Observable<string> {        
-      return this.http.post<string>(`${this.URL_API_BASE}/export_reporte_siat_excel`, { fecha_ini:fecha_ini, fecha_fin:fecha_fin });
-   } 
-   //END:Reporte Siat
-
    //BEGIN:Reporte Cuentas por Cobrar
    list_cuentas_cobrar(fecha_ini:string,fecha_fin:string): Observable<RespuestaRequest<any>> {        
       return this.http.post<RespuestaRequest<any>>(`${this.URL_API_BASE}/cuentas_cobrar`, { fecha_ini:fecha_ini, fecha_fin:fecha_fin });
