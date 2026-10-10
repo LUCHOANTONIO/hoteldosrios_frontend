@@ -255,11 +255,11 @@ export class ReservaFormComponent {
         if (!this.reserva.cantidad_adulto || this.reserva.cantidad_adulto <= 0) {
           this.reserva.cantidad_adulto = 1;
         }
-        this.reserva.precio_unit_adulto = 0;
+        this.reserva.precio_unit_adulto = Number(this.reserva.precio_unit_adulto) || 0;
         if (this.reserva.cantidad_ninio === undefined || this.reserva.cantidad_ninio === null) {
           this.reserva.cantidad_ninio = 0;
         }
-        this.reserva.precio_unit_ninio = 0;
+        this.reserva.precio_unit_ninio = Number(this.reserva.precio_unit_ninio) || 0;
         this.reserva.total = 0;
         this.reserva.anticipo = 0;
         this.reserva.detalle_anticipo = '';

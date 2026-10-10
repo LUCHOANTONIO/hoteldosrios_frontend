@@ -44,7 +44,7 @@
         <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Fecha de Llegada</mat-label>
           <input matInput [matDatepicker]="pickerLlegada" [(ngModel)]="fechaLlegada"
-            (dateChange)="buscarDisponibilidad()" (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
+            (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerLlegada"></mat-datepicker-toggle>
           <mat-datepicker #pickerLlegada></mat-datepicker>
         </mat-form-field>
@@ -52,7 +52,7 @@
         <!-- Salida -->
         <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Fecha de Salida</mat-label>
-          <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida" (dateChange)="buscarDisponibilidad()"
+          <input matInput [matDatepicker]="pickerSalida" [(ngModel)]="fechaSalida"
             (click)="pickerSalida.open()" readonly style="cursor: pointer;">
           <mat-datepicker-toggle matIconSuffix [for]="pickerSalida"></mat-datepicker-toggle>
           <mat-datepicker #pickerSalida></mat-datepicker>
@@ -61,11 +61,7 @@
         <!-- Botón Buscar -->
         <button mat-flat-button color="primary" class="btn-search-capsule" (click)="buscarDisponibilidad()"
           [disabled]="buscando" matTooltip="Buscar habitaciones disponibles">
-          @if (buscando) {
-          <mat-spinner diameter="18" class="spinner-white me-1"></mat-spinner>
-          } @else {
           <mat-icon>search</mat-icon>
-          }
           <span>Buscar</span>
         </button>
       </div>
@@ -132,23 +128,8 @@
             </div>
 
 
-            <!-- Card Footer: Pricing & Action Button -->
+            <!-- Card Footer: Action Button -->
             <div class="card-footer-box">
-              <div class="price-block">
-                <span class="price-label">Tarifa {{ getUnidadPrecio(hab) }}</span>
-                @if (hab.precio && +hab.precio > 0) {
-                <div class="price-value-row">
-                  <span class="curr">Bs.</span>
-                  <span class="val">{{ hab.precio | number:'1.2-2' }}</span>
-                </div>
-                @if (nochesEstadia > 1) {
-                <span class="price-sub">Estadía: Bs. {{ calcularTotalEstadia(hab) | number:'1.2-2' }}</span>
-                }
-                } @else {
-                <span class="price-quote">A cotizar</span>
-                }
-              </div>
-
               <div class="action-block">
                 <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
                   matTooltip="Reservar esta habitación">
@@ -201,20 +182,8 @@
             </div>
 
 
-            <!-- Card Footer: Pricing & Action Button -->
+            <!-- Card Footer: Action Button -->
             <div class="card-footer-box">
-              <div class="price-block">
-                <span class="price-label">Tarifa {{ getUnidadPrecio(hab) }}</span>
-                @if (hab.precio && +hab.precio > 0) {
-                <div class="price-value-row">
-                  <span class="curr">Bs.</span>
-                  <span class="val">{{ hab.precio | number:'1.2-2' }}</span>
-                </div>
-                } @else {
-                <span class="price-quote">A cotizar</span>
-                }
-              </div>
-
               <div class="action-block">
                 <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
                   matTooltip="Reservar Pase Full Day">
@@ -267,23 +236,8 @@
             </div>
 
 
-            <!-- Card Footer: Pricing & Action Button -->
+            <!-- Card Footer: Action Button -->
             <div class="card-footer-box">
-              <div class="price-block">
-                <span class="price-label">Tarifa {{ getUnidadPrecio(hab) }}</span>
-                @if (hab.precio && +hab.precio > 0) {
-                <div class="price-value-row">
-                  <span class="curr">Bs.</span>
-                  <span class="val">{{ hab.precio | number:'1.2-2' }}</span>
-                </div>
-                @if (nochesEstadia > 1) {
-                <span class="price-sub">Estadía: Bs. {{ calcularTotalEstadia(hab) | number:'1.2-2' }}</span>
-                }
-                } @else {
-                <span class="price-quote">A cotizar</span>
-                }
-              </div>
-
               <div class="action-block">
                 <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
                   matTooltip="Reservar Espacio de Camping">
@@ -325,12 +279,18 @@
       <table mat-table [dataSource]="dataSourceReservas" class="w-100 custom-table">
         <!-- Acciones -->
         <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 80px;">Acción</th>
+          <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 100px;">Acción</th>
           <td mat-cell *matCellDef="let r" class="text-center">
-            <button mat-icon-button color="primary" (click)="verVoucherReserva(r.id)"
-              matTooltip="Ver Comprobante / Voucher">
-              <mat-icon>picture_as_pdf</mat-icon>
-            </button>
+            <div class="d-flex justify-content-center align-items-center gap-1">
+              <button mat-icon-button color="primary" (click)="verVoucherReserva(r.id)"
+                matTooltip="Ver Comprobante / Voucher">
+                <mat-icon>picture_as_pdf</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" (click)="editarReserva(r.id)"
+                matTooltip="Editar / Ver Reserva">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
           </td>
         </ng-container>
 
@@ -432,12 +392,18 @@
       <table mat-table [dataSource]="dataSourceCotizaciones" class="w-100 custom-table">
         <!-- Acciones -->
         <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 80px;">Acción</th>
+          <th mat-header-cell *matHeaderCellDef class="text-center" style="width: 100px;">Acción</th>
           <td mat-cell *matCellDef="let c" class="text-center">
-            <button mat-icon-button color="primary" (click)="verVoucherCotizacion(c.id)"
-              matTooltip="Ver Cotización PDF">
-              <mat-icon>picture_as_pdf</mat-icon>
-            </button>
+            <div class="d-flex justify-content-center align-items-center gap-1">
+              <button mat-icon-button color="primary" (click)="verVoucherCotizacion(c.id)"
+                matTooltip="Ver Cotización PDF">
+                <mat-icon>picture_as_pdf</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" (click)="abrirModalCotizacion(undefined, c)"
+                matTooltip="Editar / Ver Cotización">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
           </td>
         </ng-container>
 

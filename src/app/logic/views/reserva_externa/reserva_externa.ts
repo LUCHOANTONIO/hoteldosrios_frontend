@@ -23,6 +23,11 @@ import { CotizacionModel } from '../../models/cotizacion.model';
 import { TipoDocumentoModel } from '../../../base/models/tipodocumento.model';
 import { PaisModel } from '../../models/pais.model';
 import { CanalReservaModel } from '../../models/canal_reserva.model';
+import { FormaPagoModel } from '../../models/forma_pago.model';
+import { EstadoCivilModel } from '../../../base/models/estadocivil.model';
+import { TipoHuespedModel } from '../../models/tipo_huesped.model';
+import { MotivoModel } from '../../models/motivo.model';
+import { ProductoModel } from '../../models/producto.model';
 
 // SERVICES
 import { HabitacionService } from '../../services/habitacion.service';
@@ -34,10 +39,16 @@ import { PaisService } from '../../services/pais.service';
 import { CanalReservaService } from '../../services/canal_reserva.service';
 import { DocumentoService } from '../../services/documento.service';
 import { AlertService } from '../../../base/services/local/alert.service';
+import { FormaPagoService } from '../../services/forma_pago.service';
+import { TipoHuespedService } from '../../services/tipo_huesped.service';
+import { MotivoService } from '../../services/motivo.service';
+import { ProductoService } from '../../services/producto.service';
+import { EstadoCivilService } from '../../../base/services/estadocivil.service';
+import { ComunicacionService } from '../../services/local/comunicacion.service';
 
-// SUBCOMPONENTS
-import { ReservaExternaModalComponent } from './reserva_externa-reserva-modal/reserva_externa-reserva-modal';
-import { ReservaExternaCotizacionModalComponent } from './reserva_externa-cotizacion-modal/reserva_externa-cotizacion-modal';
+// SUBCOMPONENTS / FORMS
+import { ReservaFormComponent } from '../timeline/reserva-form/reserva-form';
+import { CotizacionFormComponent } from '../cotizacion/cotizacion-form/cotizacion-form';
 import { PdfViewerComponent } from '../../shared/views/pdf-viewer/pdf-viewer';
 
 export interface HabitacionDisponibleCard {
@@ -100,6 +111,12 @@ export class ReservaExternaComponent implements OnInit {
   tipoDocumentos: TipoDocumentoModel[] = [];
   paises: PaisModel[] = [];
   canalReservas: CanalReservaModel[] = [];
+  productos: ProductoModel[] = [];
+  formaPagos: FormaPagoModel[] = [];
+  estadoCivil: EstadoCivilModel[] = [];
+  tipoHuespedes: TipoHuespedModel[] = [];
+  motivos: MotivoModel[] = [];
+  cotizacionesSignal = signal<CotizacionModel[]>([]);
 
   // Habitaciones Disponibles agrupadas por categoría
   habitacionesDisponibles: HabitacionDisponibleCard[] = [];
@@ -169,6 +186,12 @@ export class ReservaExternaComponent implements OnInit {
     private canalReservaService: CanalReservaService,
     private documentoService: DocumentoService,
     private alertService: AlertService,
+    private formaPagoService: FormaPagoService,
+    private tipoHuespedService: TipoHuespedService,
+    private motivoService: MotivoService,
+    private productoService: ProductoService,
+    private estadoCivilService: EstadoCivilService,
+    private comunicacionService: ComunicacionService,
     private dialog: MatDialog
   ) { }
 
@@ -189,7 +212,12 @@ export class ReservaExternaComponent implements OnInit {
       cotizaciones: this.cotizacionService.listar(),
       tipoDocumentos: this.tipoDocumentoService.listar(),
       paises: this.paisService.listar(),
-      canalReservas: this.canalReservaService.listar()
+      canalReservas: this.canalReservaService.listar(),
+      productos: this.productoService.listar(),
+      formaPagos: this.formaPagoService.listar(),
+      estadoCivil: this.estadoCivilService.listar(),
+      tipoHuespedes: this.tipoHuespedService.listar(),
+      motivos: this.motivoService.listar()
     }).subscribe({
       next: (res) => {
         this.habitaciones = Array.isArray(res.habitaciones) ? res.habitaciones : [];
@@ -197,6 +225,11 @@ export class ReservaExternaComponent implements OnInit {
         this.tipoDocumentos = Array.isArray(res.tipoDocumentos) ? res.tipoDocumentos : [];
         this.paises = Array.isArray(res.paises) ? res.paises : [];
         this.canalReservas = Array.isArray(res.canalReservas) ? res.canalReservas : [];
+        this.productos = Array.isArray(res.productos) ? res.productos : [];
+        this.formaPagos = Array.isArray(res.formaPagos) ? res.formaPagos : [];
+        this.estadoCivil = Array.isArray(res.estadoCivil) ? res.estadoCivil : [];
+        this.tipoHuespedes = Array.isArray(res.tipoHuespedes) ? res.tipoHuespedes : [];
+        this.motivos = Array.isArray(res.motivos) ? res.motivos : [];
 
         // Parse reservas
         if (res.reservasRes && res.reservasRes.dato) {
@@ -213,6 +246,7 @@ export class ReservaExternaComponent implements OnInit {
 
         // Cotizaciones
         this.cotizaciones = Array.isArray(res.cotizaciones) ? res.cotizaciones : [];
+        this.cotizacionesSignal.set(this.cotizaciones);
 
         // Procesar datos cargados desde HabitacionRepository metodo disponibilidadHabitacionExterno
         this.procesarDisponibilidad(res.disponibilidad);
@@ -249,8 +283,6 @@ export class ReservaExternaComponent implements OnInit {
       next: (res) => {
         this.procesarDisponibilidad(res);
         this.buscando = false;
-        const totalDisp = this.habitacionesDisponibles.reduce((acc, h) => acc + (Number(h.cantidad_disponible) || 0), 0);
-        this.alertService.show(`Disponibilidad actualizada: ${totalDisp} unidades disponibles`, { duration: 2500, type: 'success' });
       },
       error: (err) => {
         console.error("Error al consultar disponibilidad:", err);
@@ -417,52 +449,101 @@ export class ReservaExternaComponent implements OnInit {
     });
   }
 
-  abrirModalReserva(hab: HabitacionDisponibleCard): void {
-    const dialogRef = this.dialog.open(ReservaExternaModalComponent, {
-      width: '95vw',
-      maxWidth: '780px',
-      maxHeight: '92vh',
-      disableClose: true,
-      data: {
-        habitacionSeleccionada: hab,
-        habitacionesDisponibles: this.habitacionesDisponibles,
-        fecha_ini: this.fechaLlegada,
-        fecha_fin: this.fechaSalida,
-        tipoDocumentos: this.tipoDocumentos,
-        paises: this.paises,
-        canalReservas: this.canalReservas
+  abrirModalReserva(hab?: HabitacionDisponibleCard, reservaExistente?: ReservaModel): void {
+    let reservaParaForm: ReservaModel;
+
+    if (reservaExistente) {
+      reservaParaForm = { ...reservaExistente };
+    } else {
+      reservaParaForm = new ReservaModel();
+      reservaParaForm.fecha_ini = moment(this.fechaLlegada).format('YYYY-MM-DD');
+      reservaParaForm.fecha_fin = moment(this.fechaSalida).format('YYYY-MM-DD');
+      if (hab) {
+        reservaParaForm.habitacion_id = Number(hab.id || hab.habitacion_id);
+        reservaParaForm.precio_unit_adulto = hab.precio ? Number(hab.precio) : 0;
+      } else {
+        reservaParaForm.precio_unit_adulto = 0;
       }
+      reservaParaForm.cantidad_adulto = 1;
+      reservaParaForm.cantidad_ninio = 0;
+      reservaParaForm.precio_unit_ninio = 0;
+      reservaParaForm.canal_reserva_id = (this.canalReservas && this.canalReservas.length > 0) ? this.canalReservas[0].id : 1;
+      reservaParaForm.total = 0;
+    }
+
+    this.comunicacionService.executeActionReserva.set(false);
+
+    const dialogRef = this.dialog.open(ReservaFormComponent, {
+      data: {
+        reserva: reservaParaForm,
+        reservas: this.reservas,
+        habitaciones: this.habitaciones,
+        tipo_documentos: this.tipoDocumentos,
+        estado_civil: this.estadoCivil,
+        paises: this.paises,
+        forma_pagos: this.formaPagos,
+        canal_reservas: this.canalReservas,
+        tipo_huespedes: this.tipoHuespedes,
+        motivos: this.motivos,
+        productos: this.productos,
+        tipo_habitaciones: this.tipoHabitaciones,
+        items: { update: () => {}, get: () => [], remove: () => {} },
+        updateGroupsSignal: signal<number | null>(null)
+      },
+      width: '98vw',
+      maxWidth: '650px',
+      maxHeight: '92vh',
+      disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe(res => {
-      if (res && res.success) {
-        this.cargarDatosGenerales();
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarDatosGenerales();
+    });
+  }
+
+  editarReserva(reservaId: number): void {
+    this.reservaService.mostrar(reservaId).subscribe({
+      next: (res: any) => {
+        const r = (res?.response?.reserva || res?.reserva || res) as ReservaModel;
+        this.abrirModalReserva(undefined, r);
+      },
+      error: () => {
+        this.alertService.show("Error al cargar la reserva", { duration: 3000, type: 'error' });
       }
     });
   }
 
-  abrirModalCotizacion(hab?: HabitacionDisponibleCard): void {
-    const dialogRef = this.dialog.open(ReservaExternaCotizacionModalComponent, {
-      width: '95vw',
-      maxWidth: '780px',
-      maxHeight: '92vh',
-      disableClose: true,
-      data: {
-        habitacionSeleccionada: hab || null,
-        habitacionesDisponibles: this.habitacionesDisponibles,
-        fecha_ini: this.fechaLlegada,
-        fecha_fin: this.fechaSalida,
-        tipoDocumentos: this.tipoDocumentos,
-        paises: this.paises,
-        canalReservas: this.canalReservas
+  abrirModalCotizacion(hab?: HabitacionDisponibleCard, cotizacionExistente?: CotizacionModel): void {
+    let cotizacionParaForm: CotizacionModel;
+
+    if (cotizacionExistente) {
+      cotizacionParaForm = { ...cotizacionExistente };
+    } else {
+      cotizacionParaForm = new CotizacionModel();
+      cotizacionParaForm.fecha_ini = moment(this.fechaLlegada).format('YYYY-MM-DD');
+      cotizacionParaForm.fecha_fin = moment(this.fechaSalida).format('YYYY-MM-DD');
+      if (hab) {
+        cotizacionParaForm.detalle = `Cotización para ${hab.tipo_habitacion || 'Habitación'} #${hab.nro_habitacion || ''}`.trim();
       }
+    }
+
+    const dialogRef = this.dialog.open(CotizacionFormComponent, {
+      data: {
+        cotizacion: cotizacionParaForm,
+        cotizaciones: this.cotizacionesSignal
+      },
+      width: '98vw',
+      maxWidth: '650px',
+      maxHeight: '92vh',
+      disableClose: true
     });
 
     dialogRef.afterClosed().subscribe(res => {
-      if (res && res.success) {
+      if (res) {
         this.cotizacionService.listar().subscribe({
           next: (cots) => {
             this.cotizaciones = Array.isArray(cots) ? cots : [];
+            this.cotizacionesSignal.set(this.cotizaciones);
             this.actualizarTablas();
           }
         });
