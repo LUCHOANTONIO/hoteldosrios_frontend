@@ -1,7 +1,12 @@
 export class BalanceDetalleModel {
-    categoria_id: number;
+    id?: number;
+    transaccion_id?: number;
+    categoria_id?: number;
     detalle: string;
     monto: number;
+    pagado?: number;
+    saldo?: number;
+    is_base?: number;
 }
 
 export class BalanceModel {   

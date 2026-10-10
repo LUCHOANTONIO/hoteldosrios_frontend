@@ -36,6 +36,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatTableModule } from '@angular/material/table';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 //COMPONENT
 import { PdfViewerComponent } from '../../../shared/views/pdf-viewer/pdf-viewer';
@@ -69,6 +70,7 @@ import { ConfirmarEliminarComponent } from '../../../../base/shared/views/confir
     MatCardModule,   
     MatPaginatorModule,
     MatTableModule,
+    MatCheckboxModule,
   ],
   templateUrl: './pago-form.html',
   styleUrl: './pago-form.scss'
@@ -80,6 +82,7 @@ export class CompletarPagoFormComponent implements OnInit {
                  
   transaccion_pago:MovimientoModel=new MovimientoModel(); 
   transaccion_pagos:MovimientoModel[]=[];     
+  selectedTransaccion: any = null;
   balance:any; //Variable signal cargado desde constructor
 
   //Comprobante              
@@ -120,23 +123,67 @@ export class CompletarPagoFormComponent implements OnInit {
     });
   }
 
+  toggleSeleccion(item: any) {
+    if (this.selectedTransaccion?.id === item.id) {
+      this.deseleccionarTransaccion();
+    } else {
+      this.seleccionarTransaccion(item);
+    }
+  }
+
+  seleccionarTransaccion(item: any) {
+    if (item.saldo <= 0) {
+      this.alertService.show("El ítem seleccionado ya se encuentra totalmente pagado", { duration: 3000, type: 'info' });
+      return;
+    }
+    this.selectedTransaccion = item;
+    this.transaccion_pago.transaccion_id = item.id;
+    this.transaccion_pago.monto = item.saldo;
+    this.transaccion_pago.detalle = 'Pago ' + (item.detalle || '');
+  }
+
+  deseleccionarTransaccion() {
+    this.selectedTransaccion = null;
+    this.transaccion_pago.transaccion_id = null;
+    this.transaccion_pago.monto = null as any;
+    this.transaccion_pago.detalle = '';
+  }
+
   submitPago(f: NgForm) {               
+      if (!this.selectedTransaccion) {
+          this.alertService.show("Debe seleccionar una opción en el resumen para realizar el pago", { duration: 3000, type: 'info' });
+          return;
+      }
       if (f.valid) {             
+          const montoNum = Number(this.transaccion_pago.monto);
+          if (!this.transaccion_pago.monto || montoNum <= 0) {
+              this.alertService.show("El monto debe ser mayor a cero", { duration: 3000, type: 'info' });
+              return;
+          }
+          if (montoNum > this.selectedTransaccion.saldo) {
+              this.alertService.show(`El monto no puede superar el saldo pendiente de Bs. ${this.selectedTransaccion.saldo.toFixed(2)}`, { duration: 4000, type: 'info' });
+              return;
+          }
           this.botonGuardarDirectiva.deshabilitarFormBoton();
           this.procesarPago(); 
       } else {
-          this.alertService.show("Debe llenar los campos", { duration: 3000, type: 'info' });
+          this.alertService.show("Debe llenar los campos requeridos", { duration: 3000, type: 'info' });
       }
   }
   
   cargarMovimiento(reserva_id:number){    
     this.transaccionPagoService.pagos(reserva_id).subscribe({
       next:(res)=>{
-        const data = JSON.parse(res.dato);        
-        this.balance.set(data.balance); //Establecer valor por medio de signal
-        this.transaccion_pagos = data.pagos as MovimientoModel[];       
-        this.dataSourceMovimientos = new MatTableDataSource<MovimientoModel>(this.transaccion_pagos);
-        this.dataSourceMovimientos.paginator = this.paginator;        
+        if (res?.dato) {
+            const data = JSON.parse(res.dato);        
+            if (data?.balance) {
+                this.balance.set(data.balance); //Establecer valor por medio de signal
+            }
+            this.transaccion_pagos = (data?.pagos || []) as MovimientoModel[];       
+            this.dataSourceMovimientos = new MatTableDataSource<MovimientoModel>(this.transaccion_pagos);
+            this.dataSourceMovimientos.paginator = this.paginator;        
+            this.selectedTransaccion = null;
+        }
       },
       error:(error)=>{
          //Sin acciones
@@ -158,6 +205,7 @@ export class CompletarPagoFormComponent implements OnInit {
           this.dataSourceMovimientos = new MatTableDataSource<MovimientoModel>(this.transaccion_pagos);
           this.dataSourceMovimientos.paginator = this.paginator; 
           this.transaccion_pago=new MovimientoModel();//Limpiar datos de transaccion pago                          
+          this.selectedTransaccion = null;                          
 
           //this.reserva.saldo=data.balance.saldo;                    
           

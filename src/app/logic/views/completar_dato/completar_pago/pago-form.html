@@ -11,30 +11,35 @@
                 <table class="table-resumen">
                     <thead>
                         <tr>
+                            <th class="th-check"></th>
                             <th class="th-detalle">Detalle</th>
                             <th class="th-monto">Monto</th>
+                            <th class="th-pagado">Pagado</th>
+                            <th class="th-saldo">Saldo</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @for (item of balance()?.detalles; track item.categoria_id || $index) {
-                        @if (item.monto > 0) {
-                        <tr class="row-categoria">
+                        @for (item of balance()?.detalles; track item.id || item.transaccion_id || $index) {
+                        <tr class="row-item" [class.selected]="selectedTransaccion?.id === item.id" (click)="toggleSeleccion(item)">
+                            <td class="td-check" (click)="$event.stopPropagation()">
+                                <mat-checkbox [checked]="selectedTransaccion?.id === item.id"
+                                              [disabled]="item.saldo <= 0"
+                                              (change)="toggleSeleccion(item)"
+                                              color="primary">
+                                </mat-checkbox>
+                            </td>
                             <td class="td-detalle">{{ item.detalle }}</td>
                             <td class="td-monto">Bs. {{ item.monto | number:'1.2-2' }}</td>
+                            <td class="td-pagado">Bs. {{ item.pagado | number:'1.2-2' }}</td>
+                            <td class="td-saldo">Bs. {{ item.saldo | number:'1.2-2' }}</td>
                         </tr>
-                        }
                         }
                         <tr class="row-total">
+                            <td class="td-check"></td>
                             <td class="td-detalle">TOTAL</td>
                             <td class="td-monto">Bs. {{ balance()?.total | number:'1.2-2' }}</td>
-                        </tr>
-                        <tr class="row-pagado">
-                            <td class="td-detalle">PAGADO</td>
-                            <td class="td-monto">Bs. {{ balance()?.pago | number:'1.2-2' }}</td>
-                        </tr>
-                        <tr class="row-saldo">
-                            <td class="td-detalle">SALDO</td>
-                            <td class="td-monto">Bs. {{ balance()?.saldo | number:'1.2-2' }}</td>
+                            <td class="td-pagado">Bs. {{ balance()?.pago | number:'1.2-2' }}</td>
+                            <td class="td-saldo">Bs. {{ balance()?.saldo | number:'1.2-2' }}</td>
                         </tr>
                     </tbody>
                 </table>

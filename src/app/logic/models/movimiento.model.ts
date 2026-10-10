@@ -5,4 +5,5 @@ export class MovimientoModel{
     forma_pago_id :number;
     monto :number;   
     detalle :string;    
+    transaccion_id?: number | null;
 }
