@@ -177,11 +177,12 @@ export class CompletarPagoFormComponent implements OnInit {
     }
 
     this.transaccion_pago.transacciones = transaccionesParaPago;
-    if (transaccionesParaPago.length > 0) {
-      this.transaccion_pago.transaccion_id = transaccionesParaPago[0].transaccion_id;
-      this.transaccion_pago.detalle = 'Pago ' + detallesNombres.join(', ');
+    this.transaccion_pago.transaccion_id = transaccionesParaPago[0]?.transaccion_id || null;
+    if (this.selectedTransacciones.length > 1) {
+      this.transaccion_pago.detalle = ''; // En blanco cuando son varias opciones
+    } else if (this.selectedTransacciones.length === 1) {
+      this.transaccion_pago.detalle = 'Pago ' + (this.selectedTransacciones[0]?.detalle || '');
     } else {
-      this.transaccion_pago.transaccion_id = null;
       this.transaccion_pago.detalle = '';
     }
   }
@@ -211,7 +212,6 @@ export class CompletarPagoFormComponent implements OnInit {
 
     let totalSeleccionado = 0;
     const transaccionesParaPago: any[] = [];
-    const detallesNombres: string[] = [];
 
     for (const item of this.selectedTransacciones) {
       const saldoItem = Number(item.saldo);
@@ -221,13 +221,53 @@ export class CompletarPagoFormComponent implements OnInit {
         monto: saldoItem,
         detalle: 'Pago ' + (item.detalle || '')
       });
-      detallesNombres.push(item.detalle);
     }
 
     this.transaccion_pago.monto = Math.round(totalSeleccionado * 100) / 100;
     this.transaccion_pago.transacciones = transaccionesParaPago;
     this.transaccion_pago.transaccion_id = transaccionesParaPago[0]?.transaccion_id || null;
-    this.transaccion_pago.detalle = 'Pago ' + detallesNombres.join(', ');
+    if (this.selectedTransacciones.length > 1) {
+      this.transaccion_pago.detalle = ''; // En blanco cuando son varias opciones
+    } else if (this.selectedTransacciones.length === 1) {
+      this.transaccion_pago.detalle = 'Pago ' + (this.selectedTransacciones[0]?.detalle || '');
+    } else {
+      this.transaccion_pago.detalle = '';
+    }
+  }
+
+  generarTransaccionesParaPago(userGlosa: string): any[] {
+    const monto = Number(this.transaccion_pago.monto) || 0;
+    let restante = monto;
+    const transacciones: any[] = [];
+
+    const cleanGlosa = (userGlosa || '').trim().replace(/[-–—\s]+$/, '');
+
+    for (const item of this.selectedTransacciones) {
+      if (restante <= 0) break;
+      const saldoItem = Number(item.saldo);
+      const cubierto = Math.min(restante, saldoItem);
+
+      let itemDetalle = '';
+      if (cleanGlosa) {
+        if (item.detalle && cleanGlosa.toLowerCase().includes(item.detalle.toLowerCase())) {
+          itemDetalle = cleanGlosa;
+        } else {
+          itemDetalle = `${cleanGlosa} - ${item.detalle}`;
+        }
+      } else {
+        itemDetalle = `Pago ${item.detalle}`;
+      }
+
+      transacciones.push({
+        transaccion_id: item.id,
+        monto: Math.round(cubierto * 100) / 100,
+        detalle: itemDetalle
+      });
+
+      restante -= cubierto;
+    }
+
+    return transacciones;
   }
 
   submitPago(f: NgForm) {               
@@ -246,9 +286,13 @@ export class CompletarPagoFormComponent implements OnInit {
               this.alertService.show(`El monto no puede superar el saldo pendiente total de Bs. ${saldoTotal.toFixed(2)}`, { duration: 4000, type: 'info' });
               return;
           }
-          if (!this.transaccion_pago.transacciones || this.transaccion_pago.transacciones.length === 0) {
-              this.onMontoChange();
+
+          const userGlosa = (this.transaccion_pago.detalle || '').trim();
+          this.transaccion_pago.transacciones = this.generarTransaccionesParaPago(userGlosa);
+          if (this.transaccion_pago.transacciones.length > 0) {
+              this.transaccion_pago.transaccion_id = this.transaccion_pago.transacciones[0].transaccion_id;
           }
+
           this.botonGuardarDirectiva.deshabilitarFormBoton();
           this.procesarPago(); 
       } else {
