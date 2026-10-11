@@ -11,7 +11,9 @@
                 <table class="table-resumen">
                     <thead>
                         <tr>
-                            <th class="th-check"></th>
+                            <th class="th-check">
+                                <mat-checkbox [checked]="isAllPaid()" [disabled]="true"></mat-checkbox>
+                            </th>
                             <th class="th-detalle">Detalle</th>
                             <th class="th-monto">Monto</th>
                             <th class="th-pagado">Pagado</th>
@@ -20,9 +22,9 @@
                     </thead>
                     <tbody>
                         @for (item of balance()?.detalles; track item.id || item.transaccion_id || $index) {
-                        <tr class="row-item" [class.selected]="selectedTransaccion?.id === item.id" (click)="toggleSeleccion(item)">
+                        <tr class="row-item" [class.selected]="isItemSelectedActive(item)" [class.paid]="item.saldo <= 0" (click)="toggleSeleccion(item)">
                             <td class="td-check" (click)="$event.stopPropagation()">
-                                <mat-checkbox [checked]="selectedTransaccion?.id === item.id"
+                                <mat-checkbox [checked]="isItemChecked(item)"
                                               [disabled]="item.saldo <= 0"
                                               (change)="toggleSeleccion(item)"
                                               color="primary">
@@ -62,7 +64,7 @@
     
             <mat-form-field class="col-6">
                 <mat-label>Monto</mat-label>
-                <input matInput type="number" [(ngModel)]="transaccion_pago.monto" name="pago_monto" #txtMonto required>                       
+                <input matInput type="number" [(ngModel)]="transaccion_pago.monto" (ngModelChange)="onMontoChange($event)" name="pago_monto" #txtMonto required>                       
             </mat-form-field>
     
             <mat-form-field class="col-12">

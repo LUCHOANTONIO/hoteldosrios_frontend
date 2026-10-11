@@ -122,6 +122,14 @@
         &.selected {
           background-color: #eff6ff;
         }
+
+        &.paid {
+          cursor: default;
+
+          &:hover {
+            background-color: transparent;
+          }
+        }
       }
 
       &.row-total {

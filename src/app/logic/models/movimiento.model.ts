@@ -6,4 +6,5 @@ export class MovimientoModel{
     monto :number;   
     detalle :string;    
     transaccion_id?: number | null;
+    transacciones?: any[];
 }

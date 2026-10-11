@@ -82,7 +82,7 @@ export class CompletarPagoFormComponent implements OnInit {
                  
   transaccion_pago:MovimientoModel=new MovimientoModel(); 
   transaccion_pagos:MovimientoModel[]=[];     
-  selectedTransaccion: any = null;
+  selectedTransacciones: any[] = [];
   balance:any; //Variable signal cargado desde constructor
 
   //Comprobante              
@@ -123,35 +123,116 @@ export class CompletarPagoFormComponent implements OnInit {
     });
   }
 
-  toggleSeleccion(item: any) {
-    if (this.selectedTransaccion?.id === item.id) {
-      this.deseleccionarTransaccion();
-    } else {
-      this.seleccionarTransaccion(item);
-    }
+  isAllPaid(): boolean {
+    const detalles = this.balance()?.detalles;
+    if (!detalles || detalles.length === 0) return false;
+    return detalles.every((item: any) => Number(item.saldo) <= 0);
   }
 
-  seleccionarTransaccion(item: any) {
-    if (item.saldo <= 0) {
-      this.alertService.show("El ítem seleccionado ya se encuentra totalmente pagado", { duration: 3000, type: 'info' });
+  isItemChecked(item: any): boolean {
+    if (Number(item.saldo) <= 0) {
+      return true;
+    }
+    return this.selectedTransacciones.some(t => t.id === item.id);
+  }
+
+  isItemSelectedActive(item: any): boolean {
+    return Number(item.saldo) > 0 && this.selectedTransacciones.some(t => t.id === item.id);
+  }
+
+  onMontoChange(valor?: any) {
+    const monto = Number(this.transaccion_pago.monto) || 0;
+    this.selectedTransacciones = [];
+
+    if (monto <= 0) {
+      this.transaccion_pago.transaccion_id = null;
+      this.transaccion_pago.transacciones = [];
+      this.transaccion_pago.detalle = '';
       return;
     }
-    this.selectedTransaccion = item;
-    this.transaccion_pago.transaccion_id = item.id;
-    this.transaccion_pago.monto = item.saldo;
-    this.transaccion_pago.detalle = 'Pago ' + (item.detalle || '');
+
+    const detalles = this.balance()?.detalles || [];
+    const pendientes = detalles.filter((d: any) => Number(d.saldo) > 0);
+
+    let restante = monto;
+    const transaccionesParaPago: any[] = [];
+    const detallesNombres: string[] = [];
+
+    for (const item of pendientes) {
+      if (restante <= 0) {
+        break;
+      }
+      const saldoItem = Number(item.saldo);
+      const cubierto = Math.min(restante, saldoItem);
+
+      this.selectedTransacciones.push(item);
+      transaccionesParaPago.push({
+        transaccion_id: item.id,
+        monto: cubierto,
+        detalle: 'Pago ' + (item.detalle || '')
+      });
+      detallesNombres.push(item.detalle);
+
+      restante -= cubierto;
+    }
+
+    this.transaccion_pago.transacciones = transaccionesParaPago;
+    if (transaccionesParaPago.length > 0) {
+      this.transaccion_pago.transaccion_id = transaccionesParaPago[0].transaccion_id;
+      this.transaccion_pago.detalle = 'Pago ' + detallesNombres.join(', ');
+    } else {
+      this.transaccion_pago.transaccion_id = null;
+      this.transaccion_pago.detalle = '';
+    }
   }
 
-  deseleccionarTransaccion() {
-    this.selectedTransaccion = null;
-    this.transaccion_pago.transaccion_id = null;
-    this.transaccion_pago.monto = null as any;
-    this.transaccion_pago.detalle = '';
+  toggleSeleccion(item: any) {
+    if (Number(item.saldo) <= 0) {
+      return;
+    }
+    const idx = this.selectedTransacciones.findIndex(t => t.id === item.id);
+    if (idx !== -1) {
+      this.selectedTransacciones.splice(idx, 1);
+    } else {
+      this.selectedTransacciones.push(item);
+    }
+
+    this.recalcularDesdeSeleccion();
+  }
+
+  recalcularDesdeSeleccion() {
+    if (this.selectedTransacciones.length === 0) {
+      this.transaccion_pago.monto = null as any;
+      this.transaccion_pago.transaccion_id = null;
+      this.transaccion_pago.detalle = '';
+      this.transaccion_pago.transacciones = [];
+      return;
+    }
+
+    let totalSeleccionado = 0;
+    const transaccionesParaPago: any[] = [];
+    const detallesNombres: string[] = [];
+
+    for (const item of this.selectedTransacciones) {
+      const saldoItem = Number(item.saldo);
+      totalSeleccionado += saldoItem;
+      transaccionesParaPago.push({
+        transaccion_id: item.id,
+        monto: saldoItem,
+        detalle: 'Pago ' + (item.detalle || '')
+      });
+      detallesNombres.push(item.detalle);
+    }
+
+    this.transaccion_pago.monto = Math.round(totalSeleccionado * 100) / 100;
+    this.transaccion_pago.transacciones = transaccionesParaPago;
+    this.transaccion_pago.transaccion_id = transaccionesParaPago[0]?.transaccion_id || null;
+    this.transaccion_pago.detalle = 'Pago ' + detallesNombres.join(', ');
   }
 
   submitPago(f: NgForm) {               
-      if (!this.selectedTransaccion) {
-          this.alertService.show("Debe seleccionar una opción en el resumen para realizar el pago", { duration: 3000, type: 'info' });
+      if (this.selectedTransacciones.length === 0) {
+          this.alertService.show("Debe ingresar un monto o seleccionar una opción para realizar el pago", { duration: 3000, type: 'info' });
           return;
       }
       if (f.valid) {             
@@ -160,9 +241,13 @@ export class CompletarPagoFormComponent implements OnInit {
               this.alertService.show("El monto debe ser mayor a cero", { duration: 3000, type: 'info' });
               return;
           }
-          if (montoNum > this.selectedTransaccion.saldo) {
-              this.alertService.show(`El monto no puede superar el saldo pendiente de Bs. ${this.selectedTransaccion.saldo.toFixed(2)}`, { duration: 4000, type: 'info' });
+          const saldoTotal = Number(this.balance()?.saldo) || 0;
+          if (montoNum > saldoTotal) {
+              this.alertService.show(`El monto no puede superar el saldo pendiente total de Bs. ${saldoTotal.toFixed(2)}`, { duration: 4000, type: 'info' });
               return;
+          }
+          if (!this.transaccion_pago.transacciones || this.transaccion_pago.transacciones.length === 0) {
+              this.onMontoChange();
           }
           this.botonGuardarDirectiva.deshabilitarFormBoton();
           this.procesarPago(); 
@@ -182,7 +267,7 @@ export class CompletarPagoFormComponent implements OnInit {
             this.transaccion_pagos = (data?.pagos || []) as MovimientoModel[];       
             this.dataSourceMovimientos = new MatTableDataSource<MovimientoModel>(this.transaccion_pagos);
             this.dataSourceMovimientos.paginator = this.paginator;        
-            this.selectedTransaccion = null;
+            this.selectedTransacciones = [];
         }
       },
       error:(error)=>{
@@ -205,7 +290,7 @@ export class CompletarPagoFormComponent implements OnInit {
           this.dataSourceMovimientos = new MatTableDataSource<MovimientoModel>(this.transaccion_pagos);
           this.dataSourceMovimientos.paginator = this.paginator; 
           this.transaccion_pago=new MovimientoModel();//Limpiar datos de transaccion pago                          
-          this.selectedTransaccion = null;                          
+          this.selectedTransacciones = [];                          
 
           //this.reserva.saldo=data.balance.saldo;                    
           
