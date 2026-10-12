@@ -42,4 +42,6 @@ export class ReservaModel {
     anticipo: number = 0;
     detalle_anticipo: string = "";
     transacciones: TransaccionModel[] = [];
+    created_at?: string = "";
+    updated_at?: string = "";
 }

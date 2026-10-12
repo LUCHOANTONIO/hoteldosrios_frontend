@@ -366,3 +366,29 @@
     transform: translateY(0);
   }
 }
+
+@media (max-width: 768px) {
+  .cotizacion-modal-form {
+    max-height: 100dvh;
+    height: 100%;
+  }
+
+  .cotizacion-dialog-content {
+    max-height: calc(100dvh - 110px);
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .form-section-card {
+    padding: 10px 10px 6px 10px;
+    margin-bottom: 8px;
+  }
+
+  .cotizacion-dialog-footer {
+    padding: 8px 12px !important;
+
+    button {
+      flex: 1;
+    }
+  }
+}

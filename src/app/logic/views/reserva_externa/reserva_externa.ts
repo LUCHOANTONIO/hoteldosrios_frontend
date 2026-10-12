@@ -15,7 +15,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatPaginator, MatPaginatorIntl, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SpanishPaginatorIntl } from '../../../base/utils/spanish-paginator-intl';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import moment from 'moment';
 
 // MODELS
@@ -163,6 +163,7 @@ export class ReservaExternaComponent implements OnInit {
 
   // Reservas Externas (Sin montos)
   dataSourceReservas = new MatTableDataSource<ReservaModel>([]);
+  reservasPaginadas$: Observable<ReservaModel[]> = this.dataSourceReservas.connect();
   displayedColumnsReservas: string[] = [
     'acciones',
     'correlativo',
@@ -177,6 +178,7 @@ export class ReservaExternaComponent implements OnInit {
 
   // Cotizaciones Externas (Sin montos)
   dataSourceCotizaciones = new MatTableDataSource<CotizacionModel>([]);
+  cotizacionesPaginadas$: Observable<CotizacionModel[]> = this.dataSourceCotizaciones.connect();
   displayedColumnsCotizaciones: string[] = [
     'acciones',
     'correlativo',
@@ -405,8 +407,7 @@ export class ReservaExternaComponent implements OnInit {
   }
 
   actualizarTablas(): void {
-    const reservasExternas = this.reservas;
-    this.dataSourceReservas = new MatTableDataSource<ReservaModel>(reservasExternas);
+    this.dataSourceReservas.data = this.reservas;
     this.dataSourceReservas.filterPredicate = (r: ReservaModel, filter: string) => {
       const info = this.obtenerInfoHabitacion(r);
       const tipoServicio = info.tipo.toLowerCase();
@@ -423,7 +424,7 @@ export class ReservaExternaComponent implements OnInit {
     }
     this.aplicarFiltroCompletoReservas();
 
-    this.dataSourceCotizaciones = new MatTableDataSource<CotizacionModel>(this.cotizaciones);
+    this.dataSourceCotizaciones.data = this.cotizaciones;
     this.dataSourceCotizaciones.filterPredicate = (c: CotizacionModel, filter: string) => {
       const cliente = (c.cliente || (c.nombre + ' ' + (c.primer_apellido || '')) || '').toLowerCase();
       const doc = (c.dni || '').toLowerCase();
@@ -475,6 +476,7 @@ export class ReservaExternaComponent implements OnInit {
 
     this.comunicacionService.executeActionReserva.set(false);
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
     const dialogRef = this.dialog.open(ReservaFormComponent, {
       data: {
         reserva: reservaParaForm,
@@ -493,9 +495,11 @@ export class ReservaExternaComponent implements OnInit {
         items: { update: () => { }, get: () => [], remove: () => { } },
         updateGroupsSignal: signal<number | null>(null)
       },
-      width: '98vw',
-      maxWidth: '650px',
-      maxHeight: '92vh',
+      width: isMobile ? '100vw' : '98vw',
+      maxWidth: isMobile ? '100vw' : '650px',
+      height: isMobile ? '100dvh' : 'auto',
+      maxHeight: isMobile ? '100dvh' : '92vh',
+      panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
       disableClose: true
     });
 
@@ -530,15 +534,18 @@ export class ReservaExternaComponent implements OnInit {
       }
     }
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
     const dialogRef = this.dialog.open(CotizacionFormComponent, {
       data: {
         cotizacion: cotizacionParaForm,
         cotizaciones: this.cotizacionesSignal,
         is_externo: true
       },
-      width: '98vw',
-      maxWidth: '650px',
-      maxHeight: '92vh',
+      width: isMobile ? '100vw' : '98vw',
+      maxWidth: isMobile ? '100vw' : '650px',
+      height: isMobile ? '100dvh' : 'auto',
+      maxHeight: isMobile ? '100dvh' : '92vh',
+      panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
       disableClose: true
     });
 
@@ -573,6 +580,14 @@ export class ReservaExternaComponent implements OnInit {
     return m.isValid() ? m.format('DD/MM/YYYY') : String(fecha);
   }
 
+  obtenerFechaRegistro(r: ReservaModel): string {
+    return this.formatearFecha((r as any).created_at || r.fecha_ini);
+  }
+
+  obtenerFechaRegistroCot(c: CotizacionModel): string {
+    return this.formatearFecha(c.fecha || c.created_at);
+  }
+
   formatearRangoFechas(fIni: any, fFin: any): string {
     if (!fIni && !fFin) return '-';
     const ini = this.formatearFecha(fIni);
@@ -585,10 +600,13 @@ export class ReservaExternaComponent implements OnInit {
     this.documentoService.obtenerVoucherReserva(reservaId).subscribe({
       next: (pdfBase64: string) => {
         if (pdfBase64) {
+          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
           this.dialog.open(PdfViewerComponent, {
-            width: '92vw',
-            maxWidth: '1100px',
-            height: '90vh',
+            width: isMobile ? '100vw' : '92vw',
+            maxWidth: isMobile ? '100vw' : '1100px',
+            height: isMobile ? '100dvh' : '90vh',
+            maxHeight: isMobile ? '100dvh' : '90vh',
+            panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
             data: {
               pdf_base64: pdfBase64,
               titulo_documento: `Voucher de Reserva #${reservaId}`
@@ -608,10 +626,13 @@ export class ReservaExternaComponent implements OnInit {
     this.documentoService.obtenerVoucherCotizacion(cotizacionId).subscribe({
       next: (pdfBase64: string) => {
         if (pdfBase64) {
+          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
           this.dialog.open(PdfViewerComponent, {
-            width: '92vw',
-            maxWidth: '1100px',
-            height: '90vh',
+            width: isMobile ? '100vw' : '92vw',
+            maxWidth: isMobile ? '100vw' : '1100px',
+            height: isMobile ? '100dvh' : '90vh',
+            maxHeight: isMobile ? '100dvh' : '90vh',
+            panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
             data: {
               pdf_base64: pdfBase64,
               titulo_documento: `Cotización #${cotizacionId}`
@@ -636,8 +657,8 @@ export class ReservaExternaComponent implements OnInit {
     this.busqueda(texto);
   }
 
-  cambiarFiltroCategoriaReserva(cat: 'HABITACION' | 'FULL_DAY' | 'CAMPING'): void {
-    if (this.filtroCategoriaReserva === cat) {
+  cambiarFiltroCategoriaReserva(cat: 'TODOS' | 'HABITACION' | 'FULL_DAY' | 'CAMPING'): void {
+    if (this.filtroCategoriaReserva === cat && cat !== 'TODOS') {
       this.filtroCategoriaReserva = 'TODOS';
     } else {
       this.filtroCategoriaReserva = cat;

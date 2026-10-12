@@ -1,27 +1,10 @@
 <div class="reserva-externa-portal-container">
   <!-- FILA 1: Barra de Navegación y Acciones Globales -->
   <nav class="portal-nav-bar">
-    <div class="hotel-brand">
-      <span class="hotel-title">HOTEL DOS RÍOS</span>
-      <span class="portal-tag">Reservas</span>
-    </div>
-
-    <div class="nav-right-actions">
-      <div class="view-switcher-pills">
-        <button class="pill-btn" [class.active]="vistaActiva === 'catalogo'" (click)="cambiarVista('catalogo')">
-          <mat-icon>meeting_room</mat-icon>
-          <span>Habitaciones Disponibles</span>
-        </button>
-
-        <button class="pill-btn" [class.active]="vistaActiva === 'reservas'" (click)="cambiarVista('reservas')">
-          <mat-icon>event_available</mat-icon>
-          <span>Mis Reservas</span>
-        </button>
-
-        <button class="pill-btn" [class.active]="vistaActiva === 'cotizaciones'" (click)="cambiarVista('cotizaciones')">
-          <mat-icon>request_quote</mat-icon>
-          <span>Mis Cotizaciones</span>
-        </button>
+    <div class="nav-top-row">
+      <div class="hotel-brand">
+        <span class="hotel-title">HOTEL DOS RÍOS</span>
+        <span class="portal-tag">Reservas</span>
       </div>
 
       <button type="button" class="btn-top-cotizar" (click)="abrirModalCotizacion()"
@@ -29,6 +12,31 @@
         <mat-icon>request_quote</mat-icon>
         <span>Cotizar</span>
       </button>
+    </div>
+
+    <div class="nav-pills-row">
+      <div class="view-switcher-pills">
+        <button class="pill-btn" [class.active]="vistaActiva === 'catalogo'" (click)="cambiarVista('catalogo')">
+          <mat-icon>meeting_room</mat-icon>
+          <span class="pill-text-desktop">Habitaciones Disponibles</span>
+          <span class="pill-text-mobile">Disponibles</span>
+        </button>
+
+        <button class="pill-btn" [class.active]="vistaActiva === 'reservas'" (click)="cambiarVista('reservas')">
+          <mat-icon>event_available</mat-icon>
+          <span class="pill-text-desktop">Mis Reservas</span>
+          <span class="pill-text-mobile">Reservas</span>
+          @if (totalReservas > 0) {
+          <span class="pill-badge">{{ totalReservas }}</span>
+          }
+        </button>
+
+        <button class="pill-btn" [class.active]="vistaActiva === 'cotizaciones'" (click)="cambiarVista('cotizaciones')">
+          <mat-icon>request_quote</mat-icon>
+          <span class="pill-text-desktop">Mis Cotizaciones</span>
+          <span class="pill-text-mobile">Cotizaciones</span>
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -41,7 +49,7 @@
     <header class="page-header centered-search-header">
       <div class="booking-search-bar">
         <!-- Llegada -->
-        <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field class="capsule-field date-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Fecha de Llegada</mat-label>
           <input matInput [matDatepicker]="pickerLlegada" [(ngModel)]="fechaLlegada"
             (ngModelChange)="onFechaLlegadaChange()" (click)="pickerLlegada.open()" readonly style="cursor: pointer;">
@@ -50,7 +58,7 @@
         </mat-form-field>
 
         <!-- Salida -->
-        <mat-form-field class="capsule-field" appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field class="capsule-field date-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Fecha de Salida</mat-label>
           <input matInput [matDatepicker]="pickerSalida" [min]="fechaLlegada" [(ngModel)]="fechaSalida"
             (click)="pickerSalida.open()" readonly style="cursor: pointer;">
@@ -61,7 +69,11 @@
         <!-- Botón Buscar -->
         <button mat-flat-button color="primary" class="btn-search-capsule" (click)="buscarDisponibilidad()"
           [disabled]="buscando" matTooltip="Buscar habitaciones disponibles">
+          @if (buscando) {
+          <mat-spinner diameter="18" class="spinner-white"></mat-spinner>
+          } @else {
           <mat-icon>search</mat-icon>
+          }
           <span>Buscar</span>
         </button>
       </div>
@@ -127,7 +139,6 @@
               </div>
             </div>
 
-
             <!-- Card Footer: Action Button -->
             <div class="card-footer-box">
               <div class="action-block">
@@ -180,7 +191,6 @@
                 <h3 class="room-title">{{ formatearNombreTipo(hab) }}</h3>
               </div>
             </div>
-
 
             <!-- Card Footer: Action Button -->
             <div class="card-footer-box">
@@ -235,7 +245,6 @@
               </div>
             </div>
 
-
             <!-- Card Footer: Action Button -->
             <div class="card-footer-box">
               <div class="action-block">
@@ -260,60 +269,67 @@
   <!-- VISTA 2: MIS RESERVAS REGISTRADAS          -->
   <!-- ========================================== -->
   @if (vistaActiva === 'reservas') {
-  <mat-card class="my-1" appearance="outlined">
-    <mat-card-header class="bg-light my-1"
-      style="padding: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-      <div style="display: flex; align-items: center;">
-        <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
-          <mat-icon style="vertical-align: middle; margin-right: 6px;" class="text-primary">event_available</mat-icon>
-          MIS RESERVAS
+  <mat-card class="my-1 border-0 shadow-sm" appearance="outlined">
+    <mat-card-header class="reservas-view-header">
+      <div class="header-title-row">
+        <mat-card-title class="view-title">
+          <mat-icon class="text-primary title-icon">event_available</mat-icon>
+          <span>MIS RESERVAS</span>
         </mat-card-title>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle count-badge">
+          {{ totalReservas }} total
+        </span>
       </div>
 
       <!-- Filtros rápidos por Categoría (Habitaciones / Full Day / Camping) -->
-      <div class="d-inline-flex align-items-center gap-1 ms-2">
-        <button type="button" class="btn btn-sm py-1 px-2"
+      <div class="category-filters-scroll">
+        <button type="button" class="btn btn-sm cat-filter-btn"
+          [ngClass]="filtroCategoriaReserva === 'TODOS' ? 'btn-primary' : 'btn-outline-secondary'"
+          (click)="cambiarFiltroCategoriaReserva('TODOS')">
+          Todos ({{ totalReservas }})
+        </button>
+        <button type="button" class="btn btn-sm cat-filter-btn"
           [ngClass]="filtroCategoriaReserva === 'HABITACION' ? 'btn-primary' : 'btn-outline-primary'"
           (click)="cambiarFiltroCategoriaReserva('HABITACION')">
-          <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle;">meeting_room</mat-icon>
+          <mat-icon class="btn-icon">meeting_room</mat-icon>
           Habitaciones ({{ totalReservasHotel }})
         </button>
-        <button type="button" class="btn btn-sm py-1 px-2"
+        <button type="button" class="btn btn-sm cat-filter-btn"
           [ngClass]="filtroCategoriaReserva === 'FULL_DAY' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark'"
           (click)="cambiarFiltroCategoriaReserva('FULL_DAY')">
-          <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle;">wb_sunny</mat-icon>
+          <mat-icon class="btn-icon">wb_sunny</mat-icon>
           Full Day ({{ totalReservasFullDay }})
         </button>
-        <button type="button" class="btn btn-sm py-1 px-2"
+        <button type="button" class="btn btn-sm cat-filter-btn"
           [ngClass]="filtroCategoriaReserva === 'CAMPING' ? 'btn-success' : 'btn-outline-success'"
           (click)="cambiarFiltroCategoriaReserva('CAMPING')">
-          <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle;">forest</mat-icon>
+          <mat-icon class="btn-icon">forest</mat-icon>
           Camping ({{ totalReservasCamping }})
         </button>
       </div>
 
-      <!-- Campo de búsqueda alineado a la derecha -->
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto;">
-        <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
-        <input matInput type="search" class="text-bg-light" placeholder="Buscar reserva..."
-          (keydown.enter)="busqueda(txtBusquedaRes.value)" (keyup)="busqueda(txtBusquedaRes.value)" #txtBusquedaRes>
-        <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusquedaRes.value)"
-          style="padding: 0;">
-          <mat-icon>search</mat-icon>
-        </button>
-      </mat-form-field>
+      <!-- Campo de búsqueda -->
+      <div class="header-search-container">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-input-field">
+          <mat-label>Buscar reserva (cliente, doc, nro, tel...)</mat-label>
+          <input matInput type="search" placeholder="Buscar reserva..."
+            (keydown.enter)="busqueda(txtBusquedaRes.value)" (keyup)="busqueda(txtBusquedaRes.value)" #txtBusquedaRes>
+          <button mat-icon-button matSuffix class="text-primary" (click)="busqueda(txtBusquedaRes.value)">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
     </mat-card-header>
 
     <mat-card-content class="bg-white p-0">
-      <div class="mat-elevation-z8">
+      <!-- VISTA DESKTOP / TABLET (>= 768px): Tabla tradicional -->
+      <div class="d-none d-md-block">
         <div class="table-responsive">
           <table mat-table [dataSource]="dataSourceReservas">
             <!-- Acciones -->
             <ng-container matColumnDef="acciones">
               <th mat-header-cell *matHeaderCellDef style="text-align: left; vertical-align: middle; width: 110px;">
-                <div style="display: flex; align-items: center;">
-                  <span style="margin-left: 8px;">Acciones</span>
-                </div>
+                <span style="margin-left: 8px;">Acciones</span>
               </th>
               <td mat-cell *matCellDef="let r">
                 <button mat-icon-button (click)="verVoucherReserva(r.id)" class="text-danger"
@@ -338,7 +354,7 @@
             <ng-container matColumnDef="fecha">
               <th mat-header-cell *matHeaderCellDef class="text-nowrap">Fecha Registro</th>
               <td mat-cell *matCellDef="let r" class="text-nowrap">
-                <span>{{ formatearFecha(r.created_at || r.fecha_ini) }}</span>
+                <span>{{ obtenerFechaRegistro(r) }}</span>
               </td>
             </ng-container>
 
@@ -392,7 +408,7 @@
 
             <!-- Fila para mostrar "No hay datos disponibles" -->
             <tr *matNoDataRow>
-              <td [attr.colspan]="displayedColumnsReservas.length" class="text-center" style="font-size: 18px;">
+              <td [attr.colspan]="displayedColumnsReservas.length" class="text-center py-4" style="font-size: 16px;">
                 No hay datos disponibles
               </td>
             </tr>
@@ -401,11 +417,97 @@
             <tr mat-row *matRowDef="let row; columns: displayedColumnsReservas;" id="fila{{row.id}}"></tr>
           </table>
         </div>
-
-        <mat-divider></mat-divider>
-        <mat-paginator #paginatorReservas [pageSizeOptions]="[5, 10, 20]" [pageSize]="10" showFirstLastButtons
-          class="bg-light"></mat-paginator>
       </div>
+
+      <!-- VISTA MÓVIL (< 768px): Tarjetas táctiles y amigables -->
+      <div class="d-block d-md-none mobile-cards-container">
+        @let itemsReservas = (reservasPaginadas$ | async) || [];
+        @if (itemsReservas.length === 0) {
+        <div class="text-center py-4 text-muted">
+          <mat-icon style="font-size: 36px; width: 36px; height: 36px;">search_off</mat-icon>
+          <p class="mt-2 mb-0">No hay reservas disponibles</p>
+        </div>
+        }
+        @for (r of itemsReservas; track r.id) {
+        @let info = obtenerInfoHabitacion(r);
+        @let badge = obtenerEstadoBadge(r.estado_reserva_id);
+        <div class="mobile-item-card" [ngClass]="'card-tipo-' + info.categoriaKey.toLowerCase()">
+          <!-- Header de la tarjeta -->
+          <div class="card-top-header">
+            <div class="identifier-badges">
+              <span class="correlativo-chip">#{{ r.correlativo || r.id }}</span>
+              <span class="badge" [ngClass]="{
+                'bg-warning text-dark': r.estado_reserva_id === 1,
+                'bg-success text-white': r.estado_reserva_id === 2,
+                'bg-danger text-white': r.estado_reserva_id === 3,
+                'bg-secondary text-white': r.estado_reserva_id > 3
+              }">{{ badge.texto }}</span>
+            </div>
+            <span class="date-chip">
+              <mat-icon>event</mat-icon>
+              {{ obtenerFechaRegistro(r) }}
+            </span>
+          </div>
+
+          <!-- Detalles -->
+          <div class="card-details-grid">
+            <div class="detail-row">
+              <mat-icon class="detail-icon text-primary">{{ info.icono }}</mat-icon>
+              <div class="detail-content">
+                <span class="main-text">{{ info.tipo }}</span>
+                <span class="sub-text">{{ info.detalle }}</span>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <mat-icon class="detail-icon text-success">date_range</mat-icon>
+              <div class="detail-content">
+                <span class="sub-text">Estadía:</span>
+                <span class="main-text">{{ formatearRangoFechas(r.fecha_ini, r.fecha_fin) }}</span>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <mat-icon class="detail-icon text-secondary">person</mat-icon>
+              <div class="detail-content">
+                <span class="main-text">{{ r.cliente }}</span>
+                @if (r.nro_documento) {
+                <span class="sub-text">Doc: {{ r.nro_documento }}</span>
+                }
+              </div>
+            </div>
+
+            @if (r.telefono) {
+            <div class="detail-row">
+              <mat-icon class="detail-icon text-info">call</mat-icon>
+              <div class="detail-content">
+                <a [href]="'tel:' + r.telefono" class="phone-call-link">
+                  <span>{{ r.telefono }}</span>
+                  <mat-icon style="font-size: 13px; width: 13px; height: 13px;">open_in_new</mat-icon>
+                </a>
+              </div>
+            </div>
+            }
+          </div>
+
+          <!-- Acciones táctiles -->
+          <div class="card-actions-row">
+            <button type="button" class="btn-card-action btn-voucher" (click)="verVoucherReserva(r.id)">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>Voucher PDF</span>
+            </button>
+            <button type="button" class="btn-card-action btn-edit" (click)="editarReserva(r.id)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+      <mat-paginator #paginatorReservas [pageSizeOptions]="[5, 10, 20]" [pageSize]="10" showFirstLastButtons
+        class="bg-light"></mat-paginator>
     </mat-card-content>
   </mat-card>
   }
@@ -414,30 +516,37 @@
   <!-- VISTA 3: MIS COTIZACIONES                  -->
   <!-- ========================================== -->
   @if (vistaActiva === 'cotizaciones') {
-  <mat-card class="my-1" appearance="outlined">
-    <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center;">
-      <div style="display: flex; align-items: center; flex: 1;">
-        <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
-          <mat-icon style="vertical-align: middle; margin-right: 6px;" class="text-primary">request_quote</mat-icon>
-          MIS COTIZACIONES
+  <mat-card class="my-1 border-0 shadow-sm" appearance="outlined">
+    <mat-card-header class="reservas-view-header">
+      <div class="header-title-row">
+        <mat-card-title class="view-title">
+          <mat-icon class="text-primary title-icon">request_quote</mat-icon>
+          <span>MIS COTIZACIONES</span>
         </mat-card-title>
+        <button type="button" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 py-1 px-3"
+          (click)="abrirModalCotizacion()">
+          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon>
+          <span>Nueva Cotización</span>
+        </button>
       </div>
 
-      <!-- Campo de búsqueda alineado a la derecha -->
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="margin-left: auto;">
-        <mat-label class="text-bg-light" style="font-size: 14px;">Texto búsqueda</mat-label>
-        <input matInput type="search" class="text-bg-light" placeholder="Buscar cotización..."
-          (keydown.enter)="busquedaCot(txtBusquedaCot.value)" (keyup)="busquedaCot(txtBusquedaCot.value)"
-          #txtBusquedaCot>
-        <button mat-icon-button matSuffix class="text-info" (click)="busquedaCot(txtBusquedaCot.value)"
-          style="padding: 0;">
-          <mat-icon>search</mat-icon>
-        </button>
-      </mat-form-field>
+      <!-- Campo de búsqueda -->
+      <div class="header-search-container">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-input-field">
+          <mat-label>Buscar cotización (cliente, dni, detalle...)</mat-label>
+          <input matInput type="search" placeholder="Buscar cotización..."
+            (keydown.enter)="busquedaCot(txtBusquedaCot.value)" (keyup)="busquedaCot(txtBusquedaCot.value)"
+            #txtBusquedaCot>
+          <button mat-icon-button matSuffix class="text-primary" (click)="busquedaCot(txtBusquedaCot.value)">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
     </mat-card-header>
 
     <mat-card-content class="bg-white p-0">
-      <div class="mat-elevation-z8">
+      <!-- VISTA DESKTOP / TABLET (>= 768px): Tabla tradicional -->
+      <div class="d-none d-md-block">
         <div class="table-responsive">
           <table mat-table [dataSource]="dataSourceCotizaciones">
             <!-- Acciones -->
@@ -474,7 +583,7 @@
             <ng-container matColumnDef="fecha">
               <th mat-header-cell *matHeaderCellDef class="text-nowrap">Fecha Registro</th>
               <td mat-cell *matCellDef="let c" class="text-nowrap">
-                <span>{{ formatearFecha(c.fecha || c.created_at) }}</span>
+                <span>{{ obtenerFechaRegistroCot(c) }}</span>
               </td>
             </ng-container>
 
@@ -513,7 +622,7 @@
 
             <!-- Fila para mostrar "No hay datos disponibles" -->
             <tr *matNoDataRow>
-              <td [attr.colspan]="displayedColumnsCotizaciones.length" class="text-center" style="font-size: 18px;">
+              <td [attr.colspan]="displayedColumnsCotizaciones.length" class="text-center py-4" style="font-size: 16px;">
                 No hay datos disponibles
               </td>
             </tr>
@@ -522,11 +631,91 @@
             <tr mat-row *matRowDef="let row; columns: displayedColumnsCotizaciones;" id="fila{{row.id}}"></tr>
           </table>
         </div>
-
-        <mat-divider></mat-divider>
-        <mat-paginator #paginatorCotizaciones [pageSizeOptions]="[5, 10, 20]" [pageSize]="10" showFirstLastButtons
-          class="bg-light"></mat-paginator>
       </div>
+
+      <!-- VISTA MÓVIL (< 768px): Tarjetas táctiles y amigables -->
+      <div class="d-block d-md-none mobile-cards-container">
+        @let itemsCotizaciones = (cotizacionesPaginadas$ | async) || [];
+        @if (itemsCotizaciones.length === 0) {
+        <div class="text-center py-4 text-muted">
+          <mat-icon style="font-size: 36px; width: 36px; height: 36px;">search_off</mat-icon>
+          <p class="mt-2 mb-0">No hay cotizaciones disponibles</p>
+        </div>
+        }
+        @for (c of itemsCotizaciones; track c.id) {
+        <div class="mobile-item-card">
+          <!-- Header de la tarjeta -->
+          <div class="card-top-header">
+            <div class="identifier-badges">
+              <span class="correlativo-chip">#{{ c.correlativo || c.id }}</span>
+            </div>
+            <span class="date-chip">
+              <mat-icon>event</mat-icon>
+              {{ obtenerFechaRegistroCot(c) }}
+            </span>
+          </div>
+
+          <!-- Detalles -->
+          <div class="card-details-grid">
+            <div class="detail-row">
+              <mat-icon class="detail-icon text-primary">person</mat-icon>
+              <div class="detail-content">
+                <span class="main-text">{{ c.cliente || (c.nombre + ' ' + (c.primer_apellido || '')) }}</span>
+                @if (c.dni) {
+                <span class="sub-text">DNI: {{ c.dni }}</span>
+                }
+              </div>
+            </div>
+
+            @if (c.telefono) {
+            <div class="detail-row">
+              <mat-icon class="detail-icon text-info">call</mat-icon>
+              <div class="detail-content">
+                <a [href]="'tel:' + c.telefono" class="phone-call-link">
+                  <span>{{ c.telefono }}</span>
+                  <mat-icon style="font-size: 13px; width: 13px; height: 13px;">open_in_new</mat-icon>
+                </a>
+              </div>
+            </div>
+            }
+
+            <div class="detail-row">
+              <mat-icon class="detail-icon text-success">date_range</mat-icon>
+              <div class="detail-content">
+                <span class="sub-text">Fechas Cotizadas:</span>
+                <span class="main-text">{{ formatearRangoFechas(c.fecha_ini, c.fecha_fin) }}</span>
+              </div>
+            </div>
+
+            @if (c.detalle) {
+            <div class="detail-row">
+              <mat-icon class="detail-icon text-secondary">notes</mat-icon>
+              <div class="detail-content">
+                <span class="sub-text">Observaciones:</span>
+                <span class="main-text">{{ c.detalle }}</span>
+              </div>
+            </div>
+            }
+          </div>
+
+          <!-- Acciones táctiles -->
+          <div class="card-actions-row">
+            <button type="button" class="btn-card-action btn-voucher" (click)="verVoucherCotizacion(c.id)">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>Voucher PDF</span>
+            </button>
+            <button type="button" class="btn-card-action btn-edit" (click)="editarCotizacion(c.id)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+      <mat-paginator #paginatorCotizaciones [pageSizeOptions]="[5, 10, 20]" [pageSize]="10" showFirstLastButtons
+        class="bg-light"></mat-paginator>
     </mat-card-content>
   </mat-card>
   }
