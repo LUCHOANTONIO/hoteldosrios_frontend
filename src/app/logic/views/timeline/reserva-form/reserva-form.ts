@@ -40,6 +40,7 @@ import { ComunicacionService } from '../../../services/local/comunicacion.servic
 import { TransaccionService } from '../../../services/transaccion.service';
 import { PermisoService } from '../../../../base/services/permiso.service';
 import { CategoriaService } from '../../../services/categoria.service';
+import { MovimientoService } from '../../../services/movimiento.service';
 
 //ANGULAR MATERIAL
 import { MatButtonModule } from '@angular/material/button';
@@ -171,6 +172,14 @@ export class ReservaFormComponent {
   //Comprobante              
   dialogVoucherRef: any;
 
+  // Informacion de Pago Registrado
+  pagoRegistradoInfo: {
+    forma_pago_id?: number | null;
+    forma_pago_desc?: string;
+    detalle?: string;
+    monto?: number;
+  } = {};
+
   //Variable Signals
   updateGroupsSignal = signal<number | null>(null);
   private triggerEstadoReserva = signal<number>(Date.now());
@@ -199,6 +208,7 @@ export class ReservaFormComponent {
     private comunicacionService: ComunicacionService,
     private permisoService: PermisoService,
     private categoriaService: CategoriaService,
+    private transaccionPagoService: MovimientoService,
     private cdr: ChangeDetectorRef
   ) {
     // Asignación de datos desde el objeto 'data'
@@ -222,15 +232,21 @@ export class ReservaFormComponent {
     // Configuración de suscripciones y servicios
     this.dialogRef.backdropClick().subscribe(x => { });
     this.balance = this.balanceService.balance;
+    if (data.balance) {
+      this.balance.set(data.balance);
+    }
 
     // Lógica condicional de inicialización
     if (this.isFullDay()) {
       this.reserva.fecha_fin = this.reserva.fecha_ini;
     }
     if (this.reserva.id > 0) {
-      this.cargarDatosTransaccion(this.reserva.id)
-      this.btnVisibleCheckIn = true;
-      this.btnVisibleCheckOut = true;
+      this.cargarDatosTransaccion(this.reserva.id);
+      this.cargarDatosPagos(this.reserva.id);
+      if (!this.is_externo) {
+        this.btnVisibleCheckIn = true;
+        this.btnVisibleCheckOut = true;
+      }
     }
 
     effect(() => {
@@ -269,6 +285,7 @@ export class ReservaFormComponent {
         this.reserva.precio_unit_adulto = Number(this.reserva.precio_unit_adulto) || 0;
         this.reserva.precio_unit_ninio = Number(this.reserva.precio_unit_ninio) || 0;
         this.reserva.anticipo = this.getYaPagado();
+        this.cargarDatosPagos(this.reserva.id);
       }
 
       if (this.isFullDay()) {
@@ -310,11 +327,21 @@ export class ReservaFormComponent {
           this.reserva.habitacion_ids = [...this.selectedHabitaciones];
         }
         setTimeout(() => {
-          this.isDisabled = true;
-          this.mnuVisibleOpciones = true;
-          this.btnVisibleCancelReserva = false;
-          this.btnVisibleSaveReserva = false;
-          this.isVisibleTabs = true;
+          if (this.is_externo) {
+            this.isDisabled = false;
+            this.isEditReserva = true;
+            this.btnVisibleSaveReserva = true;
+            this.btnVisibleCancelReserva = true;
+            this.btnVisibleCheckIn = false;
+            this.btnVisibleCheckOut = false;
+            this.mnuVisibleOpciones = false;
+          } else {
+            this.isDisabled = true;
+            this.mnuVisibleOpciones = true;
+            this.btnVisibleCancelReserva = false;
+            this.btnVisibleSaveReserva = false;
+            this.isVisibleTabs = true;
+          }
           this.cdr.detectChanges(); //Con esto se corrigio el error ExpressionChangedAfterItHasBeenCheckedError
         });
       } else {
@@ -374,15 +401,15 @@ export class ReservaFormComponent {
   }
 
   get tipoCamping(): TipoHabitacionModel | undefined {
-    return this.tipo_habitaciones.find(th => 
-      th.codigo?.toUpperCase() === 'CAMP' || 
+    return this.tipo_habitaciones.find(th =>
+      th.codigo?.toUpperCase() === 'CAMP' ||
       th.descripcion?.trim().toUpperCase() === 'CAMPING'
     );
   }
 
   get tipoFullDay(): TipoHabitacionModel | undefined {
-    return this.tipo_habitaciones.find(th => 
-      th.codigo?.toUpperCase() === 'FULL' || 
+    return this.tipo_habitaciones.find(th =>
+      th.codigo?.toUpperCase() === 'FULL' ||
       th.descripcion?.trim().toUpperCase() === 'FULL DAY'
     );
   }
@@ -565,6 +592,11 @@ export class ReservaFormComponent {
   }
 
   onCancel() {
+    if (this.is_externo) {
+      this.dialogRef.close();
+      return;
+    }
+
     if (this.isEditReserva) {
       this.isEditReserva = false;
       this.btnVisibleCheckIn = true;
@@ -574,7 +606,12 @@ export class ReservaFormComponent {
       this.btnVisibleCancelReserva = false;
       this.btnVisibleSaveReserva = false;
       this.reserva.anticipo = this.getYaPagado();
-      this.reserva.detalle_anticipo = '';
+      if (this.pagoRegistradoInfo.detalle) {
+        this.reserva.detalle_anticipo = this.pagoRegistradoInfo.detalle;
+      }
+      if (this.pagoRegistradoInfo.forma_pago_id) {
+        this.reserva.forma_pago_id = this.pagoRegistradoInfo.forma_pago_id;
+      }
       if (this.reserva.grupo_id || this.reserva.is_grupal) {
         this.selectedHabitaciones = (this.reserva.habitacion_ids && this.reserva.habitacion_ids.length > 0)
           ? this.reserva.habitacion_ids.map(id => Number(id))
@@ -681,6 +718,9 @@ export class ReservaFormComponent {
         if (res.correcto) {
           const data = JSON.parse(res.dato);
           this.reserva = data.reserva as ReservaModel;
+          if (this.is_externo) {
+            this.reserva.is_externo = 1;
+          }
           this.balance.set(data.balance); //Establecer valor a por medio de signal                
           this.reserva.anticipo = this.getYaPagado();
           this.reserva.detalle_anticipo = '';
@@ -740,6 +780,12 @@ export class ReservaFormComponent {
             this.items.update({ id: this.reserva.id, correlativo: this.reserva.correlativo, cliente: this.reserva.cliente, start: timelineStart, end: timelineEnd, group: this.reserva.habitacion_id, className: newClassName, saldo: this.reserva.saldo });
             this.alertService.show("Se guardó la reserva", { duration: 5000, type: 'success' });
           }
+
+          if (this.is_externo) {
+            this.dialogRef.close({ action: 'saved', reserva: this.reserva });
+            return;
+          }
+
           this.isDisabled = true;
           this.btnVisibleCheckIn = true;
           this.btnVisibleCheckOut = true;
@@ -801,7 +847,9 @@ export class ReservaFormComponent {
       cantidad_ninio: cantNinio,
       precio_unit_ninio: precioNinio,
       cantidad_huesped: (cantAdulto + cantNinio) > 0 ? (cantAdulto + cantNinio) : 1,
-      transacciones: this.reserva.transacciones || []
+      transacciones: this.reserva.transacciones || [],
+      anticipo: Number(this.reserva.anticipo) || 0,
+      detalle_anticipo: (Number(this.reserva.anticipo) > 0) ? (this.reserva.detalle_anticipo || '') : ''
     };
 
     this.reservaService.modificar(payload).subscribe({
@@ -809,6 +857,9 @@ export class ReservaFormComponent {
         if (res.correcto) {
           const data = JSON.parse(res.dato);
           this.reserva = data.reserva as ReservaModel;
+          if (this.is_externo) {
+            this.reserva.is_externo = 1;
+          }
           this.balance.set(data.balance); //Establecer valor a por medio de signal                
           this.reserva.anticipo = this.getYaPagado();
           this.reserva.detalle_anticipo = '';
@@ -849,6 +900,12 @@ export class ReservaFormComponent {
             this.items.update({ id: this.reserva.id, correlativo: this.reserva.correlativo, cliente: this.reserva.cliente, start: timelineStart, end: timelineEnd, group: this.reserva.habitacion_id, className: this.reserva.color, saldo: this.reserva.saldo });
             this.alertService.show("Se guardó la reserva", { duration: 5000, type: 'success' });
           }
+
+          if (this.is_externo) {
+            this.dialogRef.close({ action: 'saved', reserva: this.reserva });
+            return;
+          }
+
           this.isEditReserva = false;
           this.isDisabled = true;
           this.btnVisibleCheckIn = true;
@@ -1084,11 +1141,13 @@ export class ReservaFormComponent {
     }
     const totalReserva = Number(this.reserva.total) || 0;
     let pago = 0;
-    if (this.balance && this.balance() && this.balance().pago !== undefined && this.balance().pago !== null) {
-      pago = Number(this.balance().pago) || 0;
-    } else {
+    if (this.balance && this.balance() && this.balance().pago !== undefined && this.balance().pago !== null && Number(this.balance().pago) > 0) {
+      pago = Number(this.balance().pago);
+    } else if (this.reserva.saldo !== undefined && this.reserva.saldo !== null) {
       const saldo = Number(this.reserva.saldo) || 0;
       pago = Math.max(0, totalReserva - saldo);
+    } else if (this.balance && this.balance() && this.balance().pago !== undefined) {
+      pago = Number(this.balance().pago) || 0;
     }
     return Math.min(totalReserva, Math.max(0, Number(pago.toFixed(2))));
   }
@@ -1121,8 +1180,8 @@ export class ReservaFormComponent {
   getSaldoCalculado(): number {
     const totalReserva = Number(this.reserva?.total) || 0;
     const yaPagado = this.getYaPagado();
-    const anticipo = (this.isEditReserva || !this.reserva?.id) ? (Number(this.reserva?.anticipo) || 0) : 0;
-    const saldo = totalReserva - yaPagado - anticipo;
+    const nuevoAnticipo = (this.isEditReserva || !this.reserva?.id) ? (Number(this.reserva?.anticipo) || 0) : 0;
+    const saldo = totalReserva - yaPagado - (this.isEditReserva ? nuevoAnticipo : 0);
     return saldo > 0 ? Number(saldo.toFixed(2)) : 0;
   }
 
@@ -1398,6 +1457,15 @@ export class ReservaFormComponent {
     return Math.round((totalPrecios + totalServicios) * 100) / 100;
   }
 
+  getPagoResumen(): number {
+    if (this.reserva?.id && this.reserva.id > 0) {
+      const yaPagado = this.getYaPagado();
+      const nuevoAnticipo = this.isEditReserva ? (Number(this.reserva?.anticipo) || 0) : 0;
+      return Number((yaPagado + nuevoAnticipo).toFixed(2));
+    }
+    return Number((Number(this.reserva?.anticipo) || 0).toFixed(2));
+  }
+
   cargarDatosTransaccion(reserva_id: number) {
     forkJoin({
       transacciones: this.transaccionService.listarTransaccionesPorReservaId(reserva_id),
@@ -1425,6 +1493,50 @@ export class ReservaFormComponent {
     if (event.key === '-' || event.key === '+' || event.key === 'e' || event.key === 'E') {
       event.preventDefault();
     }
+  }
+
+  cargarDatosPagos(reserva_id: number): void {
+    if (!reserva_id || reserva_id <= 0) return;
+    this.transaccionPagoService.pagos(reserva_id).subscribe({
+      next: (res) => {
+        if (res?.dato) {
+          try {
+            const data_pagos = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
+            if (data_pagos?.balance) {
+              this.balance.set(data_pagos.balance);
+              if (data_pagos.balance.saldo !== undefined && data_pagos.balance.saldo !== null) {
+                this.reserva.saldo = Number(data_pagos.balance.saldo);
+              }
+            }
+            if (data_pagos?.pagos && Array.isArray(data_pagos.pagos) && data_pagos.pagos.length > 0) {
+              const primerPago = data_pagos.pagos[0];
+              const fpDesc = primerPago.forma_pago || this.forma_pagos.find(f => f.id === primerPago.forma_pago_id)?.descripcion || '';
+              this.pagoRegistradoInfo = {
+                forma_pago_id: primerPago.forma_pago_id,
+                forma_pago_desc: fpDesc,
+                detalle: primerPago.detalle || '',
+                monto: Number(primerPago.monto) || 0
+              };
+              if (!this.reserva.forma_pago_id && primerPago.forma_pago_id) {
+                this.reserva.forma_pago_id = primerPago.forma_pago_id;
+              }
+              if (!this.reserva.detalle_anticipo && primerPago.detalle) {
+                this.reserva.detalle_anticipo = primerPago.detalle;
+              }
+            }
+            if (!this.isEditReserva) {
+              this.reserva.anticipo = this.getYaPagado();
+            }
+            this.cdr.detectChanges();
+          } catch (e) {
+            console.error("Error al procesar datos de pagos en reserva-form:", e);
+          }
+        }
+      },
+      error: (err) => {
+        console.error("Error al consultar pagos de reserva:", err);
+      }
+    });
   }
 
 }

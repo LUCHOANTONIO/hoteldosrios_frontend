@@ -450,11 +450,12 @@ export class ReservaExternaComponent implements OnInit {
     });
   }
 
-  abrirModalReserva(hab?: HabitacionDisponibleCard, reservaExistente?: ReservaModel): void {
+  abrirModalReserva(hab?: HabitacionDisponibleCard, reservaExistente?: ReservaModel, balanceExistente?: any): void {
     let reservaParaForm: ReservaModel;
 
     if (reservaExistente) {
       reservaParaForm = { ...reservaExistente };
+      reservaParaForm.is_externo = 1;
     } else {
       reservaParaForm = new ReservaModel();
       reservaParaForm.fecha_ini = moment(this.fechaLlegada).format('YYYY-MM-DD');
@@ -479,6 +480,7 @@ export class ReservaExternaComponent implements OnInit {
     const dialogRef = this.dialog.open(ReservaFormComponent, {
       data: {
         reserva: reservaParaForm,
+        balance: balanceExistente,
         reservas: this.reservas,
         habitaciones: this.habitaciones,
         tipo_documentos: this.tipoDocumentos,
@@ -511,7 +513,8 @@ export class ReservaExternaComponent implements OnInit {
     this.reservaService.mostrar(reservaId).subscribe({
       next: (res: any) => {
         const r = (res?.response?.reserva || res?.reserva || res) as ReservaModel;
-        this.abrirModalReserva(undefined, r);
+        const b = (res?.response?.balance || res?.balance || null);
+        this.abrirModalReserva(undefined, r, b);
       },
       error: () => {
         this.alertService.show("Error al cargar la reserva", { duration: 3000, type: 'error' });
@@ -656,24 +659,35 @@ export class ReservaExternaComponent implements OnInit {
     this.busqueda(texto);
   }
 
-  cambiarFiltroCategoriaReserva(cat: 'TODOS' | 'HABITACION' | 'FULL_DAY' | 'CAMPING'): void {
-    if (this.filtroCategoriaReserva === cat && cat !== 'TODOS') {
-      this.filtroCategoriaReserva = 'TODOS';
-    } else {
-      this.filtroCategoriaReserva = cat;
-    }
-    this.aplicarFiltroCompletoReservas();
+  ordenarReservasPorTipo(reservas: ReservaModel[]): ReservaModel[] {
+    const ordenTipo: { [key: string]: number } = {
+      'HABITACION': 1,
+      'FULL_DAY': 2,
+      'CAMPING': 3
+    };
+
+    return [...reservas].sort((a, b) => {
+      const infoA = this.obtenerInfoHabitacion(a);
+      const infoB = this.obtenerInfoHabitacion(b);
+      const ordenA = ordenTipo[infoA.categoriaKey] || 99;
+      const ordenB = ordenTipo[infoB.categoriaKey] || 99;
+
+      if (ordenA !== ordenB) {
+        return ordenA - ordenB;
+      }
+      // Dentro de cada categoría, ordenar más recientes primero
+      const dateA = a.fecha_ini ? new Date(a.fecha_ini).getTime() : 0;
+      const dateB = b.fecha_ini ? new Date(b.fecha_ini).getTime() : 0;
+      if (dateA !== dateB) {
+        return dateB - dateA;
+      }
+      return (Number(b.id) || 0) - (Number(a.id) || 0);
+    });
   }
 
   aplicarFiltroCompletoReservas(): void {
-    let filtradas = this.reservas;
-    if (this.filtroCategoriaReserva !== 'TODOS') {
-      filtradas = filtradas.filter(r => {
-        const info = this.obtenerInfoHabitacion(r);
-        return info.categoriaKey === this.filtroCategoriaReserva;
-      });
-    }
-    this.dataSourceReservas.data = filtradas;
+    const ordenadas = this.ordenarReservasPorTipo(this.reservas);
+    this.dataSourceReservas.data = ordenadas;
     this.dataSourceReservas.filter = this.textoBusquedaReserva;
   }
 

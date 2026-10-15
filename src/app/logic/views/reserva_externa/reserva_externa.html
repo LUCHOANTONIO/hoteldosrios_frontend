@@ -68,11 +68,7 @@
         <!-- Botón Buscar -->
         <button mat-flat-button color="primary" class="btn-search-capsule" (click)="buscarDisponibilidad()"
           [disabled]="buscando" matTooltip="Buscar habitaciones disponibles">
-          @if (buscando) {
-          <mat-spinner diameter="18" class="spinner-white"></mat-spinner>
-          } @else {
           <mat-icon>search</mat-icon>
-          }
           <span>Buscar</span>
         </button>
       </div>
@@ -278,48 +274,18 @@
           <mat-icon class="text-primary title-icon">event_available</mat-icon>
           <span>MIS RESERVAS</span>
         </mat-card-title>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle count-badge">
-          {{ totalReservas }} total
-        </span>
-      </div>
 
-      <!-- Filtros rápidos por Categoría (Habitaciones / Full Day / Camping) -->
-      <div class="category-filters-scroll">
-        <button type="button" class="btn btn-sm cat-filter-btn"
-          [ngClass]="filtroCategoriaReserva === 'TODOS' ? 'btn-primary' : 'btn-outline-secondary'"
-          (click)="cambiarFiltroCategoriaReserva('TODOS')">
-          Todos ({{ totalReservas }})
-        </button>
-        <button type="button" class="btn btn-sm cat-filter-btn"
-          [ngClass]="filtroCategoriaReserva === 'HABITACION' ? 'btn-primary' : 'btn-outline-primary'"
-          (click)="cambiarFiltroCategoriaReserva('HABITACION')">
-          <mat-icon class="btn-icon">meeting_room</mat-icon>
-          Habitaciones ({{ totalReservasHotel }})
-        </button>
-        <button type="button" class="btn btn-sm cat-filter-btn"
-          [ngClass]="filtroCategoriaReserva === 'FULL_DAY' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark'"
-          (click)="cambiarFiltroCategoriaReserva('FULL_DAY')">
-          <mat-icon class="btn-icon">wb_sunny</mat-icon>
-          Full Day ({{ totalReservasFullDay }})
-        </button>
-        <button type="button" class="btn btn-sm cat-filter-btn"
-          [ngClass]="filtroCategoriaReserva === 'CAMPING' ? 'btn-success' : 'btn-outline-success'"
-          (click)="cambiarFiltroCategoriaReserva('CAMPING')">
-          <mat-icon class="btn-icon">forest</mat-icon>
-          Camping ({{ totalReservasCamping }})
-        </button>
-      </div>
-
-      <!-- Campo de búsqueda -->
-      <div class="header-search-container">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-input-field">
-          <mat-label>Buscar reserva (cliente, doc, nro, tel...)</mat-label>
-          <input matInput type="search" placeholder="Buscar reserva..." (keydown.enter)="busqueda(txtBusquedaRes.value)"
-            (keyup)="busqueda(txtBusquedaRes.value)" #txtBusquedaRes>
-          <button mat-icon-button matSuffix class="text-primary" (click)="busqueda(txtBusquedaRes.value)">
-            <mat-icon>search</mat-icon>
-          </button>
-        </mat-form-field>
+        <!-- Campo de búsqueda en la misma línea del título -->
+        <div class="header-search-container">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-input-field">
+            <mat-label>Buscar reserva...</mat-label>
+            <input matInput type="search" placeholder="Buscar reserva..." (keydown.enter)="busqueda(txtBusquedaRes.value)"
+              (keyup)="busqueda(txtBusquedaRes.value)" #txtBusquedaRes>
+            <button mat-icon-button matSuffix class="text-primary" (click)="busqueda(txtBusquedaRes.value)">
+              <mat-icon>search</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
       </div>
     </mat-card-header>
 
@@ -380,7 +346,11 @@
             <th mat-header-cell *matHeaderCellDef class="text-nowrap">Habitación / Servicio</th>
             <td mat-cell *matCellDef="let r" class="text-nowrap">
               @let info = obtenerInfoHabitacion(r);
-              <span>{{ info.tipo }} - {{ info.detalle }}</span>
+              <span class="badge me-1" [ngClass]="info.claseBadge">
+                <mat-icon style="font-size: 13px; height: 13px; width: 13px; vertical-align: middle; margin-right: 2px;">{{ info.icono }}</mat-icon>
+                {{ info.tipo }}
+              </span>
+              <span>{{ info.detalle }}</span>
             </td>
           </ng-container>
 
@@ -423,24 +393,19 @@
           <mat-icon class="text-primary title-icon">request_quote</mat-icon>
           <span>MIS COTIZACIONES</span>
         </mat-card-title>
-        <button type="button" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 py-1 px-3"
-          (click)="abrirModalCotizacion()">
-          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon>
-          <span>Nueva Cotización</span>
-        </button>
-      </div>
 
-      <!-- Campo de búsqueda -->
-      <div class="header-search-container">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-input-field">
-          <mat-label>Buscar cotización (cliente, dni, detalle...)</mat-label>
-          <input matInput type="search" placeholder="Buscar cotización..."
-            (keydown.enter)="busquedaCot(txtBusquedaCot.value)" (keyup)="busquedaCot(txtBusquedaCot.value)"
-            #txtBusquedaCot>
-          <button mat-icon-button matSuffix class="text-primary" (click)="busquedaCot(txtBusquedaCot.value)">
-            <mat-icon>search</mat-icon>
-          </button>
-        </mat-form-field>
+        <!-- Campo de búsqueda en la misma línea del título -->
+        <div class="header-search-container">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-input-field">
+            <mat-label>Buscar cotización...</mat-label>
+            <input matInput type="search" placeholder="Buscar cotización..."
+              (keydown.enter)="busquedaCot(txtBusquedaCot.value)" (keyup)="busquedaCot(txtBusquedaCot.value)"
+              #txtBusquedaCot>
+            <button mat-icon-button matSuffix class="text-primary" (click)="busquedaCot(txtBusquedaCot.value)">
+              <mat-icon>search</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
       </div>
     </mat-card-header>
 
