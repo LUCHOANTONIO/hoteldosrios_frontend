@@ -46,16 +46,6 @@
       letter-spacing: 0.5px;
       color: #0f172a;
     }
-
-    .portal-tag {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: #eff6ff;
-      color: #2563eb;
-      border: 1px solid #dbeafe;
-    }
   }
 
   .nav-pills-row {
@@ -589,143 +579,37 @@
   }
 }
 
-.mobile-cards-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-  background-color: #f8fafc;
-}
+/* TABLA RESPONSIVE */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 
-.mobile-item-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: relative;
-  overflow: hidden;
+  table {
+    width: 100%;
+    min-width: 820px;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    bottom: 0;
-    background-color: #0284c7;
-  }
-  &.card-tipo-full_day::before { background-color: #f59e0b; }
-  &.card-tipo-camping::before { background-color: #10b981; }
-
-  .card-top-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-
-    .identifier-badges {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      .correlativo-chip {
-        font-size: 13px;
-        font-weight: 800;
-        color: #0f172a;
-        background: #f1f5f9;
-        padding: 2px 8px;
-        border-radius: 6px;
-      }
+    th, td {
+      vertical-align: middle;
+      white-space: nowrap;
     }
 
-    .date-chip {
-      font-size: 11px;
-      color: #64748b;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    .mat-column-cliente,
+    .cdk-column-cliente {
+      white-space: normal;
+      min-width: 170px;
     }
-  }
 
-  .card-details-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    .detail-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: 13px;
-
-      .detail-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        flex-shrink: 0;
-        margin-top: 1px;
-      }
-
-      .detail-content {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.35;
-
-        .main-text { font-weight: 700; color: #0f172a; }
-        .sub-text { font-size: 12px; color: #64748b; }
-
-        .phone-call-link {
-          color: #0284c7;
-          font-weight: 600;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-        }
-      }
+    .mat-column-detalle,
+    .cdk-column-detalle {
+      white-space: normal;
+      min-width: 190px;
     }
-  }
 
-  .card-actions-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-top: 8px;
-    border-top: 1px solid #f1f5f9;
-
-    .btn-card-action {
-      flex: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 12.5px;
-      font-weight: 700;
-      cursor: pointer;
-      min-height: 38px;
-      border: 1px solid transparent;
-      transition: all 0.2s ease;
-
-      mat-icon { font-size: 16px; width: 16px; height: 16px; }
-
-      &.btn-voucher {
-        background-color: #fef2f2;
-        color: #dc2626;
-        border-color: #fecaca;
-      }
-
-      &.btn-edit {
-        background-color: #eff6ff;
-        color: #2563eb;
-        border-color: #bfdbfe;
-      }
+    .mat-column-acciones,
+    .cdk-column-acciones {
+      width: 100px;
+      min-width: 100px;
     }
   }
 }

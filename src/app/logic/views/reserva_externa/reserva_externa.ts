@@ -171,8 +171,7 @@ export class ReservaExternaComponent implements OnInit {
     'cliente',
     'telefono',
     'habitacion',
-    'fechas_estadia',
-    'estado'
+    'fechas_estadia'
   ];
   @ViewChild('paginatorReservas') paginatorReservas!: MatPaginator;
 
