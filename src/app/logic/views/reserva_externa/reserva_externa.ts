@@ -16,6 +16,7 @@ import { MatPaginator, MatPaginatorIntl, MatPaginatorModule } from '@angular/mat
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SpanishPaginatorIntl } from '../../../base/utils/spanish-paginator-intl';
 import { forkJoin, Observable } from 'rxjs';
+import { Router } from '@angular/router';
 import moment from 'moment';
 
 // MODELS
@@ -205,7 +206,8 @@ export class ReservaExternaComponent implements OnInit {
     private productoService: ProductoService,
     private estadoCivilService: EstadoCivilService,
     private comunicacionService: ComunicacionService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {
     effect(() => {
       const cots = this.cotizacionesSignal();
@@ -449,6 +451,10 @@ export class ReservaExternaComponent implements OnInit {
         this.dataSourceCotizaciones.paginator = this.paginatorCotizaciones;
       }
     });
+  }
+
+  irReporte(): void {
+    this.router.navigate(['/reporte_reserva_externa']);
   }
 
   abrirModalReserva(hab?: HabitacionDisponibleCard, reservaExistente?: ReservaModel, balanceExistente?: any): void {

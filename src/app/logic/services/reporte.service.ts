@@ -188,5 +188,35 @@ export class ReporteService{
    }
    //END:Reporte Servicio de Alimentos
 
+   //BEGIN:Reporte Reserva Externa Comisiones
+   list_reserva_externa(fecha_ini: string, fecha_fin: string, usuario_id: any = null): Observable<RespuestaRequest<any>> {
+      let params = new HttpParams()
+         .set('fecha_ini', fecha_ini)
+         .set('fecha_fin', fecha_fin);
+      if (usuario_id) {
+         params = params.set('usuario_id', usuario_id);
+      }
+      return this.http.get<RespuestaRequest<any>>(`${this.URL_API_BASE}/list_reserva_externa`, { params });
+   }
+
+   exportar_list_reserva_externa(fecha_ini: string, fecha_fin: string, usuario_id: any = null): Observable<string> {
+      let params = new HttpParams()
+         .set('fecha_ini', fecha_ini)
+         .set('fecha_fin', fecha_fin);
+      if (usuario_id) {
+         params = params.set('usuario_id', usuario_id);
+      }
+      return this.http.get<string>(`${this.URL_API_BASE}/export_list_reserva_externa`, { params });
+   }
+
+   exportar_reserva_externa_excel(fecha_ini: string, fecha_fin: string, usuario_id: any = null): Observable<string> {
+      return this.http.post<string>(`${this.URL_API_BASE}/export_reserva_externa_excel`, {
+         fecha_ini: fecha_ini,
+         fecha_fin: fecha_fin,
+         usuario_id: usuario_id
+      });
+   }
+   //END:Reporte Reserva Externa Comisiones
+
 }
    

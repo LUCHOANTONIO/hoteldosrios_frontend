@@ -1,0 +1,152 @@
+<mat-card class="my-1" appearance="outlined">
+
+  <mat-card-header class="bg-light py-2 px-3">
+    <div class="row w-100 align-items-center g-2 m-0">
+
+      <div class="col-12 col-lg-auto ps-0">
+        <mat-card-title class="text-bg-white m-0 text-nowrap" style="font-size: 15px;">
+          <strong>REPORTE RESERVAS EXTERNAS</strong>
+        </mat-card-title>
+      </div>
+
+      <div class="col-6 col-sm-6 col-md-3 col-lg col-xl">
+        <mat-form-field class="w-100" subscriptSizing="dynamic">
+          <mat-label>Desde</mat-label>
+          <input matInput [matDatepicker]="picker_ini" [(ngModel)]="fecha_ini" name="fecha_ini" #txtFechaIni required>
+          <mat-datepicker-toggle matIconSuffix [for]="picker_ini"></mat-datepicker-toggle>
+          <mat-datepicker #picker_ini></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="col-6 col-sm-6 col-md-3 col-lg col-xl">
+        <mat-form-field class="w-100" subscriptSizing="dynamic">
+          <mat-label>Hasta</mat-label>
+          <input matInput [matDatepicker]="picker_fin" [(ngModel)]="fecha_fin" name="fecha_fin" #txtFechaFin required>
+          <mat-datepicker-toggle matIconSuffix [for]="picker_fin"></mat-datepicker-toggle>
+          <mat-datepicker #picker_fin></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3 col-lg col-xl">
+        <mat-form-field class="w-100" subscriptSizing="dynamic">
+          <mat-label>Vendedor</mat-label>
+          <mat-select placeholder="" [(ngModel)]="usuario_id" name="usuario_id">
+            <mat-option [value]="null">Todo</mat-option>
+            @for (u of usuarios; track u.id) {
+              <mat-option [value]="u.id">{{ getNombreUsuario(u) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3 col-lg col-xl">
+        <mat-form-field class="w-100" subscriptSizing="dynamic">
+          <mat-label>Texto búsqueda</mat-label>
+          <input matInput type="search" placeholder="" (keydown.enter)="busqueda(txtBusqueda.value)" #txtBusqueda (keyup)="busqueda(txtBusqueda.value)">
+          <button mat-icon-button matSuffix class="text-info" (click)="busqueda(txtBusqueda.value)">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-lg-auto d-flex gap-1 justify-content-end pe-0">
+        <button mat-button (click)="cargarDatos()" class="bg-primary rounded-button text-white btn-reporte">Filtrar</button>
+        <button mat-button (click)="mostrarVisorPdf('0ms', '0ms')" class="bg-danger rounded-button text-white btn-reporte">Pdf</button>
+        <button mat-button (click)="exportarExcel()" class="bg-success rounded-button text-white btn-reporte">Excel</button>
+      </div>
+
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="bg-white p-0">
+    <div class="mat-elevation-z8">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource">
+
+          <!-- Fila para mostrar "No hay datos disponibles" -->
+          <tr *matNoDataRow>
+            <td [attr.colspan]="displayedColumns.length" class="text-center py-4" style="font-size:18px;">
+              No hay datos disponibles
+            </td>
+          </tr>
+
+          <!-- Nro. Reserva -->
+          <ng-container matColumnDef="correlativo">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Nro Reserva</th>
+            <td mat-cell *matCellDef="let x" class="text-center"> {{ x.correlativo || x.reserva_id }} </td>
+          </ng-container>
+
+          <!-- Usuario / Vendedor -->
+          <ng-container matColumnDef="usuario_nombre">
+            <th mat-header-cell *matHeaderCellDef>Usuario</th>
+            <td mat-cell *matCellDef="let x"> {{ x.usuario_nombre }} </td>
+          </ng-container>
+
+          <!-- Fecha Registro -->
+          <ng-container matColumnDef="fecha_registro">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let x"> {{ x.fecha_registro }} </td>
+          </ng-container>
+
+          <!-- Estadía -->
+          <ng-container matColumnDef="estadia">
+            <th mat-header-cell *matHeaderCellDef>Estadía</th>
+            <td mat-cell *matCellDef="let x"> {{ x.estadia }} </td>
+          </ng-container>
+
+          <!-- Habitación / Servicio -->
+          <ng-container matColumnDef="servicio_habitacion">
+            <th mat-header-cell *matHeaderCellDef>Habitación</th>
+            <td mat-cell *matCellDef="let x"> {{ x.servicio_habitacion }} </td>
+          </ng-container>
+
+          <!-- Cliente -->
+          <ng-container matColumnDef="cliente">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let x">
+              <div>{{ x.cliente }}</div>
+              @if (x.nro_documento || x.telefono) {
+                <small class="text-muted">
+                  {{ x.nro_documento ? 'Doc: ' + x.nro_documento : '' }}
+                  {{ x.nro_documento && x.telefono ? ' - ' : '' }}
+                  {{ x.telefono ? 'Tel: ' + x.telefono : '' }}
+                </small>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Estado</th>
+            <td mat-cell *matCellDef="let x" class="text-center"> {{ x.estado }} </td>
+          </ng-container>
+
+          <!-- Total -->
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef class="text-end">Total</th>
+            <td mat-cell *matCellDef="let x" class="text-end"> {{ x.total | number:'1.2-2' }} </td>
+          </ng-container>
+
+          <!-- Anticipo / Pagado -->
+          <ng-container matColumnDef="total_pagado">
+            <th mat-header-cell *matHeaderCellDef class="text-end">Anticipo</th>
+            <td mat-cell *matCellDef="let x" class="text-end"> {{ x.total_pagado | number:'1.2-2' }} </td>
+          </ng-container>
+
+          <!-- Saldo -->
+          <ng-container matColumnDef="saldo">
+            <th mat-header-cell *matHeaderCellDef class="text-end">Saldo</th>
+            <td mat-cell *matCellDef="let x" class="text-end"> {{ x.saldo | number:'1.2-2' }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-dark text-white"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" id="fila{{row.reserva_id}}"></tr>
+
+        </table>
+      </div>
+
+      <mat-divider></mat-divider>
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" [pageSize]="20" showFirstLastButtons class="bg-light"></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>
