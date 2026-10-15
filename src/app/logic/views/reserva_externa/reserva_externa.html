@@ -97,9 +97,9 @@
       <!-- 1. HABITACIONES -->
       @if (habitacionesHotel.length > 0) {
       <div class="category-section">
-        <div class="section-header">
+        <div class="section-header header-hotel">
           <div class="header-icon">
-            <mat-icon color="primary">meeting_room</mat-icon>
+            <mat-icon>meeting_room</mat-icon>
           </div>
           <h2 class="section-title">Habitaciones</h2>
           <span class="section-badge">{{ totalHotelDisponibles }} disponibles</span>
@@ -135,6 +135,7 @@
               </div>
               <div class="hero-details">
                 <h3 class="room-title">{{ formatearNombreTipo(hab) }}</h3>
+                <span class="room-category-sub">Habitación de Hotel</span>
               </div>
             </div>
 
@@ -143,8 +144,8 @@
               <div class="action-block">
                 <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
                   matTooltip="Reservar esta habitación">
-                  <mat-icon>event_available</mat-icon>
                   <span>Reservar</span>
+                  <mat-icon>arrow_forward</mat-icon>
                 </button>
               </div>
             </div>
@@ -157,9 +158,9 @@
       <!-- 2. FULL DAY -->
       @if (habitacionesFullDay.length > 0) {
       <div class="category-section">
-        <div class="section-header">
+        <div class="section-header header-fullday">
           <div class="header-icon">
-            <mat-icon color="primary">wb_sunny</mat-icon>
+            <mat-icon>wb_sunny</mat-icon>
           </div>
           <h2 class="section-title">Full Day</h2>
           <span class="section-badge">{{ totalFullDayDisponibles }} disponibles</span>
@@ -188,6 +189,7 @@
               </div>
               <div class="hero-details">
                 <h3 class="room-title">{{ formatearNombreTipo(hab) }}</h3>
+                <span class="room-category-sub">Pase de Día</span>
               </div>
             </div>
 
@@ -196,8 +198,8 @@
               <div class="action-block">
                 <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
                   matTooltip="Reservar Pase Full Day">
-                  <mat-icon>event_available</mat-icon>
                   <span>Reservar</span>
+                  <mat-icon>arrow_forward</mat-icon>
                 </button>
               </div>
             </div>
@@ -210,9 +212,9 @@
       <!-- 3. CAMPING -->
       @if (habitacionesCamping.length > 0) {
       <div class="category-section">
-        <div class="section-header">
+        <div class="section-header header-camping">
           <div class="header-icon">
-            <mat-icon color="primary">forest</mat-icon>
+            <mat-icon>forest</mat-icon>
           </div>
           <h2 class="section-title">Camping</h2>
           <span class="section-badge">{{ totalCampingDisponibles }} disponibles</span>
@@ -241,6 +243,7 @@
               </div>
               <div class="hero-details">
                 <h3 class="room-title">{{ formatearNombreTipo(hab) }}</h3>
+                <span class="room-category-sub">Espacio al Aire Libre</span>
               </div>
             </div>
 
@@ -249,8 +252,8 @@
               <div class="action-block">
                 <button type="button" class="btn-pro-reserve" (click)="abrirModalReserva(hab); $event.stopPropagation()"
                   matTooltip="Reservar Espacio de Camping">
-                  <mat-icon>event_available</mat-icon>
                   <span>Reservar</span>
+                  <mat-icon>arrow_forward</mat-icon>
                 </button>
               </div>
             </div>
