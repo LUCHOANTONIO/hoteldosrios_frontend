@@ -293,6 +293,11 @@ export class ReservaFormComponent {
       }
       this.calcularTotal();
 
+      if (this.is_externo && !this.reserva.forma_pago_id && this.forma_pagos && this.forma_pagos.length > 0) {
+        const efectivo = this.forma_pagos.find(f => f.descripcion && f.descripcion.toLowerCase().includes('efectivo'));
+        this.reserva.forma_pago_id = efectivo ? efectivo.id : this.forma_pagos[0].id;
+      }
+
       if (this.reserva.id > 0) {
         let habitacionIds: number[] = [];
 
@@ -644,10 +649,27 @@ export class ReservaFormComponent {
         this.alertService.show("El monto no puede ser vacío o cero", { duration: 5000, type: 'info' });
         return;
       }
-      if (this.reserva.anticipo && Number(this.reserva.anticipo) > 0 && (!this.reserva.id || this.isEditReserva)) {
-        if (!this.reserva.forma_pago_id) {
-          this.alertService.show("Debe seleccionar la forma de pago del anticipo", { duration: 5000, type: 'info' });
+      if (this.is_externo) {
+        const anticipoVal = Number(this.reserva.anticipo) || 0;
+        const yaPagadoVal = this.getYaPagado();
+        if ((!this.reserva.id || this.reserva.id <= 0) && anticipoVal <= 0) {
+          this.alertService.show("El pago o anticipo es obligatorio", { duration: 5000, type: 'warning' });
           return;
+        }
+        if (this.reserva.id > 0 && yaPagadoVal <= 0 && anticipoVal <= 0) {
+          this.alertService.show("El pago o anticipo es obligatorio", { duration: 5000, type: 'warning' });
+          return;
+        }
+        if (anticipoVal > 0 && !this.reserva.forma_pago_id) {
+          this.alertService.show("Debe seleccionar la forma de pago del anticipo", { duration: 5000, type: 'warning' });
+          return;
+        }
+      } else {
+        if (this.reserva.anticipo && Number(this.reserva.anticipo) > 0 && (!this.reserva.id || this.isEditReserva)) {
+          if (!this.reserva.forma_pago_id) {
+            this.alertService.show("Debe seleccionar la forma de pago del anticipo", { duration: 5000, type: 'info' });
+            return;
+          }
         }
       }
       if (this.tipo_reserva === 'grupal') {
@@ -718,8 +740,18 @@ export class ReservaFormComponent {
     this.reservaService.crear(payload).subscribe({
       next: (res) => {
         if (res.correcto) {
-          const data = JSON.parse(res.dato);
-          this.reserva = data.reserva as ReservaModel;
+          let data: any = {};
+          try {
+            data = typeof res.dato === 'string' ? JSON.parse(res.dato) : (res.dato || {});
+          } catch (e) {
+            data = res.dato || {};
+          }
+          if (data.reserva) {
+            this.reserva = data.reserva as ReservaModel;
+          } else if (data.reservas && data.reservas.length > 0) {
+            this.reserva = data.reservas[0] as ReservaModel;
+          }
+          const finalId = Number(this.reserva?.id || data?.id || (data.reservas && data.reservas[0]?.id)) || 0;
           if (this.is_externo) {
             this.reserva.is_externo = 1;
           }
@@ -784,7 +816,8 @@ export class ReservaFormComponent {
           }
 
           if (this.is_externo) {
-            this.dialogRef.close({ action: 'saved', reserva: this.reserva });
+            const finalId = Number(this.reserva?.id || data?.id || (data.reservas && data.reservas[0]?.id)) || 0;
+            this.dialogRef.close({ action: 'saved', reserva: this.reserva, reserva_id: finalId, id: finalId });
             return;
           }
 
@@ -857,8 +890,18 @@ export class ReservaFormComponent {
     this.reservaService.modificar(payload).subscribe({
       next: (res) => {
         if (res.correcto) {
-          const data = JSON.parse(res.dato);
-          this.reserva = data.reserva as ReservaModel;
+          let data: any = {};
+          try {
+            data = typeof res.dato === 'string' ? JSON.parse(res.dato) : (res.dato || {});
+          } catch (e) {
+            data = res.dato || {};
+          }
+          if (data.reserva) {
+            this.reserva = data.reserva as ReservaModel;
+          } else if (data.reservas && data.reservas.length > 0) {
+            this.reserva = data.reservas[0] as ReservaModel;
+          }
+          const finalId = Number(this.reserva?.id || data?.id || (data.reservas && data.reservas[0]?.id)) || 0;
           if (this.is_externo) {
             this.reserva.is_externo = 1;
           }
@@ -904,7 +947,8 @@ export class ReservaFormComponent {
           }
 
           if (this.is_externo) {
-            this.dialogRef.close({ action: 'saved', reserva: this.reserva });
+            const finalId = Number(this.reserva?.id || data?.id || (data.reservas && data.reservas[0]?.id)) || 0;
+            this.dialogRef.close({ action: 'saved', reserva: this.reserva, reserva_id: finalId, id: finalId });
             return;
           }
 

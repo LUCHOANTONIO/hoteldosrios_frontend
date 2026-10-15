@@ -265,8 +265,9 @@ export class ReservaExternaComponent implements OnInit {
           this.reservas = res.reservasRes as any;
         }
 
-        // Cotizaciones
-        this.cotizaciones = Array.isArray(res.cotizaciones) ? res.cotizaciones : [];
+        // Cotizaciones ordenadas por número y fecha descendente
+        const rawCots = Array.isArray(res.cotizaciones) ? res.cotizaciones : [];
+        this.cotizaciones = this.ordenarCotizaciones(rawCots);
         this.cotizacionesSignal.set(this.cotizaciones);
 
         // Procesar datos cargados desde HabitacionRepository metodo disponibilidadHabitacionExterno
@@ -504,8 +505,14 @@ export class ReservaExternaComponent implements OnInit {
       disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe(() => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       this.cargarDatosGenerales();
+      const reservaId = Number(result?.reserva_id || result?.reserva?.id || result?.id) || 0;
+      if (reservaId > 0) {
+        setTimeout(() => {
+          this.verVoucherReserva(reservaId);
+        }, 300);
+      }
     });
   }
 
@@ -555,7 +562,8 @@ export class ReservaExternaComponent implements OnInit {
       if (res) {
         this.cotizacionService.listar().subscribe({
           next: (cots) => {
-            this.cotizaciones = Array.isArray(cots) ? cots : [];
+            const rawCots = Array.isArray(cots) ? cots : [];
+            this.cotizaciones = this.ordenarCotizaciones(rawCots);
             this.cotizacionesSignal.set(this.cotizaciones);
             this.actualizarTablas();
           }
@@ -582,12 +590,20 @@ export class ReservaExternaComponent implements OnInit {
     return m.isValid() ? m.format('DD/MM/YYYY') : String(fecha);
   }
 
+  formatearFechaHora(fecha: any): string {
+    if (!fecha) return '-';
+    const m = moment(fecha);
+    return m.isValid() ? m.format('DD/MM/YYYY HH:mm') : String(fecha);
+  }
+
   obtenerFechaRegistro(r: ReservaModel): string {
-    return this.formatearFecha((r as any).created_at || r.fecha_ini);
+    const f = (r as any).created_at || (r as any).fecha_registro || r.fecha_ini;
+    return this.formatearFechaHora(f);
   }
 
   obtenerFechaRegistroCot(c: CotizacionModel): string {
-    return this.formatearFecha(c.fecha || c.created_at);
+    const f = c.created_at || c.fecha;
+    return this.formatearFechaHora(f);
   }
 
   formatearRangoFechas(fIni: any, fFin: any): string {
@@ -611,7 +627,7 @@ export class ReservaExternaComponent implements OnInit {
             panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
             data: {
               pdf_base64: pdfBase64,
-              titulo_documento: `Voucher de Reserva #${reservaId}`
+              titulo_documento: `Comprobante de Reserva ${reservaId}`
             }
           });
         } else {
@@ -659,34 +675,38 @@ export class ReservaExternaComponent implements OnInit {
     this.busqueda(texto);
   }
 
-  ordenarReservasPorTipo(reservas: ReservaModel[]): ReservaModel[] {
-    const ordenTipo: { [key: string]: number } = {
-      'HABITACION': 1,
-      'FULL_DAY': 2,
-      'CAMPING': 3
-    };
-
+  ordenarReservas(reservas: ReservaModel[]): ReservaModel[] {
     return [...reservas].sort((a, b) => {
-      const infoA = this.obtenerInfoHabitacion(a);
-      const infoB = this.obtenerInfoHabitacion(b);
-      const ordenA = ordenTipo[infoA.categoriaKey] || 99;
-      const ordenB = ordenTipo[infoB.categoriaKey] || 99;
+      const numA = Number(a.correlativo || a.id) || 0;
+      const numB = Number(b.correlativo || b.id) || 0;
 
-      if (ordenA !== ordenB) {
-        return ordenA - ordenB;
+      // 1. Ordenar por número de reserva descendente
+      if (numB !== numA) {
+        return numB - numA;
       }
-      // Dentro de cada categoría, ordenar más recientes primero
-      const dateA = a.fecha_ini ? new Date(a.fecha_ini).getTime() : 0;
-      const dateB = b.fecha_ini ? new Date(b.fecha_ini).getTime() : 0;
-      if (dateA !== dateB) {
-        return dateB - dateA;
+
+      // 2. Si son iguales, ordenar por fecha descendente
+      const fechaA = moment((a as any).created_at || a.fecha_ini).valueOf() || 0;
+      const fechaB = moment((b as any).created_at || b.fecha_ini).valueOf() || 0;
+      return fechaB - fechaA;
+    });
+  }
+
+  ordenarCotizaciones(cotizaciones: CotizacionModel[]): CotizacionModel[] {
+    return [...cotizaciones].sort((a, b) => {
+      const numA = Number(a.correlativo || a.id) || 0;
+      const numB = Number(b.correlativo || b.id) || 0;
+      if (numB !== numA) {
+        return numB - numA;
       }
-      return (Number(b.id) || 0) - (Number(a.id) || 0);
+      const fechaA = moment(a.fecha || a.created_at).valueOf() || 0;
+      const fechaB = moment(b.fecha || b.created_at).valueOf() || 0;
+      return fechaB - fechaA;
     });
   }
 
   aplicarFiltroCompletoReservas(): void {
-    const ordenadas = this.ordenarReservasPorTipo(this.reservas);
+    const ordenadas = this.ordenarReservas(this.reservas);
     this.dataSourceReservas.data = ordenadas;
     this.dataSourceReservas.filter = this.textoBusquedaReserva;
   }

@@ -291,10 +291,11 @@
                         } @else {
                         <!-- Nueva reserva -->
                         <mat-form-field appearance="outline" class="col-12 col-md-4">
-                            <mat-label>Anticipo (Pago)</mat-label>
+                            <mat-label>Anticipo (Pago){{ is_externo ? '*' : '' }}</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.anticipo" name="anticipo"
                                 [readonly]="isDisabled" (input)="validarAnticipo()" min="0"
                                 (focus)="$any($event.target).select()"
+                                [required]="is_externo"
                                 step="any" (keydown)="bloquearSignosNegativos($event)" #txtAnticipo
                                 (keydown.enter)="focusFormaPagoAnticipo()">
                         </mat-form-field>
@@ -308,11 +309,11 @@
                         }
 
                         <!-- Información de Forma de Pago y Detalle -->
-                        @if ((reserva.anticipo && reserva.anticipo > 0) || getYaPagado() > 0 || pagoRegistradoInfo.forma_pago_id) {
+                        @if ((reserva.anticipo && reserva.anticipo > 0) || getYaPagado() > 0 || pagoRegistradoInfo.forma_pago_id || is_externo) {
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
-                            <mat-label>{{ (reserva.id > 0 && isEditReserva && reserva.anticipo && reserva.anticipo > 0) ? 'Forma de Pago (Pago Adicional)' : (reserva.id > 0 ? 'Forma de Pago Registrada' : 'Forma de Pago Anticipo') }}</mat-label>
+                            <mat-label>{{ (reserva.id > 0 && isEditReserva && reserva.anticipo && reserva.anticipo > 0) ? 'Forma de Pago (Pago Adicional)' : (reserva.id > 0 ? 'Forma de Pago Registrada' : 'Forma de Pago Anticipo' + (is_externo ? '*' : '')) }}</mat-label>
                             <mat-select placeholder="Seleccionar forma de pago" [(ngModel)]="reserva.forma_pago_id"
-                                name="forma_pago_id" [disabled]="isDisabled || (reserva.id > 0 && !isEditReserva && getYaPagado() > 0)" #cboFormaPagoAnticipo required>
+                                name="forma_pago_id" [disabled]="isDisabled || (reserva.id > 0 && !isEditReserva && getYaPagado() > 0)" #cboFormaPagoAnticipo [required]="is_externo || (reserva.anticipo && reserva.anticipo > 0)">
                                 @for (x of forma_pagos; track $index) {
                                 <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
                                 }

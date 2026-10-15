@@ -312,7 +312,7 @@
           <ng-container matColumnDef="correlativo">
             <th mat-header-cell *matHeaderCellDef class="text-nowrap text-start">N° Reserva</th>
             <td mat-cell *matCellDef="let r" class="text-nowrap text-start">
-              <span>#{{ r.correlativo || r.id }}</span>
+              <span>{{ r.correlativo || r.id }}</span>
             </td>
           </ng-container>
 
@@ -415,13 +415,7 @@
           <!-- Acciones -->
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef style="text-align: left; vertical-align: middle; width: 110px;">
-              <div style="display: flex; align-items: center;">
-                <button mat-icon-button (click)="abrirModalCotizacion()" class="bg-success text-black"
-                  matTooltip="Nueva Cotización">
-                  <mat-icon>add</mat-icon>
-                </button>
-                <span style="margin-left: 8px;">Acciones</span>
-              </div>
+              <span style="margin-left: 8px;">Acciones</span>
             </th>
             <td mat-cell *matCellDef="let c">
               <button mat-icon-button (click)="verVoucherCotizacion(c.id)" class="text-danger"
@@ -438,7 +432,7 @@
           <ng-container matColumnDef="correlativo">
             <th mat-header-cell *matHeaderCellDef class="text-nowrap text-start">N° Cotiz.</th>
             <td mat-cell *matCellDef="let c" class="text-nowrap text-start">
-              <span>#{{ c.correlativo || c.id }}</span>
+              <span>{{ c.correlativo || c.id }}</span>
             </td>
           </ng-container>
 
