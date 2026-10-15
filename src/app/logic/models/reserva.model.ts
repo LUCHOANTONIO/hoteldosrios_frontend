@@ -39,7 +39,7 @@ export class ReservaModel {
     usuario_alta_id: number | null = null;
     saldo: number = 0;
     total: number = 0;
-    anticipo: number = 0;
+    anticipo: number | null = null;
     detalle_anticipo: string = "";
     transacciones: TransaccionModel[] = [];
     created_at?: string = "";

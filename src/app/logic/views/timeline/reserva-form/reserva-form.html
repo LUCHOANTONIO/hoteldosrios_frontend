@@ -211,6 +211,7 @@
                             <mat-label>Cantidad Adulto</mat-label>
                             <input type="number" matInput placeholder="1" [(ngModel)]="reserva.cantidad_adulto"
                                 name="cantidad_adulto" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                (focus)="$any($event.target).select()"
                                 step="1" (keydown)="bloquearNegativos($event)" required #txtCantidadAdulto
                                 (keydown.enter)="txtPrecioUnitAdulto.focus()">
                             <mat-icon matSuffix class="text-secondary">person</mat-icon>
@@ -220,6 +221,7 @@
                             <mat-label>Precio Unit. Adulto</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unit_adulto"
                                 name="precio_unit_adulto" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                (focus)="$any($event.target).select()"
                                 step="any" (keydown)="bloquearSignosNegativos($event)" required #txtPrecioUnitAdulto
                                 (keydown.enter)="txtCantidadNinio.focus()">
                         </mat-form-field>
@@ -228,6 +230,7 @@
                             <mat-label>Cantidad Niño</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.cantidad_ninio"
                                 name="cantidad_ninio" [readonly]="isDisabled" (input)="calcularTotal()" min="0" step="1"
+                                (focus)="$any($event.target).select()"
                                 (keydown)="bloquearNegativos($event)" #txtCantidadNinio
                                 (keydown.enter)="txtPrecioUnitNinio.focus()">
                             <mat-icon matSuffix class="text-secondary">child_care</mat-icon>
@@ -237,6 +240,7 @@
                             <mat-label>Precio Unit. Niño</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.precio_unit_ninio"
                                 name="precio_unit_ninio" [readonly]="isDisabled" (input)="calcularTotal()" min="0"
+                                (focus)="$any($event.target).select()"
                                 step="any" (keydown)="bloquearSignosNegativos($event)" #txtPrecioUnitNinio
                                 (keydown.enter)="txtPrecioTotal.focus()">
                         </mat-form-field>
@@ -258,7 +262,8 @@
                         <mat-form-field appearance="outline" class="col-12 col-md-3">
                             <mat-label>Pago Adicional</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.anticipo" name="anticipo"
-                                [readonly]="isDisabled" (input)="validarAnticipo()" min="0" [max]="getSaldoCalculado() + (reserva.anticipo || 0)"
+                                [readonly]="isDisabled" (input)="validarAnticipo()" min="0"
+                                (focus)="$any($event.target).select()"
                                 step="any" (keydown)="bloquearSignosNegativos($event)" #txtAnticipo
                                 (keydown.enter)="focusFormaPagoAnticipo()">
                         </mat-form-field>
@@ -288,7 +293,8 @@
                         <mat-form-field appearance="outline" class="col-12 col-md-4">
                             <mat-label>Anticipo (Pago)</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.anticipo" name="anticipo"
-                                [readonly]="isDisabled" (input)="validarAnticipo()" min="0" [max]="reserva.total"
+                                [readonly]="isDisabled" (input)="validarAnticipo()" min="0"
+                                (focus)="$any($event.target).select()"
                                 step="any" (keydown)="bloquearSignosNegativos($event)" #txtAnticipo
                                 (keydown.enter)="focusFormaPagoAnticipo()">
                         </mat-form-field>

@@ -279,12 +279,12 @@ export class ReservaFormComponent {
         }
         this.reserva.precio_unit_ninio = Number(this.reserva.precio_unit_ninio) || 0;
         this.reserva.total = 0;
-        this.reserva.anticipo = 0;
+        this.reserva.anticipo = null as any;
         this.reserva.detalle_anticipo = '';
       } else {
         this.reserva.precio_unit_adulto = Number(this.reserva.precio_unit_adulto) || 0;
         this.reserva.precio_unit_ninio = Number(this.reserva.precio_unit_ninio) || 0;
-        this.reserva.anticipo = this.getYaPagado();
+        this.reserva.anticipo = null as any;
         this.cargarDatosPagos(this.reserva.id);
       }
 
@@ -710,7 +710,9 @@ export class ReservaFormComponent {
       cantidad_ninio: cantNinio,
       precio_unit_ninio: precioNinio,
       cantidad_huesped: (cantAdulto + cantNinio) > 0 ? (cantAdulto + cantNinio) : 1,
-      transacciones: this.reserva.transacciones || []
+      transacciones: this.reserva.transacciones || [],
+      anticipo: Number(this.reserva.anticipo) || 0,
+      detalle_anticipo: (Number(this.reserva.anticipo) > 0) ? (this.reserva.detalle_anticipo || '') : ''
     };
 
     this.reservaService.crear(payload).subscribe({
@@ -823,7 +825,7 @@ export class ReservaFormComponent {
     this.btnVisibleSaveReserva = true;
     this.btnVisibleCheckIn = false;
     this.btnVisibleCheckOut = false;
-    this.reserva.anticipo = 0;
+    this.reserva.anticipo = null as any;
     this.reserva.detalle_anticipo = '';
   }
 
@@ -1153,18 +1155,24 @@ export class ReservaFormComponent {
   }
 
   validarAnticipo(): void {
-    const total = Number(this.reserva.total) || 0;
-    let anticipo = Number(this.reserva.anticipo) || 0;
-    if (anticipo < 0) {
+    if (this.reserva.anticipo === null || this.reserva.anticipo === undefined || (this.reserva.anticipo as any) === '') {
+      return;
+    }
+    let anticipo = Number(this.reserva.anticipo);
+    if (isNaN(anticipo) || anticipo < 0) {
       this.reserva.anticipo = 0;
       anticipo = 0;
     }
+    const total = Number(this.reserva.total) || 0;
     const yaPagado = this.getYaPagado();
     const maxPermitido = this.reserva.id > 0 ? Math.max(0, Number((total - yaPagado).toFixed(2))) : total;
-    if (anticipo > maxPermitido) {
+
+    // Solo limitar si ya hay un total calculado mayor a cero
+    if (total > 0 && maxPermitido > 0 && anticipo > maxPermitido) {
       this.reserva.anticipo = maxPermitido;
       anticipo = maxPermitido;
     }
+
     if (anticipo > 0 && !this.reserva.forma_pago_id && this.forma_pagos && this.forma_pagos.length > 0) {
       const efectivo = this.forma_pagos.find(f => f.descripcion && f.descripcion.toLowerCase().includes('efectivo'));
       this.reserva.forma_pago_id = efectivo ? efectivo.id : this.forma_pagos[0].id;
@@ -1181,7 +1189,7 @@ export class ReservaFormComponent {
     const totalReserva = Number(this.reserva?.total) || 0;
     const yaPagado = this.getYaPagado();
     const nuevoAnticipo = (this.isEditReserva || !this.reserva?.id) ? (Number(this.reserva?.anticipo) || 0) : 0;
-    const saldo = totalReserva - yaPagado - (this.isEditReserva ? nuevoAnticipo : 0);
+    const saldo = totalReserva - yaPagado - nuevoAnticipo;
     return saldo > 0 ? Number(saldo.toFixed(2)) : 0;
   }
 
