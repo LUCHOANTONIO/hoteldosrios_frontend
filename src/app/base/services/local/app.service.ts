@@ -63,4 +63,12 @@ export class AppService {
     this.session=new SessionModel();
   }
 
+  isFreelancer(): boolean {
+    return this.session?.ROL_NOMBRE?.trim().toUpperCase() === 'FREELANCER';
+  }
+
+  getRutaInicio(): string {
+    return this.isFreelancer() ? '/reserva_externa' : '/timeline';
+  }
+
 }

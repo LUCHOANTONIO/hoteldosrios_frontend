@@ -24,6 +24,7 @@ import { ProductoService } from '../../services/producto.service';
 import { ComunicacionService } from '../../services/local/comunicacion.service';
 import { EstadoCivilService } from '../../../base/services/estadocivil.service';
 import { TipoHabitacionService } from '../../services/tipo_habitacion.service';
+import { AppService } from '../../../base/services/local/app.service';
 
 //COMPONENT
 import { ReservaFormComponent } from './reserva-form/reserva-form';
@@ -111,8 +112,14 @@ export class TimelineComponent implements AfterViewInit {
     private formaPagoService: FormaPagoService,
     private comunicacionService: ComunicacionService,
     private estadoCivilService: EstadoCivilService,
-    private tipoHabitacionService: TipoHabitacionService
+    private tipoHabitacionService: TipoHabitacionService,
+    private appService: AppService
   ) {
+    if (this.appService.isFreelancer()) {
+      this.router.navigate(['/reserva_externa']);
+      return;
+    }
+
     this.cargarDatos();
 
     effect(() => { //Para actualizar el color de estado de habitacion LIMPIEZA
@@ -124,7 +131,7 @@ export class TimelineComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-
+    if (this.appService.isFreelancer()) return;
   }
 
   cargarDatos() {

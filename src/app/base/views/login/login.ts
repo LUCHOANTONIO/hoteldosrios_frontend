@@ -47,7 +47,7 @@ export class LoginComponent {
   }
 
   constructor(protected authService: AuthService, protected router: Router) {
-     if (authService.isAuth()) this.router.navigate(['/home']);    
+     if (authService.isAuth()) this.router.navigate([this.appService.getRutaInicio()]);    
   }
 
   login(f: NgForm) {
@@ -63,8 +63,7 @@ export class LoginComponent {
             //ingresa al sistema y carga el rol actual al layout header
             let rol: RolModel = res.dato.roles[0];
             this.guadarDatosSession(res, rol);
-            // this.router.navigate(['/home']); //Antes estaba home, se cambio para que directo aparezca el timeline
-            this.router.navigate(['/timeline']);
+            this.router.navigate([this.appService.getRutaInicio()]);
             return;
           };
           if (res.codigo >= 2) {
@@ -136,8 +135,7 @@ export class LoginComponent {
       if (result) {
         let rol: RolModel = result.rol;
         this.guadarDatosSession(res, rol);
-        //this.router.navigate(['/home']);
-        this.router.navigate(['/timeline']);
+        this.router.navigate([this.appService.getRutaInicio()]);
       }
       else {
         this.authService.logout();

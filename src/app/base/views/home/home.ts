@@ -4,6 +4,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
+import { Router } from '@angular/router';
+import { AppService } from '../../services/local/app.service';
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -12,16 +15,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrl: './home.scss'
 })
 export class HomeComponent {
- constructor(public snackBar: MatSnackBar){
-    this.saludar();
+ constructor(public snackBar: MatSnackBar, private router: Router, private appService: AppService){
+    this.router.navigate([this.appService.getRutaInicio()]);
   }
-  
- saludar(){
-  this.snackBar.open(`Bienvenido al Sistema`, 'Aceptar', {
-                        duration:2000,
-                        horizontalPosition: "center",
-                        verticalPosition: "bottom",
-                        panelClass: 'info-snackbar'
-                      });
- }
 }
