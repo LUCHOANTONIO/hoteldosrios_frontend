@@ -30,7 +30,7 @@
                                               color="primary">
                                 </mat-checkbox>
                             </td>
-                            <td class="td-detalle">{{ item.detalle }}</td>
+                            <td class="td-detalle">{{ getDetalleItem(item) }}</td>
                             <td class="td-monto">Bs. {{ item.monto | number:'1.2-2' }}</td>
                             <td class="td-pagado">Bs. {{ item.pagado | number:'1.2-2' }}</td>
                             <td class="td-saldo">Bs. {{ item.saldo | number:'1.2-2' }}</td>

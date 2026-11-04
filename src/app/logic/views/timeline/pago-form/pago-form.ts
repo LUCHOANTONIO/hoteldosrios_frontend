@@ -145,6 +145,47 @@ export class PagoFormComponent implements OnInit {
     return Number(item.saldo) > 0 && this.selectedTransacciones.some(t => t.id === item.id);
   }
 
+  isFullDayReserva(): boolean {
+    const tipo = (this.reserva?.tipo_habitacion || '').trim().toUpperCase();
+    const desc = (this.reserva?.descripcion || '').trim().toUpperCase();
+    return tipo.includes('FULL DAY') || tipo.includes('FULLDAY') || desc.includes('FULL DAY') || desc.includes('FULLDAY');
+  }
+
+  isCampingReserva(): boolean {
+    const tipo = (this.reserva?.tipo_habitacion || '').trim().toUpperCase();
+    const desc = (this.reserva?.descripcion || '').trim().toUpperCase();
+    return tipo.includes('CAMPING') || desc.includes('CAMPING');
+  }
+
+  getDetalleItem(item: any): string {
+    const raw = (item?.detalle || '').trim();
+    const esItemBase = Number(item?.is_base) === 1 || /^HABITACI[OÓ]N\b/i.test(raw);
+    if (esItemBase) {
+      if (this.isFullDayReserva()) {
+        const desc = (this.reserva?.descripcion || '').trim().toUpperCase();
+        return desc || 'FULL DAY';
+      }
+      if (this.isCampingReserva()) {
+        const desc = (this.reserva?.descripcion || '').trim().toUpperCase();
+        return desc || 'CAMPING';
+      }
+    }
+    return raw || 'HABITACION';
+  }
+
+  normalizarBalanceDetalles(balanceData: any): any {
+    if (!balanceData || !Array.isArray(balanceData.detalles)) {
+      return balanceData;
+    }
+    return {
+      ...balanceData,
+      detalles: balanceData.detalles.map((d: any) => ({
+        ...d,
+        detalle: this.getDetalleItem(d)
+      }))
+    };
+  }
+
   onMontoChange(valor?: any) {
     const monto = Number(this.transaccion_pago.monto) || 0;
     this.selectedTransacciones = [];
@@ -170,14 +211,15 @@ export class PagoFormComponent implements OnInit {
       }
       const saldoItem = Number(item.saldo);
       const cubierto = Math.min(restante, saldoItem);
+      const detalleTexto = this.getDetalleItem(item);
 
       this.selectedTransacciones.push(item);
       transaccionesParaPago.push({
         transaccion_id: item.id,
         monto: cubierto,
-        detalle: 'Pago ' + (item.detalle || '')
+        detalle: 'Pago ' + detalleTexto
       });
-      detallesNombres.push(item.detalle);
+      detallesNombres.push(detalleTexto);
 
       restante -= cubierto;
     }
@@ -187,7 +229,7 @@ export class PagoFormComponent implements OnInit {
     if (this.selectedTransacciones.length > 1) {
       this.transaccion_pago.detalle = ''; // En blanco cuando son varias opciones
     } else if (this.selectedTransacciones.length === 1) {
-      this.transaccion_pago.detalle = 'Pago ' + (this.selectedTransacciones[0]?.detalle || '');
+      this.transaccion_pago.detalle = 'Pago ' + this.getDetalleItem(this.selectedTransacciones[0]);
     } else {
       this.transaccion_pago.detalle = '';
     }
@@ -221,11 +263,12 @@ export class PagoFormComponent implements OnInit {
 
     for (const item of this.selectedTransacciones) {
       const saldoItem = Number(item.saldo);
+      const detalleTexto = this.getDetalleItem(item);
       totalSeleccionado += saldoItem;
       transaccionesParaPago.push({
         transaccion_id: item.id,
         monto: saldoItem,
-        detalle: 'Pago ' + (item.detalle || '')
+        detalle: 'Pago ' + detalleTexto
       });
     }
 
@@ -235,7 +278,7 @@ export class PagoFormComponent implements OnInit {
     if (this.selectedTransacciones.length > 1) {
       this.transaccion_pago.detalle = ''; // En blanco cuando son varias opciones
     } else if (this.selectedTransacciones.length === 1) {
-      this.transaccion_pago.detalle = 'Pago ' + (this.selectedTransacciones[0]?.detalle || '');
+      this.transaccion_pago.detalle = 'Pago ' + this.getDetalleItem(this.selectedTransacciones[0]);
     } else {
       this.transaccion_pago.detalle = '';
     }
@@ -252,16 +295,17 @@ export class PagoFormComponent implements OnInit {
       if (restante <= 0) break;
       const saldoItem = Number(item.saldo);
       const cubierto = Math.min(restante, saldoItem);
+      const detalleTexto = this.getDetalleItem(item);
 
       let itemDetalle = '';
       if (cleanGlosa) {
-        if (item.detalle && cleanGlosa.toLowerCase().includes(item.detalle.toLowerCase())) {
+        if (detalleTexto && cleanGlosa.toLowerCase().includes(detalleTexto.toLowerCase())) {
           itemDetalle = cleanGlosa;
         } else {
-          itemDetalle = `${cleanGlosa} - ${item.detalle}`;
+          itemDetalle = `${cleanGlosa} - ${detalleTexto}`;
         }
       } else {
-        itemDetalle = `Pago ${item.detalle}`;
+        itemDetalle = `Pago ${detalleTexto}`;
       }
 
       transacciones.push({
@@ -315,7 +359,7 @@ export class PagoFormComponent implements OnInit {
             if (res.transaccion_pago?.dato) {
                 const data_pagos = JSON.parse(res.transaccion_pago.dato);        
                 if (data_pagos?.balance) {
-                    this.balance.set(data_pagos.balance); //Establecer valor por medio de signal
+                    this.balance.set(this.normalizarBalanceDetalles(data_pagos.balance)); //Establecer valor por medio de signal
                 }
                 this.transaccion_pagos = (data_pagos?.pagos || []) as MovimientoModel[];       
                 this.dataSourceMovimientos = new MatTableDataSource<MovimientoModel>(this.transaccion_pagos);
@@ -334,7 +378,7 @@ export class PagoFormComponent implements OnInit {
       next:(res)=>{
         if(res.correcto){
           const data = JSON.parse(res.dato);        
-          this.balance.set(data.balance); 
+          this.balance.set(this.normalizarBalanceDetalles(data.balance)); 
           this.transaccion_pagos = data.pagos as MovimientoModel[];                     
           const pdf_base64 = data.base64Pdf as string;
           
@@ -394,7 +438,7 @@ export class PagoFormComponent implements OnInit {
           next:(res)=>{
             if(res.correcto){             
                 const data = JSON.parse(res.dato);        
-                this.balance.set(data.balance); 
+                this.balance.set(this.normalizarBalanceDetalles(data.balance)); 
                 this.transaccion_pagos = data.pagos as MovimientoModel[];                     
                 const pdf_base64 = data.base64Pdf as string;
                 
