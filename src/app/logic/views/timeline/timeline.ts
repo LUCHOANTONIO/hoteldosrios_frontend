@@ -327,21 +327,31 @@ export class TimelineComponent implements AfterViewInit {
     }
   }
 
+  readonly COLOR_HABITACION_CELESTE = '#8ecae6';
+  readonly COLOR_FULLDAY_NARANJA = '#ffa726';
+  readonly COLOR_CAMPING_VERDE_CLARO = '#86efac';
+
   getColorGrupo(habitacion: HabitacionModel): string {
-    // En Full Day y Camping no debe haber estado de habitación (limpieza/mantenimiento); solo aplica a Habitaciones
-    if (this.isFullDayOrCamping(habitacion)) {
-      if (habitacion.color_piso) {
-        return habitacion.color_piso;
+    if (this.isFullDay(habitacion)) {
+      return this.COLOR_FULLDAY_NARANJA;
+    }
+    if (this.isCamping(habitacion)) {
+      return this.COLOR_CAMPING_VERDE_CLARO;
+    }
+    // Para Habitaciones: si tiene un estado distinto a Disponible (1), usar el color del estado; de lo contrario, celeste
+    if (Number(habitacion.estado_habitacion_id) !== 1) {
+      if (habitacion.color_estado && habitacion.color_estado.trim() !== '' && habitacion.color_estado.toLowerCase() !== '#ffffff') {
+        return habitacion.color_estado;
       }
-      // Si el color provenía del estado de habitación (2=Limpieza, 3=Mantenimiento), ignorarlo y usar color estándar
-      if (Number(habitacion.estado_habitacion_id) === 2 || Number(habitacion.estado_habitacion_id) === 3) {
-        return '#1e88a8';
+      const est = this.estado_habitaciones.find(e => Number(e.id) === Number(habitacion.estado_habitacion_id));
+      if (est) {
+        return this.getColorEstadoMenuDot(est);
       }
-      if (habitacion.color_estado && habitacion.color === habitacion.color_estado) {
-        return '#1e88a8';
+      if (habitacion.color && habitacion.color.trim() !== '' && habitacion.color.toLowerCase() !== '#ffffff') {
+        return habitacion.color;
       }
     }
-    return habitacion.color || '#FFFFFF';
+    return this.COLOR_HABITACION_CELESTE;
   }
 
   ejecutarUpdateGroups(habitacion_id) {
@@ -770,7 +780,7 @@ export class TimelineComponent implements AfterViewInit {
     hab.color_estado = estado.color;
 
     if (Number(estado.id) === 1) {
-      hab.color = hab.color_piso || '#7ec3e0';
+      hab.color = this.COLOR_HABITACION_CELESTE;
     } else {
       hab.color = (estado.color && estado.color.trim() !== '' && estado.color.toLowerCase() !== '#ffffff')
         ? estado.color
