@@ -10,6 +10,7 @@ import { ProductoModel } from '../../models/producto.model';
 import { FormaPagoModel } from '../../models/forma_pago.model';
 import { EstadoCivilModel } from '../../../base/models/estadocivil.model';
 import { TipoHabitacionModel } from '../../models/tipo_habitacion.model';
+import { EstadoHabitacionModel } from '../../models/estado_habitacion.model';
 
 //SERVICES
 import { HabitacionService } from '../../services/habitacion.service';
@@ -24,7 +25,9 @@ import { ProductoService } from '../../services/producto.service';
 import { ComunicacionService } from '../../services/local/comunicacion.service';
 import { EstadoCivilService } from '../../../base/services/estadocivil.service';
 import { TipoHabitacionService } from '../../services/tipo_habitacion.service';
+import { EstadoHabitacionService } from '../../services/estado_habitacion.service';
 import { AppService } from '../../../base/services/local/app.service';
+
 
 //COMPONENT
 import { ReservaFormComponent } from './reserva-form/reserva-form';
@@ -33,7 +36,7 @@ import { ConfirmarEliminarComponent } from '../../../base/shared/views/confirmar
 import { IrFechaModalComponent } from './ir-fecha-modal/ir-fecha-modal';
 
 //VARIOS
-import { Component, ElementRef, inject, effect, ViewChild, AfterViewInit, signal } from '@angular/core';
+import { Component, ElementRef, inject, effect, ViewChild, AfterViewInit, signal, HostListener, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Timeline } from 'vis-timeline';
@@ -72,7 +75,15 @@ export class TimelineComponent implements AfterViewInit {
   @ViewChild('contextMenu') contextMenu!: ContextMenuComponent;
   tabActiva: 'habitaciones' | 'fullday' | 'camping' | 'todas' = 'habitaciones';
   tipo_habitaciones: TipoHabitacionModel[] = [];
+  estado_habitaciones: EstadoHabitacionModel[] = [];
   habitaciones: HabitacionModel[] = [];
+
+  // Menú contextual rápido de Estado de Habitación
+  menuEstadoVisible = false;
+  menuEstadoTop = '0px';
+  menuEstadoLeft = '0px';
+  habitacionMenuSeleccionada: HabitacionModel | null = null;
+  cambiandoEstadoHabitacion = false;
   productos: ProductoModel[] = [];
   tipo_documentos: TipoDocumentoModel[] = [];
   estado_civil: EstadoCivilModel[] = [];
@@ -113,7 +124,10 @@ export class TimelineComponent implements AfterViewInit {
     private comunicacionService: ComunicacionService,
     private estadoCivilService: EstadoCivilService,
     private tipoHabitacionService: TipoHabitacionService,
-    private appService: AppService
+    private estadoHabitacionService: EstadoHabitacionService,
+    private appService: AppService,
+
+    private cdr: ChangeDetectorRef
   ) {
     if (this.appService.isFreelancer()) {
       this.router.navigate(['/reserva_externa']);
@@ -146,10 +160,12 @@ export class TimelineComponent implements AfterViewInit {
       motivos: this.motivoService.listar(),
       forma_pagos: this.formaPagoService.listar(),
       estado_civil: this.estadoCivilService.listar(),
-      tipo_habitaciones: this.tipoHabitacionService.listar()
+      tipo_habitaciones: this.tipoHabitacionService.listar(),
+      estado_habitaciones: this.estadoHabitacionService.listar()
     }).subscribe({
       next: (res) => {
         this.tipo_habitaciones = res.tipo_habitaciones;
+        this.estado_habitaciones = res.estado_habitaciones || [];
         this.estado_civil = res.estado_civil;
         this.habitaciones = res.habitaciones;
         this.productos = res.productos;
@@ -265,6 +281,7 @@ export class TimelineComponent implements AfterViewInit {
   }
 
   cambiarTab(nuevaTab: 'habitaciones' | 'fullday' | 'camping' | 'todas') {
+    this.cerrarMenuEstadoHabitacion();
     if (this.tabActiva === nuevaTab) return;
     this.tabActiva = nuevaTab;
     this.loadGroups();
@@ -331,6 +348,15 @@ export class TimelineComponent implements AfterViewInit {
     const hab = this.habitaciones.find(h => Number(h.id) === Number(habitacion_id));
     if (hab && this.isFullDayOrCamping(hab)) {
       return; // Full Day y Camping no tienen estado de habitación
+    }
+    if (hab) {
+      hab.estado_habitacion_id = '2';
+      const estLimpieza = this.estado_habitaciones.find(e => Number(e.id) === 2);
+      if (estLimpieza) {
+        hab.estado_habitacion = estLimpieza.descripcion;
+        hab.color_estado = estLimpieza.color || '#FF0000';
+      }
+      hab.color = hab.color_estado || '#FF0000';
     }
     const grupoActual = this.groups.get(habitacion_id);
     if (grupoActual) {
@@ -543,8 +569,25 @@ export class TimelineComponent implements AfterViewInit {
       const itemId = props.item;
 
       if (itemId) {
+        this.cerrarMenuEstadoHabitacion();
         this.contextMenu.show(event, itemId);
+        return;
       }
+
+      const targetEl = event?.target as HTMLElement | null;
+      const esPanelHabitacion = props.what === 'group-label' || !!targetEl?.closest('.vis-panel.vis-left, .vis-label');
+      if (props.group && esPanelHabitacion) {
+        const hab = this.habitaciones.find(h => Number(h.id) === Number(props.group));
+        // Solo para Habitaciones (no Full Day ni Camping)
+        if (hab && this.isHabitacion(hab)) {
+          event.preventDefault();
+          event.stopPropagation();
+          this.mostrarMenuEstadoHabitacion(event, hab);
+          return;
+        }
+      }
+
+      this.cerrarMenuEstadoHabitacion();
     });
 
     this.timeLine.once('rangechanged', () => { //Se ejecuta una sola ves para establecer el timeline en la fecha actual
@@ -595,6 +638,174 @@ export class TimelineComponent implements AfterViewInit {
     // 4. SOLUCIÓN: Al desplazar o mover el calendario (Scroll/Drag)
     this.timeLine.on('rangechange', () => {
       this.items.remove(HOVER_ID);
+      if (this.menuEstadoVisible) {
+        this.cerrarMenuEstadoHabitacion();
+      }
+    });
+  }
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    if (this.menuEstadoVisible) {
+      this.cerrarMenuEstadoHabitacion();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    if (this.menuEstadoVisible) {
+      this.cerrarMenuEstadoHabitacion();
+    }
+  }
+
+  mostrarMenuEstadoHabitacion(event: MouseEvent, habitacion: HabitacionModel) {
+    if (!this.isHabitacion(habitacion)) return;
+
+    this.habitacionMenuSeleccionada = habitacion;
+    const menuWidth = 240;
+    const menuHeight = 250;
+
+    let left = event.clientX + 4;
+    let top = event.clientY - 10;
+
+    if (left + menuWidth > window.innerWidth) {
+      left = Math.max(10, window.innerWidth - menuWidth - 10);
+    }
+    if (top + menuHeight > window.innerHeight) {
+      top = Math.max(10, window.innerHeight - menuHeight - 10);
+    }
+    if (top < 10) {
+      top = 10;
+    }
+
+    this.menuEstadoLeft = `${left}px`;
+    this.menuEstadoTop = `${top}px`;
+    this.menuEstadoVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarMenuEstadoHabitacion() {
+    if (!this.menuEstadoVisible && !this.habitacionMenuSeleccionada) return;
+    this.menuEstadoVisible = false;
+    this.habitacionMenuSeleccionada = null;
+    this.cdr.detectChanges();
+  }
+
+  isEstadoActualHabitacion(estado: EstadoHabitacionModel): boolean {
+    if (!this.habitacionMenuSeleccionada || !estado) return false;
+    return Number(this.habitacionMenuSeleccionada.estado_habitacion_id) === Number(estado.id);
+  }
+
+  getColorEstadoMenuDot(estado: EstadoHabitacionModel): string {
+    if (!estado) return '#cbd5e1';
+    const id = Number(estado.id);
+    const desc = (estado.descripcion || '').trim().toLowerCase();
+    const color = (estado.color || '').trim();
+
+    if (id === 1 || desc.includes('disponible')) {
+      if (!color || color.toLowerCase() === '#ffffff' || color.toLowerCase() === 'white') {
+        return '#cbd5e1';
+      }
+      return color;
+    }
+
+    if (color && color.toLowerCase() !== '#ffffff' && color.toLowerCase() !== 'white') {
+      return color;
+    }
+
+    if (desc.includes('superficial')) return '#ffff00';
+    if (desc.includes('limpieza')) return '#ff0000';
+    if (desc.includes('mantenimiento')) return '#ff00ff';
+
+    switch (id) {
+      case 2: return '#ff0000';
+      case 3: return '#ffff00';
+      case 4: return '#ff00ff';
+      default: return '#94a3b8';
+    }
+  }
+
+  private actualizarEstiloGrupoHabitacion(habitacion: HabitacionModel) {
+    if (!this.groups || !habitacion) return;
+    const grupoActual = this.groups.get(habitacion.id);
+    if (grupoActual) {
+      const colorGrupo = this.getColorGrupo(habitacion);
+      grupoActual.style = `
+          background-color: ${colorGrupo};
+          color: ${this.getContrastColor(colorGrupo)};
+          border-radius: 4px;
+          padding-left: 10px;
+          font-size: 14px;    
+          font-family: 'Roboto', 'Helvetica Neue', sans-serif; 
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          height: 100%;              
+        `;
+      this.groups.update(grupoActual);
+    }
+  }
+
+  cambiarEstadoHabitacionRapido(estado: EstadoHabitacionModel) {
+    if (!this.habitacionMenuSeleccionada || !estado || this.cambiandoEstadoHabitacion) return;
+    const hab = this.habitacionMenuSeleccionada;
+    if (!this.isHabitacion(hab)) {
+      this.cerrarMenuEstadoHabitacion();
+      return;
+    }
+
+    if (Number(hab.estado_habitacion_id) === Number(estado.id)) {
+      this.cerrarMenuEstadoHabitacion();
+      return;
+    }
+
+    const estadoAnteriorId = hab.estado_habitacion_id;
+    const estadoAnteriorDesc = hab.estado_habitacion;
+    const colorAnterior = hab.color;
+    const colorEstadoAnterior = hab.color_estado;
+
+    // Actualización optimista inmediata en el Timeline
+    hab.estado_habitacion_id = String(estado.id);
+    hab.estado_habitacion = estado.descripcion;
+    hab.color_estado = estado.color;
+
+    if (Number(estado.id) === 1) {
+      hab.color = hab.color_piso || '#7ec3e0';
+    } else {
+      hab.color = (estado.color && estado.color.trim() !== '' && estado.color.toLowerCase() !== '#ffffff')
+        ? estado.color
+        : this.getColorEstadoMenuDot(estado);
+    }
+
+    this.actualizarEstiloGrupoHabitacion(hab);
+    this.cerrarMenuEstadoHabitacion();
+    this.cambiandoEstadoHabitacion = true;
+
+    const payload: HabitacionModel = { ...hab, estado_habitacion_id: String(estado.id) };
+    this.habitacionService.modificar(payload).subscribe({
+      next: () => {
+        this.cambiandoEstadoHabitacion = false;
+
+        this.habitacionService.listar().subscribe({
+          next: (lista) => {
+            if (Array.isArray(lista)) {
+              this.habitaciones = lista;
+              const habRefrescada = this.habitaciones.find(h => Number(h.id) === Number(hab.id));
+              if (habRefrescada) {
+                this.actualizarEstiloGrupoHabitacion(habRefrescada);
+              }
+            }
+          }
+        });
+      },
+      error: () => {
+        this.cambiandoEstadoHabitacion = false;
+        hab.estado_habitacion_id = estadoAnteriorId;
+        hab.estado_habitacion = estadoAnteriorDesc;
+        hab.color = colorAnterior;
+        hab.color_estado = colorEstadoAnterior;
+        this.actualizarEstiloGrupoHabitacion(hab);
+      }
     });
   }
 

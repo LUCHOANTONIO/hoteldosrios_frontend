@@ -1,4 +1,3 @@
-
 <div class="timeline-page">
   <!-- BARRA DE PESTAÑAS Y ACCIONES -->
   <div class="timeline-header-bar">
@@ -82,10 +81,41 @@
   </div>
 </div>
 
-<app-context-menu #contextMenu [selectedItems]="selectedItems" [items]="items"></app-context-menu>
-
-
-
-
-
+<!-- MENÚ RÁPIDO DE ESTADO DE HABITACIÓN (CLICK DERECHO EN HABITACIÓN) -->
+<div 
+  *ngIf="menuEstadoVisible && habitacionMenuSeleccionada"
+  class="room-status-context-menu"
+  [style.top]="menuEstadoTop"
+  [style.left]="menuEstadoLeft"
+  (click)="$event.stopPropagation()"
+  (contextmenu)="$event.preventDefault(); $event.stopPropagation()">
   
+  <div class="room-status-header">
+    <div class="room-status-title-row">
+      <mat-icon class="room-door-icon">meeting_room</mat-icon>
+      <span class="room-title-text">Habitación {{ habitacionMenuSeleccionada.nro_habitacion }}</span>
+    </div>
+    <div class="room-status-subtitle">
+      {{ (habitacionMenuSeleccionada.tipo_habitacion || habitacionMenuSeleccionada.descripcion) | uppercase }} • Piso {{ habitacionMenuSeleccionada.piso }}
+    </div>
+  </div>
+
+  <div class="room-status-body">
+    <div class="room-status-section-label">CAMBIAR ESTADO:</div>
+    <div class="room-status-list">
+      <button
+        type="button"
+        *ngFor="let estado of estado_habitaciones"
+        class="room-status-item"
+        [class.active]="isEstadoActualHabitacion(estado)"
+        [disabled]="cambiandoEstadoHabitacion"
+        (click)="cambiarEstadoHabitacionRapido(estado)">
+        <mat-icon *ngIf="isEstadoActualHabitacion(estado)" class="status-check-icon">check</mat-icon>
+        <span class="status-dot" [style.background-color]="getColorEstadoMenuDot(estado)"></span>
+        <span class="status-label">{{ estado.descripcion }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-context-menu #contextMenu [selectedItems]="selectedItems" [items]="items"></app-context-menu>
