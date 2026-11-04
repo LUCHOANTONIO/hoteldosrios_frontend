@@ -216,15 +216,31 @@ export class TimelineComponent implements AfterViewInit {
     return this.isFullDay(habitacion) || this.isCamping(habitacion);
   }
 
+  private sortPorNumeroHabitacion(lista: HabitacionModel[]): HabitacionModel[] {
+    return [...lista].sort((a, b) => {
+      const nroA = parseInt(a.nro_habitacion || '', 10);
+      const nroB = parseInt(b.nro_habitacion || '', 10);
+      const aEsNum = !isNaN(nroA) && nroA > 0;
+      const bEsNum = !isNaN(nroB) && nroB > 0;
+      if (aEsNum && bEsNum && nroA !== nroB) return nroA - nroB;
+      if (aEsNum && !bEsNum) return -1;
+      if (!aEsNum && bEsNum) return 1;
+      return (a.nro_habitacion || '').localeCompare(b.nro_habitacion || '', undefined, { numeric: true });
+    });
+  }
+
   getHabitacionesFiltradas(): HabitacionModel[] {
     if (this.tabActiva === 'fullday') {
-      return this.habitaciones.filter((h) => this.isFullDay(h));
+      return this.sortPorNumeroHabitacion(this.habitaciones.filter((h) => this.isFullDay(h)));
     } else if (this.tabActiva === 'camping') {
-      return this.habitaciones.filter((h) => this.isCamping(h));
+      return this.sortPorNumeroHabitacion(this.habitaciones.filter((h) => this.isCamping(h)));
     } else if (this.tabActiva === 'habitaciones') {
-      return this.habitaciones.filter((h) => this.isHabitacion(h));
+      return this.sortPorNumeroHabitacion(this.habitaciones.filter((h) => this.isHabitacion(h)));
     } else {
-      return this.habitaciones;
+      const habitaciones = this.sortPorNumeroHabitacion(this.habitaciones.filter((h) => this.isHabitacion(h)));
+      const fullDay = this.sortPorNumeroHabitacion(this.habitaciones.filter((h) => this.isFullDay(h)));
+      const camping = this.sortPorNumeroHabitacion(this.habitaciones.filter((h) => this.isCamping(h)));
+      return [...habitaciones, ...fullDay, ...camping];
     }
   }
 
@@ -261,11 +277,12 @@ export class TimelineComponent implements AfterViewInit {
 
   loadGroups() {
     const habitacionesFiltradas = this.getHabitacionesFiltradas();
-    const dataGroups = habitacionesFiltradas.map((habitacion) => {
+    const dataGroups = habitacionesFiltradas.map((habitacion, index) => {
       const iconoSeparador = '⏵'; //'⟶'; // Puedes usar otros como '•', '→', '⇨', '⮞', '⏵'
       const colorGrupo = this.getColorGrupo(habitacion);
       return {
         id: habitacion.id,
+        order: index,
         content: `${habitacion.nro_habitacion} ${iconoSeparador} ${habitacion.descripcion}`,
         style: `
             background-color: ${colorGrupo};
@@ -384,6 +401,7 @@ export class TimelineComponent implements AfterViewInit {
     const inicio = moment().startOf('day');
     const rangoFin = moment(inicio).clone().add(10, 'days');
     this.options = {
+      groupOrder: 'order',
       multiselect: true,
       selectable: true,
       editable: {
