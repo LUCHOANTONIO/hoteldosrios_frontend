@@ -263,7 +263,7 @@ export class TimelineComponent implements AfterViewInit {
     const habitacionesFiltradas = this.getHabitacionesFiltradas();
     const dataGroups = habitacionesFiltradas.map((habitacion) => {
       const iconoSeparador = '⏵'; //'⟶'; // Puedes usar otros como '•', '→', '⇨', '⮞', '⏵'
-      const colorGrupo = habitacion.color || '#FFFFFF'; // Protección contra null
+      const colorGrupo = this.getColorGrupo(habitacion);
       return {
         id: habitacion.id,
         content: `${habitacion.nro_habitacion} ${iconoSeparador} ${habitacion.descripcion}`,
@@ -293,7 +293,28 @@ export class TimelineComponent implements AfterViewInit {
     }
   }
 
+  getColorGrupo(habitacion: HabitacionModel): string {
+    // En Full Day y Camping no debe haber estado de habitación (limpieza/mantenimiento); solo aplica a Habitaciones
+    if (this.isFullDayOrCamping(habitacion)) {
+      if (habitacion.color_piso) {
+        return habitacion.color_piso;
+      }
+      // Si el color provenía del estado de habitación (2=Limpieza, 3=Mantenimiento), ignorarlo y usar color estándar
+      if (Number(habitacion.estado_habitacion_id) === 2 || Number(habitacion.estado_habitacion_id) === 3) {
+        return '#1e88a8';
+      }
+      if (habitacion.color_estado && habitacion.color === habitacion.color_estado) {
+        return '#1e88a8';
+      }
+    }
+    return habitacion.color || '#FFFFFF';
+  }
+
   ejecutarUpdateGroups(habitacion_id) {
+    const hab = this.habitaciones.find(h => Number(h.id) === Number(habitacion_id));
+    if (hab && this.isFullDayOrCamping(hab)) {
+      return; // Full Day y Camping no tienen estado de habitación
+    }
     const grupoActual = this.groups.get(habitacion_id);
     if (grupoActual) {
       grupoActual.style = `

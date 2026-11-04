@@ -484,18 +484,18 @@
                 </button>
 
                 @if (!is_externo) {
-                <button type="button" mat-raised-button #btnCheckIn
+                <button type="button" mat-raised-button #btnCheckIn #btnCheckInDir="appBotonGuardar"
                     [style.display]="reserva.estado_reserva_id === 1 && btnVisibleCheckIn ? 'inline-block' : 'none'"
-                    (click)="mostrarConfirmarEstado('¿Está seguro de realizar el Check-In?','0ms', '0ms',2)"
-                    appBotonGuardar class="bg-primary text-white">
+                    (click)="mostrarConfirmarEstado('¿Está seguro de realizar el Check-In?','0ms', '0ms',2, btnCheckInDir)"
+                    appBotonGuardar [form]="reservaForm" class="bg-primary text-white">
                     <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>
                     Check In
                 </button>
 
-                <button type="button" mat-raised-button #btnCheckOut
+                <button type="button" mat-raised-button #btnCheckOut #btnCheckOutDir="appBotonGuardar"
                     [style.display]="reserva.estado_reserva_id === 2 && btnVisibleCheckOut ? 'inline-block' : 'none'"
-                    (click)="mostrarConfirmarEstado('¿Está seguro de realizar el Check-Out?','0ms', '0ms',3)"
-                    appBotonGuardar class="bg-success text-black">
+                    (click)="mostrarConfirmarEstado('¿Está seguro de realizar el Check-Out?','0ms', '0ms',3, btnCheckOutDir)"
+                    appBotonGuardar [form]="reservaForm" class="bg-success text-black">
                     <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>
                     Check Out
                 </button>

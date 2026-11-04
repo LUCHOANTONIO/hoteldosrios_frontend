@@ -10,6 +10,7 @@ export class HabitacionModel{
   descripcion: string = "";
   precio: number;
   color: string = "";
+  color_piso?: string = "";
   estado_habitacion: string = "";
   color_estado: string = "";
 }

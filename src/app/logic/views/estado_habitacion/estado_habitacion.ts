@@ -66,7 +66,7 @@ export class EstadoHabitacionComponent implements AfterViewInit{
         estado_habitaciones: this.estadoHabitacionService.listar()
       }).subscribe({
         next: (res) => {
-          this.habitaciones = res.habitaciones;          
+          this.habitaciones = this.filtrarSoloHabitaciones(res.habitaciones);          
           this.estado_habitaciones = res.estado_habitaciones;
           this.dataSource = new MatTableDataSource<HabitacionModel>(this.habitaciones);
           this.dataSource.paginator = this.paginator;                    
@@ -77,14 +77,26 @@ export class EstadoHabitacionComponent implements AfterViewInit{
     mostrarHabitaciones() {
         this.habitacionService.listar().subscribe({
           next: (res) => {
-              this.habitaciones = res;
-              this.dataSource = new MatTableDataSource<HabitacionModel>(res);
+              this.habitaciones = this.filtrarSoloHabitaciones(res);
+              this.dataSource = new MatTableDataSource<HabitacionModel>(this.habitaciones);
               this.dataSource.paginator = this.paginator;
           },
           error: (error) => {
             console.error(error);
           }
         });
+    }
+
+    private filtrarSoloHabitaciones(lista: HabitacionModel[]): HabitacionModel[] {
+      if (!Array.isArray(lista)) return [];
+      return lista.filter(h => {
+        const codigo = (h.codigo || '').trim().toUpperCase();
+        const tipo = (h.tipo_habitacion || '').trim().toUpperCase();
+        const desc = (h.descripcion || '').trim().toUpperCase();
+        const esFullDay = codigo === 'FULL' || tipo === 'FULL DAY' || tipo.includes('FULL DAY') || desc.includes('FULL DAY');
+        const esCamping = codigo === 'CAMP' || tipo === 'CAMPING' || tipo.includes('CAMPING') || desc.includes('CAMPING');
+        return !esFullDay && !esCamping;
+      });
     }
 
     readonly dialog = inject(MatDialog);
@@ -156,4 +168,3 @@ export class EstadoHabitacionComponent implements AfterViewInit{
     }
     //------------------------------------------------------------------------
 }
-

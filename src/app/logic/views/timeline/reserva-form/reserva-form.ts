@@ -1047,7 +1047,7 @@ export class ReservaFormComponent {
     });
   }
 
-  mostrarConfirmarEstado(title_estado: string, enterAnimationDuration: string, exitAnimationDuration: string, estado_reserva_id: number) {
+  mostrarConfirmarEstado(title_estado: string, enterAnimationDuration: string, exitAnimationDuration: string, estado_reserva_id: number, btnDirective?: BotonGuardarDirective) {
     const dialogRef = this.dialog.open(ConfirmarComponent, {
       width: '250px',
       enterAnimationDuration,
@@ -1059,7 +1059,8 @@ export class ReservaFormComponent {
       if (result) {
         const data_reserva = { ...this.reserva }; //Clonar reserva
         data_reserva.estado_reserva_id = estado_reserva_id;
-        this.botonGuardarDirectiva?.deshabilitarFormBoton();
+        const directivaActiva = btnDirective || this.botonGuardarDirectiva;
+        directivaActiva?.deshabilitarFormBoton();
 
         forkJoin({
           reserva: this.reservaService.estado(data_reserva),
@@ -1081,7 +1082,7 @@ export class ReservaFormComponent {
               this.comunicacionService.executeActionReserva.set(true);
               this.comunicacionService.loadBitacoraSignal.set({ reserva_id: this.reserva.id, trigger: Date.now() });
 
-              if (estado_reserva_id == 3) { // Estado Check Out
+              if (estado_reserva_id == 3 && !this.isFullDayOrCamping()) { // Estado Check Out (solo para habitaciones)
                 this.updateGroupsSignal.set(this.reserva.habitacion_id);
               }
 
@@ -1091,7 +1092,10 @@ export class ReservaFormComponent {
               this.alertService.show(res.reserva.mensaje, { duration: 10000, type: 'info' });
             }
 
-            this.botonGuardarDirectiva.habilitarFormBoton();
+            directivaActiva?.habilitarFormBoton();
+          },
+          error: () => {
+            directivaActiva?.habilitarFormBoton();
 
           },
         });

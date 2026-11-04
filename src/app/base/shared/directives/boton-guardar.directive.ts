@@ -6,12 +6,13 @@ import { Directive, HostListener, Renderer2, ElementRef, Injectable, OnInit, OnD
 
 @Directive({
   selector: '[appBotonGuardar]',
+  exportAs: 'appBotonGuardar',
   standalone: true
 })
 export class BotonGuardarDirective implements OnInit {
 
   @Input() form: any; // Referencia al formulario reactivo
-  spinner:any;
+  spinner: any;
   constructor(private el: ElementRef, private renderer: Renderer2) {
 
   }
@@ -23,16 +24,23 @@ export class BotonGuardarDirective implements OnInit {
   deshabilitarFormBoton(){
     this.renderer.addClass(this.el.nativeElement, "opacity-75");
     this.renderer.setAttribute(this.el.nativeElement, "disabled", "true");
-    this.renderer.removeClass(this.spinner, 'd-none');   
-    this.form.form.disable();
+    if (this.spinner) {
+      this.renderer.removeClass(this.spinner, 'd-none');
+    }
+    if (this.form && this.form.form) {
+      this.form.form.disable();
+    }
   }
 
   habilitarFormBoton(){
     this.renderer.removeClass(this.el.nativeElement, "opacity-75");
     this.renderer.removeAttribute(this.el.nativeElement, "disabled");
-    this.renderer.addClass(this.spinner, 'd-none');   
-    this.form.form.enable();
+    if (this.spinner) {
+      this.renderer.addClass(this.spinner, 'd-none');
+    }
+    if (this.form && this.form.form) {
+      this.form.form.enable();
+    }
   }
 
 }
-
