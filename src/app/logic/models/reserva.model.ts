@@ -17,6 +17,9 @@ export class ReservaModel {
     cliente: string = "";
     nombre_corto_cliente: string = "";
     habitacion_id: number;
+    nro_habitacion?: string = "";
+    descripcion?: string = "";
+    tipo_habitacion?: string = "";
     grupo_id: number | null = null;
     grupo_nombre: string = "";
     is_grupal: boolean = false;

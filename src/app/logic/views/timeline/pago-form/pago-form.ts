@@ -146,14 +146,14 @@ export class PagoFormComponent implements OnInit {
   }
 
   isFullDayReserva(): boolean {
-    const tipo = (this.reserva?.tipo_habitacion || '').trim().toUpperCase();
-    const desc = (this.reserva?.descripcion || '').trim().toUpperCase();
+    const tipo = ((this.reserva as any)?.tipo_habitacion || '').trim().toUpperCase();
+    const desc = ((this.reserva as any)?.descripcion || '').trim().toUpperCase();
     return tipo.includes('FULL DAY') || tipo.includes('FULLDAY') || desc.includes('FULL DAY') || desc.includes('FULLDAY');
   }
 
   isCampingReserva(): boolean {
-    const tipo = (this.reserva?.tipo_habitacion || '').trim().toUpperCase();
-    const desc = (this.reserva?.descripcion || '').trim().toUpperCase();
+    const tipo = ((this.reserva as any)?.tipo_habitacion || '').trim().toUpperCase();
+    const desc = ((this.reserva as any)?.descripcion || '').trim().toUpperCase();
     return tipo.includes('CAMPING') || desc.includes('CAMPING');
   }
 
@@ -162,11 +162,11 @@ export class PagoFormComponent implements OnInit {
     const esItemBase = Number(item?.is_base) === 1 || /^HABITACI[OÓ]N\b/i.test(raw);
     if (esItemBase) {
       if (this.isFullDayReserva()) {
-        const desc = (this.reserva?.descripcion || '').trim().toUpperCase();
+        const desc = ((this.reserva as any)?.descripcion || '').trim().toUpperCase();
         return desc || 'FULL DAY';
       }
       if (this.isCampingReserva()) {
-        const desc = (this.reserva?.descripcion || '').trim().toUpperCase();
+        const desc = ((this.reserva as any)?.descripcion || '').trim().toUpperCase();
         return desc || 'CAMPING';
       }
     }
