@@ -469,10 +469,8 @@ export class ReservaExternaComponent implements OnInit {
       reservaParaForm.fecha_fin = moment(this.fechaSalida).format('YYYY-MM-DD');
       if (hab) {
         reservaParaForm.habitacion_id = Number(hab.id || hab.habitacion_id);
-        reservaParaForm.precio_unit_adulto = hab.precio ? Number(hab.precio) : 0;
-      } else {
-        reservaParaForm.precio_unit_adulto = 0;
       }
+      reservaParaForm.precio_unit_adulto = 0;
       reservaParaForm.cantidad_adulto = 1;
       reservaParaForm.cantidad_ninio = 0;
       reservaParaForm.precio_unit_ninio = 0;
