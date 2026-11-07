@@ -446,7 +446,13 @@ export class TimelineComponent implements AfterViewInit {
         remove: false,
         add: true
       },
-      margin: { item: 10 },
+      margin: {
+        axis: 5,
+        item: {
+          horizontal: 0,
+          vertical: 5,
+        },
+      },
       stack: true, //ESTO EVITA EL SALTO DE LÍNEA VERTICAL
       type: 'range',
       showCurrentTime: true,

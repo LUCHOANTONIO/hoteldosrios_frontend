@@ -39,3 +39,52 @@
     letter-spacing: 0.2px;
   }
 }
+
+/* TOP BAR PARA LABELS Y BOTÓN DE GESTIÓN */
+.field-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+  margin-bottom: 4px;
+}
+
+.field-custom-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* BOTÓN ÚNICO DE GESTIÓN (MODAL CATÁLOGO) */
+.btn-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  cursor: pointer;
+  padding: 0;
+  color: #2563eb;
+  transition: all 0.15s ease-in-out;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    line-height: 17px;
+  }
+
+  &:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.25);
+  }
+}

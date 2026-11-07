@@ -3,6 +3,9 @@ import { TarifaModel } from '../../models/tarifa.model';
 
 // SERVICES
 import { TarifaService } from '../../services/tarifa.service';
+import { ServicioService } from '../../services/servicio.service';
+import { PaqueteService } from '../../services/paquete.service';
+import { TipoHospedajeService } from '../../services/tipo_hospedaje.service';
 import { AlertService } from '../../../base/services/local/alert.service';
 
 // MATERIAL DESIGN
@@ -70,6 +73,9 @@ export class TarifaComponent implements AfterViewInit {
 
   constructor(
     private tarifaService: TarifaService,
+    private servicioService: ServicioService,
+    private paqueteService: PaqueteService,
+    private tipoHospedajeService: TipoHospedajeService,
     private alertService: AlertService
   ) {
     this.cargarDatos();
@@ -87,6 +93,9 @@ export class TarifaComponent implements AfterViewInit {
       next: (res) => {
         this.tarifas.set(Array.isArray(res) ? res : []);
         this.buttonEnabled = true;
+        this.servicioService.listar().subscribe();
+        this.paqueteService.listar().subscribe();
+        this.tipoHospedajeService.listar().subscribe();
       },
       error: (err) => {
         console.error("Error al cargar tarifas:", err);
@@ -112,7 +121,7 @@ export class TarifaComponent implements AfterViewInit {
     const dialogRef = this.dialog.open(TarifaFormComponent, {
       data: { tarifa: this.tarifa, tarifas: this.tarifas },
       width: "98vw",
-      maxWidth: "650px",
+      maxWidth: "720px",
       disableClose: true
     });
 
@@ -128,7 +137,7 @@ export class TarifaComponent implements AfterViewInit {
     const dialogRef = this.dialog.open(TarifaFormComponent, {
       data: { tarifa: this.tarifa, tarifas: this.tarifas },
       width: "98vw",
-      maxWidth: "650px",
+      maxWidth: "720px",
       disableClose: true
     });
     this.cambiarfondoFila("azure");

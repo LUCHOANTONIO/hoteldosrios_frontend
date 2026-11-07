@@ -1,0 +1,112 @@
+<div class="paquete-modal-root">
+  <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header d-flex justify-content-between align-items-center">
+    <span class="d-flex align-items-center gap-2">
+      <mat-icon style="color: #60a5fa;">inventory_2</mat-icon>
+      <span>CATÁLOGO DE PAQUETES</span>
+    </span>
+    <button mat-icon-button (click)="cerrar()" type="button" style="color: white;">
+      <mat-icon>close</mat-icon>
+    </button>
+  </h1>
+
+  <mat-dialog-content class="mat-typography px-3 pt-2 pb-2">
+    <!-- BARRA SUPERIOR: BUSCADOR Y BOTÓN ADICIONAR -->
+    <div class="d-flex gap-2 mb-2 align-items-center">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-grow-1">
+        <mat-label>Buscar paquete...</mat-label>
+        <input matInput [(ngModel)]="filtro" placeholder="Escriba para filtrar...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <button mat-raised-button type="button" class="bg-success text-black" (click)="abrirNuevo()" matTooltip="Adicionar nuevo paquete">
+        <mat-icon>add</mat-icon> Nuevo
+      </button>
+    </div>
+
+    <!-- PANEL INLINE: CREAR NUEVO PAQUETE -->
+    @if (mostrandoNuevo) {
+      <div class="box-nuevo border border-success rounded p-2 mb-2 bg-light">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="fw-bold text-success small">
+            <mat-icon style="font-size: 15px; width: 15px; height: 15px; vertical-align: middle;">add_circle</mat-icon>
+            Nuevo Paquete
+          </span>
+          <button type="button" class="btn-close-sm" (click)="cancelarNuevo()">
+            <mat-icon style="font-size: 15px; width: 15px; height: 15px;">close</mat-icon>
+          </button>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <input type="text" class="form-control form-control-sm" placeholder="Descripción del nuevo paquete..." [(ngModel)]="nuevoDescripcion" (keydown.enter)="$event.preventDefault(); guardarNuevo()" #inputNuevo>
+          <button type="button" class="btn btn-sm btn-success text-black d-flex align-items-center gap-1" (click)="guardarNuevo()" [disabled]="guardandoNuevo || !nuevoDescripcion.trim()">
+            @if (guardandoNuevo) {
+              <mat-spinner diameter="14"></mat-spinner>
+            } @else {
+              <mat-icon style="font-size: 15px; width: 15px; height: 15px;">check</mat-icon>
+            }
+            Guardar
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cancelarNuevo()" [disabled]="guardandoNuevo">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- SPINNER CARGANDO -->
+    @if (cargando) {
+      <div class="d-flex justify-content-center align-items-center py-4">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+    }
+
+    <!-- LISTADO DE PAQUETES -->
+    <div class="list-container border rounded" [class.d-none]="cargando">
+      @for (item of getPaquetesFiltrados(); track item.id) {
+        <div class="list-row d-flex justify-content-between align-items-center px-3 py-2 border-bottom" [class.row-selected]="item.id === seleccionadoId">
+          <!-- MODO EDICIÓN EN FILA -->
+          @if (filaEditandoId === item.id) {
+            <div class="d-flex gap-2 align-items-center w-100 py-1">
+              <input type="text" class="form-control form-control-sm flex-grow-1" [(ngModel)]="tempFilaDesc" (keydown.enter)="$event.preventDefault(); guardarEdicionFila(item)">
+              <button type="button" class="btn btn-sm btn-primary text-white d-flex align-items-center gap-1" (click)="guardarEdicionFila(item)" [disabled]="guardandoEdicion">
+                @if (guardandoEdicion) {
+                  <mat-spinner diameter="12"></mat-spinner>
+                } @else {
+                  <mat-icon style="font-size: 14px; width: 14px; height: 14px;">save</mat-icon>
+                }
+                Guardar
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary text-white" (click)="cancelarEdicionFila()" [disabled]="guardandoEdicion">
+                Cancelar
+              </button>
+            </div>
+          } @else {
+            <!-- MODO VISUALIZACIÓN EN FILA -->
+            <span class="item-name fw-medium" [class.text-primary]="item.id === seleccionadoId" (click)="seleccionar(item)" style="cursor: pointer;" matTooltip="Clic para seleccionar para la tarifa">
+              {{ item.descripcion }}
+              @if (item.id === seleccionadoId) {
+                <span class="badge bg-primary ms-1" style="font-size: 10px;">Seleccionado</span>
+              }
+            </span>
+            <div class="d-flex gap-1 align-items-center">
+              <button mat-icon-button type="button" class="text-success" (click)="seleccionar(item)" matTooltip="Seleccionar y usar">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+              <button mat-icon-button type="button" class="text-primary" (click)="iniciarEdicionFila(item)" matTooltip="Modificar paquete">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" class="text-danger" (click)="eliminar(item)" matTooltip="Eliminar paquete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
+      @if (getPaquetesFiltrados().length === 0) {
+        <div class="text-center p-3 text-muted">No se encontraron paquetes</div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="d-flex justify-content-end bg-light py-2 pe-3">
+    <button mat-raised-button (click)="cerrar()" type="button" class="bg-secondary text-white rounded-button">Cerrar</button>
+  </mat-dialog-actions>
+</div>

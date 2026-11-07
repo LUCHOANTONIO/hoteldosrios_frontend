@@ -22,12 +22,17 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 // DIRECTIVAS
 import { PreventEnterSubmitDirective } from '../../../../base/shared/directives/prevent-enter-submit.directive';
 import { PreventEnterSelectDirective } from '../../../../base/shared/directives/prevent-enter-select.directive';
 import { AnimarPerderFocoDirective } from '../../../../base/shared/directives/animar-perder-foco.directive';
 import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-guardar.directive';
+
+// MODALES COMPONENTES
+import { ServicioModalComponent } from '../servicio-modal/servicio-modal';
+import { PaqueteModalComponent } from '../paquete-modal/paquete-modal';
 
 // VARIOS
 import { Component, Inject, ViewChild } from '@angular/core';
@@ -52,6 +57,7 @@ import { forkJoin } from 'rxjs';
     MatCheckboxModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    MatTooltipModule,
     CdkDrag,
     CdkDragHandle,
     PreventEnterSubmitDirective,
@@ -88,20 +94,70 @@ export class TarifaFormComponent {
   }
 
   cargarListas() {
-    forkJoin({
-      servicios: this.servicioService.listar(),
-      tiposHospedaje: this.tipoHospedajeService.listar(),
-      paquetes: this.paqueteService.listar()
-    }).subscribe({
-      next: (res) => {
-        this.servicios = res.servicios;
-        this.tiposHospedaje = res.tiposHospedaje;
-        this.paquetes = res.paquetes;
-      },
-      error: (err) => console.error("Error al cargar listas para Tarifa:", err)
+    this.servicioService.listar().subscribe({
+      next: (res) => this.servicios = res || []
+    });
+    this.tipoHospedajeService.listar().subscribe({
+      next: (res) => this.tiposHospedaje = res || []
+    });
+    this.paqueteService.listar().subscribe({
+      next: (res) => this.paquetes = res || []
     });
   }
 
+  // ===================== GESTIÓN DE SERVICIOS EN MODAL =====================
+  abrirModalServicio() {
+    const dialogRef = this.dialog.open(ServicioModalComponent, {
+      width: '95vw',
+      maxWidth: '560px',
+      disableClose: true,
+      data: {
+        servicios: this.servicios,
+        seleccionadoId: this.tarifa.servicio_id
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(res => {
+      if (res) {
+        if (res.servicios) {
+          this.servicios = res.servicios;
+        }
+        if (res.seleccionadoId) {
+          this.tarifa.servicio_id = res.seleccionadoId;
+        } else if (this.tarifa.servicio_id && !this.servicios.some(s => s.id === this.tarifa.servicio_id)) {
+          this.tarifa.servicio_id = null as any;
+        }
+      }
+    });
+  }
+
+  // ===================== GESTIÓN DE PAQUETES EN MODAL =====================
+  abrirModalPaquete() {
+    const dialogRef = this.dialog.open(PaqueteModalComponent, {
+      width: '95vw',
+      maxWidth: '560px',
+      disableClose: true,
+      data: {
+        paquetes: this.paquetes,
+        seleccionadoId: this.tarifa.paquete_id
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(res => {
+      if (res) {
+        if (res.paquetes) {
+          this.paquetes = res.paquetes;
+        }
+        if (res.seleccionadoId) {
+          this.tarifa.paquete_id = res.seleccionadoId;
+        } else if (this.tarifa.paquete_id && !this.paquetes.some(p => p.id === this.tarifa.paquete_id)) {
+          this.tarifa.paquete_id = null as any;
+        }
+      }
+    });
+  }
+
+  // ===================== SUBMIT TARIFA =====================
   submit(f: NgForm) {
     if (f.valid) {
       this.botonGuardarDirectiva.deshabilitarFormBoton();
@@ -129,7 +185,7 @@ export class TarifaFormComponent {
           this.botonGuardarDirectiva.habilitarFormBoton();
         }
       },
-      error: (error) => {
+      error: () => {
         this.botonGuardarDirectiva.habilitarFormBoton();
       }
     });
@@ -149,7 +205,7 @@ export class TarifaFormComponent {
           this.botonGuardarDirectiva.habilitarFormBoton();
         }
       },
-      error: (error) => {
+      error: () => {
         this.botonGuardarDirectiva.habilitarFormBoton();
       }
     });

@@ -15,38 +15,69 @@
                 <span class="section-title">Datos de la Tarifa</span>
             </div>
             <div class="row row-cols-1 row-cols-md-2 g-2">
-                <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Servicio</mat-label>
-                    <mat-select placeholder="" [(ngModel)]="tarifa.servicio_id" name="servicio_id" #cboServicioId (keydown.enter)="cboTipoHospedajeId.focus()" appPreventEnterSelect required>
-                        @for (item of servicios; track item.id) {
-                            <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
-                        }
-                    </mat-select>
-                </mat-form-field>
+                
+                <!-- COLUMNA 1: SERVICIO -->
+                <div class="col">
+                    <div class="field-top-bar">
+                        <label class="field-custom-label">Servicio <span class="text-danger">*</span></label>
+                        <button type="button" class="btn-tool btn-tool-manage" (click)="abrirModalServicio()" matTooltip="Gestionar servicios (Adicionar, Modificar, Eliminar)">
+                            <mat-icon>format_list_bulleted</mat-icon>
+                        </button>
+                    </div>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                        <mat-label>Seleccione Servicio</mat-label>
+                        <mat-select [(ngModel)]="tarifa.servicio_id" name="servicio_id" #cboServicioId (keydown.enter)="cboTipoHospedajeId.focus()" appPreventEnterSelect required>
+                            @for (item of servicios; track item.id) {
+                                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
 
-                <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Tipo Hospedaje</mat-label>
-                    <mat-select placeholder="" [(ngModel)]="tarifa.tipo_hospedaje_id" name="tipo_hospedaje_id" #cboTipoHospedajeId (keydown.enter)="cboPaqueteId.focus()" appPreventEnterSelect required>
-                        @for (item of tiposHospedaje; track item.id) {
-                            <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
-                        }
-                    </mat-select>
-                </mat-form-field>
+                <!-- COLUMNA 2: TIPO HOSPEDAJE -->
+                <div class="col">
+                    <div class="field-top-bar">
+                        <label class="field-custom-label">Tipo Hospedaje <span class="text-danger">*</span></label>
+                    </div>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                        <mat-label>Seleccione Tipo Hospedaje</mat-label>
+                        <mat-select [(ngModel)]="tarifa.tipo_hospedaje_id" name="tipo_hospedaje_id" #cboTipoHospedajeId (keydown.enter)="cboPaqueteId.focus()" appPreventEnterSelect required>
+                            @for (item of tiposHospedaje; track item.id) {
+                                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
 
-                <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Paquete</mat-label>
-                    <mat-select placeholder="" [(ngModel)]="tarifa.paquete_id" name="paquete_id" #cboPaqueteId (keydown.enter)="txtComida.focus()" appPreventEnterSelect required>
-                        @for (item of paquetes; track item.id) {
-                            <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
-                        }
-                    </mat-select>
-                </mat-form-field>
+                <!-- COLUMNA 3: PAQUETE -->
+                <div class="col">
+                    <div class="field-top-bar">
+                        <label class="field-custom-label">Paquete <span class="text-danger">*</span></label>
+                        <button type="button" class="btn-tool btn-tool-manage" (click)="abrirModalPaquete()" matTooltip="Gestionar paquetes (Adicionar, Modificar, Eliminar)">
+                            <mat-icon>format_list_bulleted</mat-icon>
+                        </button>
+                    </div>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                        <mat-label>Seleccione Paquete</mat-label>
+                        <mat-select [(ngModel)]="tarifa.paquete_id" name="paquete_id" #cboPaqueteId (keydown.enter)="txtComida.focus()" appPreventEnterSelect required>
+                            @for (item of paquetes; track item.id) {
+                                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
 
-                <mat-form-field class="col" appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Comida Incluida</mat-label>
-                    <input matInput placeholder="Ej: 4 Comidas, Desayuno Buffet, etc." [(ngModel)]="tarifa.comida_incluida" name="comida_incluida" #txtComida (keydown.enter)="txtTarifaAdulto.focus()">
-                    <mat-icon matSuffix>restaurant</mat-icon>
-                </mat-form-field>
+                <!-- COLUMNA 4: COMIDA INCLUIDA -->
+                <div class="col">
+                    <div class="field-top-bar">
+                        <label class="field-custom-label">Comida Incluida</label>
+                    </div>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
+                        <input matInput placeholder="Ej: 4 Comidas, Desayuno Buffet, etc." [(ngModel)]="tarifa.comida_incluida" name="comida_incluida" #txtComida (keydown.enter)="txtTarifaAdulto.focus()">
+                        <mat-icon matSuffix>restaurant</mat-icon>
+                    </mat-form-field>
+                </div>
+
             </div>
         </div>
 
