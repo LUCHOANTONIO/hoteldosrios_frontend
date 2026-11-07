@@ -26,20 +26,19 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 // DIRECTIVAS
 import { PreventEnterSubmitDirective } from '../../../../base/shared/directives/prevent-enter-submit.directive';
-import { PreventEnterSelectDirective } from '../../../../base/shared/directives/prevent-enter-select.directive';
 import { AnimarPerderFocoDirective } from '../../../../base/shared/directives/animar-perder-foco.directive';
 import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-guardar.directive';
 
 // MODALES COMPONENTES
 import { ServicioModalComponent } from '../servicio-modal/servicio-modal';
 import { PaqueteModalComponent } from '../paquete-modal/paquete-modal';
+import { SelectSearchComponent } from '../../../../base/shared/views/select-search/select-search';
 
 // VARIOS
 import { Component, Inject, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-tarifa-form',
@@ -61,9 +60,9 @@ import { forkJoin } from 'rxjs';
     CdkDrag,
     CdkDragHandle,
     PreventEnterSubmitDirective,
-    PreventEnterSelectDirective,
     AnimarPerderFocoDirective,
-    BotonGuardarDirective
+    BotonGuardarDirective,
+    SelectSearchComponent
   ],
   templateUrl: './tarifa-form.html',
   styleUrls: ['./tarifa-form.scss']
@@ -95,13 +94,13 @@ export class TarifaFormComponent {
 
   cargarListas() {
     this.servicioService.listar().subscribe({
-      next: (res) => this.servicios = res || []
+      next: (res) => this.servicios = [...(res || [])]
     });
     this.tipoHospedajeService.listar().subscribe({
-      next: (res) => this.tiposHospedaje = res || []
+      next: (res) => this.tiposHospedaje = [...(res || [])]
     });
     this.paqueteService.listar().subscribe({
-      next: (res) => this.paquetes = res || []
+      next: (res) => this.paquetes = [...(res || [])]
     });
   }
 
@@ -120,7 +119,7 @@ export class TarifaFormComponent {
     dialogRef.afterClosed().subscribe(res => {
       if (res) {
         if (res.servicios) {
-          this.servicios = res.servicios;
+          this.servicios = [...res.servicios];
         }
         if (res.seleccionadoId) {
           this.tarifa.servicio_id = res.seleccionadoId;
@@ -146,7 +145,7 @@ export class TarifaFormComponent {
     dialogRef.afterClosed().subscribe(res => {
       if (res) {
         if (res.paquetes) {
-          this.paquetes = res.paquetes;
+          this.paquetes = [...res.paquetes];
         }
         if (res.seleccionadoId) {
           this.tarifa.paquete_id = res.seleccionadoId;

@@ -10,6 +10,8 @@
 }
 
 .search-item-wrapper {
+  position: sticky;
+  top: 0;
   z-index: 10;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   contain: layout; // Optimización de renderizado
@@ -47,9 +49,4 @@
 // Margen para que el scroll por teclado no quede oculto bajo el buscador
 ::ng-deep .mat-mdc-option {
   scroll-margin-top: 40px; 
-}
-
-// Resaltado visual del teclado
-::ng-deep .mat-mdc-option.mat-mdc-option-active {
-  background-color: rgba(0, 0, 0, 0.04) !important;
 }

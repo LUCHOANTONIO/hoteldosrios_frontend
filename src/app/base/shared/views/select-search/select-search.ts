@@ -59,6 +59,8 @@ export class SelectSearchComponent implements ControlValueAccessor, AfterViewIni
   disabled = model<boolean>(false);
   showCleanButton = input(false, { transform: booleanAttribute });
   searchFields = input<string[]>([]);
+  appearance = input<'fill' | 'outline'>('outline');
+  subscriptSizing = input<'fixed' | 'dynamic'>('dynamic');
   // Definimos el evento de salida
   selectionChange = output<{value:any,object:any}>();
   keyupEnter = output<void>();

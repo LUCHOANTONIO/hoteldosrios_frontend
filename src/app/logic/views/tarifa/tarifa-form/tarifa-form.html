@@ -24,14 +24,19 @@
                             <mat-icon>format_list_bulleted</mat-icon>
                         </button>
                     </div>
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
-                        <mat-label>Seleccione Servicio</mat-label>
-                        <mat-select [(ngModel)]="tarifa.servicio_id" name="servicio_id" #cboServicioId (keydown.enter)="cboTipoHospedajeId.focus()" appPreventEnterSelect required>
-                            @for (item of servicios; track item.id) {
-                                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
+                    <app-select-search
+                        #cboServicio
+                        (keyupEnter)="cboTipoHospedaje.focus()"
+                        label="Seleccione Servicio"
+                        placeholder="Buscar servicio..."
+                        [(ngModel)]="tarifa.servicio_id"
+                        [dataSource]="servicios"
+                        text="descripcion"
+                        value="id"
+                        name="servicio_id"
+                        required
+                        [searchFields]="['descripcion']">
+                    </app-select-search>
                 </div>
 
                 <!-- COLUMNA 2: TIPO HOSPEDAJE -->
@@ -39,14 +44,19 @@
                     <div class="field-top-bar">
                         <label class="field-custom-label">Tipo Hospedaje <span class="text-danger">*</span></label>
                     </div>
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
-                        <mat-label>Seleccione Tipo Hospedaje</mat-label>
-                        <mat-select [(ngModel)]="tarifa.tipo_hospedaje_id" name="tipo_hospedaje_id" #cboTipoHospedajeId (keydown.enter)="cboPaqueteId.focus()" appPreventEnterSelect required>
-                            @for (item of tiposHospedaje; track item.id) {
-                                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
+                    <app-select-search
+                        #cboTipoHospedaje
+                        (keyupEnter)="cboPaquete.focus()"
+                        label="Seleccione Tipo Hospedaje"
+                        placeholder="Buscar tipo hospedaje..."
+                        [(ngModel)]="tarifa.tipo_hospedaje_id"
+                        [dataSource]="tiposHospedaje"
+                        text="descripcion"
+                        value="id"
+                        name="tipo_hospedaje_id"
+                        required
+                        [searchFields]="['descripcion']">
+                    </app-select-search>
                 </div>
 
                 <!-- COLUMNA 3: PAQUETE -->
@@ -57,14 +67,19 @@
                             <mat-icon>format_list_bulleted</mat-icon>
                         </button>
                     </div>
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
-                        <mat-label>Seleccione Paquete</mat-label>
-                        <mat-select [(ngModel)]="tarifa.paquete_id" name="paquete_id" #cboPaqueteId (keydown.enter)="txtComida.focus()" appPreventEnterSelect required>
-                            @for (item of paquetes; track item.id) {
-                                <mat-option [value]="item.id">{{ item.descripcion }}</mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
+                    <app-select-search
+                        #cboPaquete
+                        (keyupEnter)="txtComida.focus()"
+                        label="Seleccione Paquete"
+                        placeholder="Buscar paquete..."
+                        [(ngModel)]="tarifa.paquete_id"
+                        [dataSource]="paquetes"
+                        text="descripcion"
+                        value="id"
+                        name="paquete_id"
+                        required
+                        [searchFields]="['descripcion']">
+                    </app-select-search>
                 </div>
 
                 <!-- COLUMNA 4: COMIDA INCLUIDA -->
@@ -102,12 +117,22 @@
             </div>
         </div>
 
+        <!-- CARD 3: DETALLE / OBSERVACIONES -->
+        <div class="form-section-card mb-1">
+            <div class="section-header">
+                <mat-icon class="section-icon">description</mat-icon>
+                <span class="section-title">Detalle / Observaciones</span>
+            </div>
+            <mat-form-field class="w-100" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Detalle adicional de la tarifa</mat-label>
+                <textarea matInput rows="2" placeholder="Observaciones o aclaraciones de la tarifa..." [(ngModel)]="tarifa.detalle" name="detalle"></textarea>
+            </mat-form-field>
+        </div>
+
     </mat-dialog-content>
 
-    <mat-dialog-actions class="d-flex justify-content-around bg-light py-2">
-        <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white rounded-button" style="min-width: 120px;">Cancelar</button>
-        <button mat-raised-button type="submit" class="bg-success text-black rounded-button" style="min-width: 120px;" appBotonGuardar [form]="f">
-            <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon> Guardar
-        </button>
+    <mat-dialog-actions align="center" class="pt-0 pb-2">
+        <button mat-flat-button color="primary" class="rounded-button" type="button" mat-dialog-close>Cancelar</button>
+        <button mat-flat-button class="rounded-button" appBotonGuardar type="submit">Guardar</button>
     </mat-dialog-actions>
 </form>

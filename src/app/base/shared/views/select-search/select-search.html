@@ -1,6 +1,6 @@
-<mat-form-field class="w-100">
+<mat-form-field class="w-100" [appearance]="appearance()" [subscriptSizing]="subscriptSizing()">
   @if (showCleanButton() && selectedValue() !== undefined && selectedValue() !== null) {
-      <button mat-icon-button matPrefix type="button"title="Limpiar selección" [disabled]="disabled()" (click)="reset($event)">
+      <button mat-icon-button matPrefix type="button" title="Limpiar selección" [disabled]="disabled()" (click)="reset($event)">
           <mat-icon>close</mat-icon>
       </button>
     }
@@ -15,7 +15,7 @@
               disableOptionCentering
               panelClass="custom-select-panel">
 
-    <div class="search-item-wrapper sticky-top bg-white" (keydown)="$event.stopPropagation()">
+    <div class="search-item-wrapper sticky-top bg-white" (keydown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
       <div class="search-item-content">
         <mat-icon>search</mat-icon>
         <input #txtFiltro 
