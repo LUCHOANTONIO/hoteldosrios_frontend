@@ -1,11 +1,23 @@
 <mat-card class="my-1" appearance="outlined">
-    <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center;">
-        <div style="display: flex; align-items: center; flex: 1;">
+    <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; flex: 1; min-width: 160px;">
             <mat-card-title class="text-bg-white pt-1" style="font-size: 18px; font-weight: bold;">
                 <mat-icon style="vertical-align: middle; margin-right: 6px;"
                     class="text-primary">price_change</mat-icon>
                 TARIFAS
             </mat-card-title>
+        </div>
+
+        <!-- Botones de Exportar PDF y Excel -->
+        <div class="d-flex gap-2 align-items-center">
+            <button mat-button (click)="exportarPdf('0ms', '0ms')"
+                class="bg-danger rounded-button text-white px-3" matTooltip="Exportar a PDF">
+                <mat-icon class="me-1">picture_as_pdf</mat-icon> PDF
+            </button>
+            <button mat-button (click)="exportarExcel()"
+                class="bg-success rounded-button text-black px-3" matTooltip="Exportar a Excel">
+                <mat-icon class="me-1">description</mat-icon> Excel
+            </button>
         </div>
 
         <!-- Campo de búsqueda alineado a la derecha -->

@@ -24,6 +24,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 // COMPONENTS
 import { TarifaFormComponent } from './tarifa-form/tarifa-form';
 import { ConfirmarEliminarComponent } from '../../../base/shared/views/confirmar-eliminar/confirmar-eliminar';
+import { PdfViewerComponent } from '../../shared/views/pdf-viewer/pdf-viewer';
 
 // VARIOS
 import { AfterViewInit, Component, ViewChild, effect, inject, signal } from '@angular/core';
@@ -176,6 +177,67 @@ export class TarifaComponent implements AfterViewInit {
         });
       } else {
         this.cambiarfondoFila("");
+      }
+    });
+  }
+
+  exportarPdf(enterAnimationDuration: string = '0ms', exitAnimationDuration: string = '0ms') {
+    this.tarifaService.exportarPdf().subscribe({
+      next: (res: string) => {
+        if (!res) {
+          this.alertService.show("No se pudo generar el reporte en PDF", { duration: 4000, type: 'error' });
+          return;
+        }
+        this.dialog.open(PdfViewerComponent, {
+          width: '85vw',
+          maxWidth: '95vw',
+          height: '85vh',
+          enterAnimationDuration,
+          exitAnimationDuration,
+          data: { pdf_base64: res, titulo_documento: 'Tarifas de Hospedaje y Servicios' },
+          disableClose: true,
+        });
+      },
+      error: (err) => {
+        console.error("Error al exportar PDF:", err);
+        this.alertService.show("Error al generar el reporte en PDF", { duration: 4000, type: 'error' });
+      }
+    });
+  }
+
+  exportarExcel() {
+    this.tarifaService.exportarExcel().subscribe({
+      next: (res: string) => {
+        if (!res) {
+          this.alertService.show("No se pudo generar el archivo Excel", { duration: 4000, type: 'error' });
+          return;
+        }
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const nombreArchivo = `tarifas_${yyyy}-${mm}-${dd}.xlsx`;
+
+        const byteCharacters = atob(res);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error("Error al exportar Excel:", err);
+        this.alertService.show("Error al generar el archivo Excel", { duration: 4000, type: 'error' });
       }
     });
   }

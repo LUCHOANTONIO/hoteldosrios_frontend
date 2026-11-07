@@ -32,4 +32,12 @@ export class TarifaService {
     eliminar(id: number): Observable<RespuestaRequest<any>> {
         return this.http.delete<RespuestaRequest<any>>(`${this.URL_API_BASE}/${id}`);
     }
+
+    exportarPdf(): Observable<string> {
+        return this.http.get<string>(`${this.URL_API_BASE}/export_pdf`);
+    }
+
+    exportarExcel(): Observable<string> {
+        return this.http.get<string>(`${this.URL_API_BASE}/export_excel`);
+    }
 }
