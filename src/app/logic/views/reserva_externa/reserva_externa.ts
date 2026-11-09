@@ -481,7 +481,7 @@ export class ReservaExternaComponent implements OnInit {
 
     this.comunicacionService.executeActionReserva.set(false);
 
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 850;
     const dialogRef = this.dialog.open(ReservaFormComponent, {
       data: {
         reserva: reservaParaForm,
@@ -501,11 +501,11 @@ export class ReservaExternaComponent implements OnInit {
         items: { update: () => { }, get: () => [], remove: () => { } },
         updateGroupsSignal: signal<number | null>(null)
       },
-      width: isMobile ? '100vw' : '98vw',
-      maxWidth: isMobile ? '100vw' : '650px',
+      width: isMobile ? '100vw' : '720px',
+      maxWidth: isMobile ? '100vw' : '95vw',
       height: isMobile ? '100dvh' : 'auto',
       maxHeight: isMobile ? '100dvh' : '92vh',
-      panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
+      panelClass: ['reserva-externa-fullscreen-dialog'],
       disableClose: true
     });
 
@@ -547,18 +547,18 @@ export class ReservaExternaComponent implements OnInit {
       }
     }
 
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 850;
     const dialogRef = this.dialog.open(CotizacionFormComponent, {
       data: {
         cotizacion: cotizacionParaForm,
         cotizaciones: this.cotizacionesSignal,
         is_externo: true
       },
-      width: isMobile ? '100vw' : '98vw',
-      maxWidth: isMobile ? '100vw' : '650px',
+      width: isMobile ? '100vw' : '720px',
+      maxWidth: isMobile ? '100vw' : '95vw',
       height: isMobile ? '100dvh' : 'auto',
       maxHeight: isMobile ? '100dvh' : '92vh',
-      panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
+      panelClass: ['reserva-externa-fullscreen-dialog'],
       disableClose: true
     });
 
@@ -622,13 +622,13 @@ export class ReservaExternaComponent implements OnInit {
     this.documentoService.obtenerVoucherReserva(reservaId).subscribe({
       next: (pdfBase64: string) => {
         if (pdfBase64) {
-          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 850;
           this.dialog.open(PdfViewerComponent, {
             width: isMobile ? '100vw' : '92vw',
             maxWidth: isMobile ? '100vw' : '1100px',
             height: isMobile ? '100dvh' : '90vh',
             maxHeight: isMobile ? '100dvh' : '90vh',
-            panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
+            panelClass: ['reserva-externa-fullscreen-dialog'],
             data: {
               pdf_base64: pdfBase64,
               titulo_documento: `Comprobante de Reserva ${reservaId}`
@@ -648,13 +648,13 @@ export class ReservaExternaComponent implements OnInit {
     this.documentoService.obtenerVoucherCotizacion(cotizacionId).subscribe({
       next: (pdfBase64: string) => {
         if (pdfBase64) {
-          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 850;
           this.dialog.open(PdfViewerComponent, {
             width: isMobile ? '100vw' : '92vw',
             maxWidth: isMobile ? '100vw' : '1100px',
             height: isMobile ? '100dvh' : '90vh',
             maxHeight: isMobile ? '100dvh' : '90vh',
-            panelClass: isMobile ? ['mobile-fullscreen-dialog'] : [],
+            panelClass: ['reserva-externa-fullscreen-dialog'],
             data: {
               pdf_base64: pdfBase64,
               titulo_documento: `Cotización #${cotizacionId}`

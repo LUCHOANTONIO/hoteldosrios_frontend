@@ -131,8 +131,8 @@
 
     </mat-dialog-content>
 
-    <mat-dialog-actions align="center" class="pt-0 pb-2">
-        <button mat-flat-button color="primary" class="rounded-button" type="button" mat-dialog-close>Cancelar</button>
-        <button mat-flat-button class="rounded-button" appBotonGuardar type="submit">Guardar</button>
+    <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f"><mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner> </mat-icon> Guardar </button>
     </mat-dialog-actions>
 </form>
