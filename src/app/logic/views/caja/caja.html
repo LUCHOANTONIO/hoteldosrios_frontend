@@ -1,4 +1,3 @@
-
 <mat-card class="my-1" appearance="outlined">
   <mat-card-header class="bg-light my-1" style="padding: 5px; display: flex; align-items: center;"> <!--padding:5px ajusta el tamaño del card header-->
       <div style="display: flex; align-items: center; flex: 1;">
@@ -91,13 +90,6 @@
                       <td mat-cell *matCellDef="let x"> {{x.estado}} </td>
                   </ng-container>                                    
 
-                  <ng-container matColumnDef="arqueo">
-                      <th mat-header-cell *matHeaderCellDef>Arqueo</th>
-                      <td mat-cell *matCellDef="let x">
-                        <button mat-raised-button class="bg-primary text-white rounded-button" (click)="arqueoCaja(x.id,x.estado_id)">Arqueo</button>                                                  
-                      </td>
-                  </ng-container> 
-                  
                   <ng-container matColumnDef="detalle">
                       <th mat-header-cell *matHeaderCellDef>Detalle</th>
                       <td mat-cell *matCellDef="let x">
@@ -116,6 +108,3 @@
       </div>
   </mat-card-content>   
 </mat-card>
-
-
-

@@ -53,7 +53,7 @@ export class CajaComponent implements AfterViewInit {
   pdf_base64: string = '';
 
   // displayedColumns: string[] = ['actions', 'usuario','nro_documento', 'fecha_ini', 'fecha_fin', 'estado','arqueo_usd','arqueo_bob','detalle'];
-  displayedColumns: string[] = ['actions', 'usuario', 'nro_documento', 'fecha_ini', 'fecha_fin', 'estado', 'arqueo', 'detalle'];
+  displayedColumns: string[] = ['actions', 'usuario', 'nro_documento', 'fecha_ini', 'fecha_fin', 'estado', 'detalle'];
   dataSource: MatTableDataSource<CajaModel>;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
