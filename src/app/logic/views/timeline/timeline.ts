@@ -900,6 +900,7 @@ export class TimelineComponent implements AfterViewInit {
         const dialogRef = this.dialog.open(ReservaFormComponent, {
           data: {
             reserva: this.reserva,
+            balance: res.response.balance,
             reservas: this.reservas,
             habitaciones: this.habitaciones,
             tipo_documentos: this.tipo_documentos,

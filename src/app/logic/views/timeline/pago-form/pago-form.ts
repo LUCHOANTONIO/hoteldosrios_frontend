@@ -30,7 +30,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormaPagoModel } from '../../../models/forma_pago.model';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
@@ -186,7 +186,7 @@ export class PagoFormComponent implements OnInit {
     };
   }
 
-  onMontoChange(valor?: any) {
+  onMontoChange() {
     const monto = Number(this.transaccion_pago.monto) || 0;
     this.selectedTransacciones = [];
 
@@ -380,14 +380,12 @@ export class PagoFormComponent implements OnInit {
           const data = JSON.parse(res.dato);        
           this.balance.set(this.normalizarBalanceDetalles(data.balance)); 
           this.transaccion_pagos = data.pagos as MovimientoModel[];                     
-          const pdf_base64 = data.base64Pdf as string;
           
           this.dataSourceMovimientos = new MatTableDataSource<MovimientoModel>(this.transaccion_pagos);
           this.dataSourceMovimientos.paginator = this.paginator; 
           this.transaccion_pago=new MovimientoModel();//Limpiar datos de transaccion pago
           this.selectedTransacciones = [];
           
-          //this.mostrarVisorPdf(pdf_base64);           
           const fechaIni = moment(this.reserva.fecha_ini).startOf('day').hour(14).minute(0).second(0);
           const fechaFin = moment(this.reserva.fecha_fin).startOf('day').hour(11).minute(0).second(0);
           this.reserva.fecha_ini = moment(fechaIni).format("YYYY-MM-DD HH:mm");
@@ -440,13 +438,11 @@ export class PagoFormComponent implements OnInit {
                 const data = JSON.parse(res.dato);        
                 this.balance.set(this.normalizarBalanceDetalles(data.balance)); 
                 this.transaccion_pagos = data.pagos as MovimientoModel[];                     
-                const pdf_base64 = data.base64Pdf as string;
                 
                 this.dataSourceMovimientos = new MatTableDataSource<MovimientoModel>(this.transaccion_pagos);
                 this.dataSourceMovimientos.paginator = this.paginator; 
                 this.transaccion_pago = new MovimientoModel();//Limpiar datos de transaccion pago
                 
-                //this.mostrarVisorPdf(pdf_base64);
                 const fechaIni = moment(this.reserva.fecha_ini).startOf('day').hour(14).minute(0).second(0);
                 const fechaFin = moment(this.reserva.fecha_fin).startOf('day').hour(11).minute(0).second(0);
                 this.reserva.fecha_ini = moment(fechaIni).format("YYYY-MM-DD HH:mm");

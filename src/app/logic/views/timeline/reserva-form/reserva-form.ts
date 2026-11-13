@@ -61,7 +61,7 @@ import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-
 import { ShowErrorDirective } from '../../../../base/shared/directives/show-error.directive';
 
 //VARIOS
-import { Component, Inject, ChangeDetectorRef, ViewChild, ElementRef, effect, signal } from '@angular/core';
+import { Component, Inject, ChangeDetectorRef, ViewChild, effect, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
@@ -174,6 +174,7 @@ export class ReservaFormComponent {
 
   // Informacion de Pago Registrado
   pagoRegistradoInfo: {
+    id?: number | null;
     forma_pago_id?: number | null;
     forma_pago_desc?: string;
     detalle?: string;
@@ -282,10 +283,19 @@ export class ReservaFormComponent {
         this.reserva.anticipo = null as any;
         this.reserva.detalle_anticipo = '';
       } else {
-        this.reserva.precio_unit_adulto = Number(this.reserva.precio_unit_adulto) || 0;
-        this.reserva.precio_unit_ninio = Number(this.reserva.precio_unit_ninio) || 0;
-        this.reserva.anticipo = null as any;
-        this.cargarDatosPagos(this.reserva.id);
+        this.normalizarPreciosReserva();
+        if (this.reserva.anticipo !== undefined && this.reserva.anticipo !== null) {
+          const montoInicial = Number(this.reserva.anticipo) || 0;
+          const fpId = this.reserva.forma_pago_id || null;
+          const fpDesc = (this.reserva as any).forma_pago_desc || (fpId ? (this.forma_pagos?.find(f => f.id === fpId)?.descripcion || '') : '');
+          this.pagoRegistradoInfo = {
+            id: null,
+            forma_pago_id: fpId,
+            forma_pago_desc: fpDesc,
+            detalle: this.reserva.detalle_anticipo || '',
+            monto: Number(montoInicial.toFixed(2))
+          };
+        }
       }
 
       if (this.isFullDay()) {
@@ -559,12 +569,36 @@ export class ReservaFormComponent {
   }
 
   changeHabitacionesMulti(event: any): void {
-    this.selectedHabitaciones = event.value || [];
+    this.selectedHabitaciones = (event.value || []).map((id: any) => Number(id));
     this.reserva.habitacion_ids = [...this.selectedHabitaciones];
     if (this.selectedHabitaciones.length > 0) {
-      this.reserva.habitacion_id = this.selectedHabitaciones[0];
+      if (!this.reserva.habitacion_id || !this.selectedHabitaciones.includes(Number(this.reserva.habitacion_id))) {
+        this.reserva.habitacion_id = this.selectedHabitaciones[0];
+      }
     }
     this.calcularPrecioGrupal();
+  }
+
+  private normalizarPreciosReserva(): void {
+    if (!this.reserva) return;
+    this.reserva.cantidad_adulto = Number(this.reserva.cantidad_adulto) || 0;
+    this.reserva.precio_unit_adulto = Number(this.reserva.precio_unit_adulto) || 0;
+    this.reserva.cantidad_ninio = Number(this.reserva.cantidad_ninio) || 0;
+    this.reserva.precio_unit_ninio = Number(this.reserva.precio_unit_ninio) || 0;
+
+    const totalDesglosado = (this.reserva.cantidad_adulto * this.reserva.precio_unit_adulto) +
+                            (this.reserva.cantidad_ninio * this.reserva.precio_unit_ninio);
+    const totalRespaldo = Number(this.reserva.total) || Number((this.reserva as any).precio_unitario) || 0;
+
+    if (totalDesglosado <= 0 && totalRespaldo > 0) {
+      if (this.reserva.cantidad_adulto <= 0) {
+        const cantHuesped = Number((this.reserva as any).cantidad_huesped) || 0;
+        this.reserva.cantidad_adulto = cantHuesped > 0 ? cantHuesped : 1;
+      }
+      this.reserva.precio_unit_adulto = Math.round((totalRespaldo / this.reserva.cantidad_adulto) * 100) / 100;
+    } else if (this.reserva.cantidad_adulto <= 0 && this.reserva.cantidad_ninio <= 0) {
+      this.reserva.cantidad_adulto = 1;
+    }
   }
 
   calcularPrecioGrupal(): void {
@@ -664,10 +698,18 @@ export class ReservaFormComponent {
           this.alertService.show("Debe seleccionar la forma de pago del anticipo", { duration: 5000, type: 'warning' });
           return;
         }
+        if (anticipoVal > 0 && (!this.reserva.detalle_anticipo || !this.reserva.detalle_anticipo.trim())) {
+          this.alertService.show("Debe ingresar el detalle del anticipo", { duration: 5000, type: 'warning' });
+          return;
+        }
       } else {
         if (this.reserva.anticipo && Number(this.reserva.anticipo) > 0 && (!this.reserva.id || this.isEditReserva)) {
           if (!this.reserva.forma_pago_id) {
             this.alertService.show("Debe seleccionar la forma de pago del anticipo", { duration: 5000, type: 'info' });
+            return;
+          }
+          if (!this.reserva.detalle_anticipo || !this.reserva.detalle_anticipo.trim()) {
+            this.alertService.show("Debe ingresar el detalle del anticipo", { duration: 5000, type: 'info' });
             return;
           }
         }
@@ -684,8 +726,10 @@ export class ReservaFormComponent {
           return;
         }
         this.reserva.is_grupal = true;
-        this.reserva.habitacion_ids = this.selectedHabitaciones;
-        this.reserva.habitacion_id = this.selectedHabitaciones[0];
+        this.reserva.habitacion_ids = this.selectedHabitaciones.map(id => Number(id));
+        if (!this.reserva.habitacion_id || !this.reserva.habitacion_ids.includes(Number(this.reserva.habitacion_id))) {
+          this.reserva.habitacion_id = this.reserva.habitacion_ids[0];
+        }
       } else {
         this.reserva.is_grupal = false;
         this.reserva.habitacion_ids = [this.reserva.habitacion_id];
@@ -751,15 +795,32 @@ export class ReservaFormComponent {
           } else if (data.reservas && data.reservas.length > 0) {
             this.reserva = data.reservas[0] as ReservaModel;
           }
-          const finalId = Number(this.reserva?.id || data?.id || (data.reservas && data.reservas[0]?.id)) || 0;
+          this.normalizarPreciosReserva();
+          this.calcularTotal();
           if (this.is_externo) {
             this.reserva.is_externo = 1;
           }
           this.balance.set(data.balance); //Establecer valor a por medio de signal                
           this.reserva.anticipo = this.getYaPagado();
-          this.reserva.detalle_anticipo = '';
+          this.reserva.detalle_anticipo = this.pagoRegistradoInfo?.detalle || '';
+          if (!this.reserva.forma_pago_id && this.pagoRegistradoInfo?.forma_pago_id) {
+            this.reserva.forma_pago_id = this.pagoRegistradoInfo.forma_pago_id;
+          }
+          if (this.reserva.id > 0) {
+            this.cargarDatosPagos(this.reserva.id);
+          }
           this.reserva.fecha_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD");
           this.reserva.fecha_fin = moment(this.reserva.fecha_fin).format("YYYY-MM-DD");
+
+          if (this.reserva.grupo_id || this.reserva.is_grupal) {
+            this.tipo_reserva = 'grupal';
+            if (this.reserva.habitacion_ids && this.reserva.habitacion_ids.length > 0) {
+              this.selectedHabitaciones = this.reserva.habitacion_ids.map(id => Number(id));
+            }
+          } else {
+            this.tipo_reserva = 'individual';
+            this.selectedHabitaciones = [Number(this.reserva.habitacion_id)];
+          }
 
           // Limpiar borde naranja de cualquier reserva registrada anteriormente
           if (this.items) {
@@ -858,8 +919,15 @@ export class ReservaFormComponent {
     this.btnVisibleSaveReserva = true;
     this.btnVisibleCheckIn = false;
     this.btnVisibleCheckOut = false;
-    this.reserva.anticipo = null as any;
-    this.reserva.detalle_anticipo = '';
+    this.normalizarPreciosReserva();
+    this.calcularTotal();
+    this.reserva.anticipo = this.getYaPagado();
+    if (!this.reserva.forma_pago_id && this.pagoRegistradoInfo?.forma_pago_id) {
+      this.reserva.forma_pago_id = this.pagoRegistradoInfo.forma_pago_id;
+    }
+    if (!this.reserva.detalle_anticipo && this.pagoRegistradoInfo?.detalle) {
+      this.reserva.detalle_anticipo = this.pagoRegistradoInfo.detalle;
+    }
   }
 
   modificarReserva() {
@@ -871,6 +939,9 @@ export class ReservaFormComponent {
     const cantNinio = Number(this.reserva.cantidad_ninio) || 0;
     const precioNinio = Number(this.reserva.precio_unit_ninio) || 0;
     const totalBase = (cantAdulto * precioAdulto) + (cantNinio * precioNinio);
+    const anticipoIngresado = Number(this.reserva.anticipo) || 0;
+    const formaPagoEditada = this.reserva.forma_pago_id || null;
+    const detalleEditado = this.reserva.detalle_anticipo || '';
 
     const payload: any = {
       ...this.reserva,
@@ -883,8 +954,11 @@ export class ReservaFormComponent {
       precio_unit_ninio: precioNinio,
       cantidad_huesped: (cantAdulto + cantNinio) > 0 ? (cantAdulto + cantNinio) : 1,
       transacciones: this.reserva.transacciones || [],
-      anticipo: Number(this.reserva.anticipo) || 0,
-      detalle_anticipo: (Number(this.reserva.anticipo) > 0) ? (this.reserva.detalle_anticipo || '') : ''
+      pago_id: this.pagoRegistradoInfo?.id || null,
+      forma_pago_id: formaPagoEditada,
+      anticipo: anticipoIngresado,
+      anticipo_editado: true,
+      detalle_anticipo: detalleEditado
     };
 
     this.reservaService.modificar(payload).subscribe({
@@ -901,15 +975,32 @@ export class ReservaFormComponent {
           } else if (data.reservas && data.reservas.length > 0) {
             this.reserva = data.reservas[0] as ReservaModel;
           }
-          const finalId = Number(this.reserva?.id || data?.id || (data.reservas && data.reservas[0]?.id)) || 0;
+          this.normalizarPreciosReserva();
+          this.calcularTotal();
           if (this.is_externo) {
             this.reserva.is_externo = 1;
           }
           this.balance.set(data.balance); //Establecer valor a por medio de signal                
           this.reserva.anticipo = this.getYaPagado();
-          this.reserva.detalle_anticipo = '';
+          this.reserva.detalle_anticipo = this.pagoRegistradoInfo?.detalle || '';
+          if (!this.reserva.forma_pago_id && this.pagoRegistradoInfo?.forma_pago_id) {
+            this.reserva.forma_pago_id = this.pagoRegistradoInfo.forma_pago_id;
+          }
+          if (this.reserva.id > 0) {
+            this.cargarDatosPagos(this.reserva.id);
+          }
           this.reserva.fecha_ini = moment(this.reserva.fecha_ini).format("YYYY-MM-DD");
           this.reserva.fecha_fin = moment(this.reserva.fecha_fin).format("YYYY-MM-DD");
+
+          if (this.reserva.grupo_id || this.reserva.is_grupal) {
+            this.tipo_reserva = 'grupal';
+            if (this.reserva.habitacion_ids && this.reserva.habitacion_ids.length > 0) {
+              this.selectedHabitaciones = this.reserva.habitacion_ids.map(id => Number(id));
+            }
+          } else {
+            this.tipo_reserva = 'individual';
+            this.selectedHabitaciones = [Number(this.reserva.habitacion_id)];
+          }
           // Si es grupal y se crearon/actualizaron múltiples reservas, actualizarlas todas en el timeline
           if (data.reservas && Array.isArray(data.reservas) && data.reservas.length > 0) {
             data.reservas.forEach((r: any) => {
@@ -1191,7 +1282,9 @@ export class ReservaFormComponent {
     }
     const totalReserva = Number(this.reserva.total) || 0;
     let pago = 0;
-    if (this.balance && this.balance() && this.balance().pago !== undefined && this.balance().pago !== null && Number(this.balance().pago) > 0) {
+    if (this.pagoRegistradoInfo && this.pagoRegistradoInfo.monto !== undefined) {
+      pago = Number(this.pagoRegistradoInfo.monto) || 0;
+    } else if (this.balance && this.balance() && this.balance().pago !== undefined && this.balance().pago !== null && Number(this.balance().pago) > 0) {
       pago = Number(this.balance().pago);
     } else if (this.reserva.saldo !== undefined && this.reserva.saldo !== null) {
       const saldo = Number(this.reserva.saldo) || 0;
@@ -1202,7 +1295,7 @@ export class ReservaFormComponent {
     return Math.min(totalReserva, Math.max(0, Number(pago.toFixed(2))));
   }
 
-  validarAnticipo(): void {
+  validarAnticipo(event?: Event): void {
     if (this.reserva.anticipo === null || this.reserva.anticipo === undefined || (this.reserva.anticipo as any) === '') {
       return;
     }
@@ -1210,15 +1303,20 @@ export class ReservaFormComponent {
     if (isNaN(anticipo) || anticipo < 0) {
       this.reserva.anticipo = 0;
       anticipo = 0;
+      if (event?.target) {
+        (event.target as HTMLInputElement).value = '0';
+      }
     }
     const total = Number(this.reserva.total) || 0;
-    const yaPagado = this.getYaPagado();
-    const maxPermitido = this.reserva.id > 0 ? Math.max(0, Number((total - yaPagado).toFixed(2))) : total;
+    const maxPermitido = total;
 
-    // Solo limitar si ya hay un total calculado mayor a cero
+    // No permitir que el pago supere el precio total
     if (total > 0 && maxPermitido > 0 && anticipo > maxPermitido) {
       this.reserva.anticipo = maxPermitido;
       anticipo = maxPermitido;
+      if (event?.target) {
+        (event.target as HTMLInputElement).value = String(maxPermitido);
+      }
     }
 
     if (anticipo > 0 && !this.reserva.forma_pago_id && this.forma_pagos && this.forma_pagos.length > 0) {
@@ -1235,9 +1333,10 @@ export class ReservaFormComponent {
 
   getSaldoCalculado(): number {
     const totalReserva = Number(this.reserva?.total) || 0;
-    const yaPagado = this.getYaPagado();
-    const nuevoAnticipo = (this.isEditReserva || !this.reserva?.id) ? (Number(this.reserva?.anticipo) || 0) : 0;
-    const saldo = totalReserva - yaPagado - nuevoAnticipo;
+    const pagado = (this.isEditReserva || !this.reserva?.id)
+      ? (Number(this.reserva?.anticipo) || 0)
+      : this.getYaPagado();
+    const saldo = totalReserva - pagado;
     return saldo > 0 ? Number(saldo.toFixed(2)) : 0;
   }
 
@@ -1551,6 +1650,12 @@ export class ReservaFormComponent {
     }
   }
 
+  onTabChange(event: any): void {
+    if (event?.index === 0 && this.reserva?.id && this.reserva.id > 0) {
+      this.cargarDatosPagos(this.reserva.id);
+    }
+  }
+
   cargarDatosPagos(reserva_id: number): void {
     if (!reserva_id || reserva_id <= 0) return;
     this.transaccionPagoService.pagos(reserva_id).subscribe({
@@ -1558,29 +1663,29 @@ export class ReservaFormComponent {
         if (res?.dato) {
           try {
             const data_pagos = typeof res.dato === 'string' ? JSON.parse(res.dato) : res.dato;
+            if (data_pagos?.pagos && Array.isArray(data_pagos.pagos)) {
+              const pagosOrdenados = [...data_pagos.pagos].sort((a: any, b: any) => Number(a.id) - Number(b.id));
+              const pagosAnticipo = pagosOrdenados.filter((p: any) => !p.transaccion_id);
+              const primerPago = pagosAnticipo[0] || null;
+              const totalAnticipo = pagosAnticipo.reduce((sum: number, p: any) => sum + (Number(p.monto) || 0), 0);
+              const fpDesc = primerPago ? (primerPago.forma_pago || this.forma_pagos.find(f => f.id === primerPago.forma_pago_id)?.descripcion || '') : '';
+              this.pagoRegistradoInfo = {
+                id: primerPago?.id || null,
+                forma_pago_id: primerPago?.forma_pago_id || null,
+                forma_pago_desc: fpDesc,
+                detalle: primerPago?.detalle || '',
+                monto: Number(totalAnticipo.toFixed(2))
+              };
+              this.reserva.forma_pago_id = primerPago?.forma_pago_id || null;
+              this.reserva.detalle_anticipo = primerPago?.detalle || '';
+            }
             if (data_pagos?.balance) {
               this.balance.set(data_pagos.balance);
               if (data_pagos.balance.saldo !== undefined && data_pagos.balance.saldo !== null) {
                 this.reserva.saldo = Number(data_pagos.balance.saldo);
               }
             }
-            if (data_pagos?.pagos && Array.isArray(data_pagos.pagos) && data_pagos.pagos.length > 0) {
-              const primerPago = data_pagos.pagos[0];
-              const fpDesc = primerPago.forma_pago || this.forma_pagos.find(f => f.id === primerPago.forma_pago_id)?.descripcion || '';
-              this.pagoRegistradoInfo = {
-                forma_pago_id: primerPago.forma_pago_id,
-                forma_pago_desc: fpDesc,
-                detalle: primerPago.detalle || '',
-                monto: Number(primerPago.monto) || 0
-              };
-              if (!this.reserva.forma_pago_id && primerPago.forma_pago_id) {
-                this.reserva.forma_pago_id = primerPago.forma_pago_id;
-              }
-              if (!this.reserva.detalle_anticipo && primerPago.detalle) {
-                this.reserva.detalle_anticipo = primerPago.detalle;
-              }
-            }
-            if (!this.isEditReserva) {
+            if (!this.isEditReserva || this.reserva.anticipo === null || this.reserva.anticipo === undefined) {
               this.reserva.anticipo = this.getYaPagado();
             }
             this.cdr.detectChanges();

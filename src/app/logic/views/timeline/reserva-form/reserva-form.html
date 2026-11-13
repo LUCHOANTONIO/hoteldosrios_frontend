@@ -5,7 +5,7 @@
     </button>
 </h1>
 
-<mat-tab-group>
+<mat-tab-group (selectedTabChange)="onTabChange($event)">
     <mat-tab label="RESERVA">
         <form id="formularioreserva" autocomplete="off" #reservaForm="ngForm" (ngSubmit)="submitReserva(reservaForm)"
             appPreventEnterSubmit appAnimarPerderFoco [dialogRef]="dialogRef"
@@ -245,55 +245,33 @@
                                 (keydown.enter)="txtPrecioTotal.focus()">
                         </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="col-12" [ngClass]="(reserva.id > 0 && isEditReserva && getYaPagado() > 0) ? 'col-md-3' : 'col-md-4'">
+                        <mat-form-field appearance="outline" class="col-12 col-md-4">
                             <mat-label>Precio Total</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.total"
                                 name="precio_total" #txtPrecioTotal readonly required class="precio-total-input">
                         </mat-form-field>
 
-                        @if (reserva.id > 0 && isEditReserva && getYaPagado() > 0) {
-                        <!-- En modo Modificar con pago previo ya registrado -->
-                        <mat-form-field appearance="outline" class="col-12 col-md-3">
-                            <mat-label>Pagado Anteriormente</mat-label>
-                            <input type="number" matInput placeholder="0" [value]="getYaPagado()"
-                                name="ya_pagado" readonly>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-12 col-md-3">
-                            <mat-label>Pago Adicional</mat-label>
-                            <input type="number" matInput placeholder="0" [(ngModel)]="reserva.anticipo" name="anticipo"
-                                [readonly]="isDisabled" (input)="validarAnticipo()" min="0"
-                                (focus)="$any($event.target).select()"
-                                step="any" (keydown)="bloquearSignosNegativos($event)" #txtAnticipo
-                                (keydown.enter)="focusFormaPagoAnticipo()">
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="col-12 col-md-3">
-                            <mat-label>Saldo Restante</mat-label>
-                            <input type="number" matInput placeholder="0" [value]="getSaldoCalculado()"
-                                name="saldo_restante" readonly class="saldo-restante-input">
-                            <mat-icon matSuffix class="saldo-restante-icon">payments</mat-icon>
-                        </mat-form-field>
-                        } @else if (reserva.id > 0 && !isEditReserva) {
+                        @if (reserva.id > 0 && !isEditReserva) {
                         <!-- En modo Visualización de reserva existente -->
                         <mat-form-field appearance="outline" class="col-12 col-md-4">
-                            <mat-label>Total Pagado</mat-label>
+                            <mat-label>Pago</mat-label>
                             <input type="number" matInput placeholder="0" [value]="getYaPagado()"
                                 name="total_pagado" readonly>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-12 col-md-4">
-                            <mat-label>Saldo Restante</mat-label>
+                            <mat-label>Total</mat-label>
                             <input type="number" matInput placeholder="0" [value]="getSaldoCalculado()"
                                 name="saldo_restante" readonly class="saldo-restante-input">
                             <mat-icon matSuffix class="saldo-restante-icon">payments</mat-icon>
                         </mat-form-field>
                         } @else {
-                        <!-- Nueva reserva -->
+                        <!-- Nueva reserva o Modificar reserva -->
                         <mat-form-field appearance="outline" class="col-12 col-md-4">
-                            <mat-label>Anticipo (Pago){{ is_externo ? '*' : '' }}</mat-label>
+                            <mat-label>Pago{{ is_externo ? '*' : '' }}</mat-label>
                             <input type="number" matInput placeholder="0" [(ngModel)]="reserva.anticipo" name="anticipo"
-                                [readonly]="isDisabled" (input)="validarAnticipo()" min="0"
+                                [readonly]="isDisabled" (input)="validarAnticipo($event)" min="0"
+                                [max]="reserva.total || null"
                                 (focus)="$any($event.target).select()"
                                 [required]="is_externo"
                                 step="any" (keydown)="bloquearSignosNegativos($event)" #txtAnticipo
@@ -301,7 +279,7 @@
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-12 col-md-4">
-                            <mat-label>Saldo Restante</mat-label>
+                            <mat-label>Total</mat-label>
                             <input type="number" matInput placeholder="0" [value]="getSaldoCalculado()"
                                 name="saldo_restante" readonly class="saldo-restante-input">
                             <mat-icon matSuffix class="saldo-restante-icon">payments</mat-icon>
@@ -311,21 +289,19 @@
                         <!-- Información de Forma de Pago y Detalle -->
                         @if ((reserva.anticipo && reserva.anticipo > 0) || getYaPagado() > 0 || pagoRegistradoInfo.forma_pago_id || is_externo) {
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
-                            <mat-label>{{ (reserva.id > 0 && isEditReserva && reserva.anticipo && reserva.anticipo > 0) ? 'Forma de Pago (Pago Adicional)' : (reserva.id > 0 ? 'Forma de Pago Registrada' : 'Forma de Pago Anticipo' + (is_externo ? '*' : '')) }}</mat-label>
+                            <mat-label>Forma de Pago{{ (!reserva.id && is_externo) ? '*' : '' }}</mat-label>
                             <mat-select placeholder="Seleccionar forma de pago" [(ngModel)]="reserva.forma_pago_id"
-                                name="forma_pago_id" [disabled]="isDisabled || (reserva.id > 0 && !isEditReserva && getYaPagado() > 0)" #cboFormaPagoAnticipo [required]="is_externo || (reserva.anticipo && reserva.anticipo > 0)">
+                                name="forma_pago_id" [disabled]="isDisabled || (reserva.id > 0 && !isEditReserva && getYaPagado() > 0)" #cboFormaPagoAnticipo [required]="!!(is_externo || (reserva.anticipo && +reserva.anticipo > 0))">
                                 @for (x of forma_pagos; track $index) {
                                 <mat-option [value]="x.id">{{x.descripcion}}</mat-option>
                                 }
                             </mat-select>
-                            <mat-icon matSuffix class="text-secondary">credit_card</mat-icon>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-12 col-md-6">
-                            <mat-label>{{ (reserva.id > 0 && isEditReserva && reserva.anticipo && reserva.anticipo > 0) ? 'Detalle / Nota Pago Adicional' : (reserva.id > 0 ? 'Detalle / Nota de Pago Registrado' : 'Detalle / Nota Anticipo') }}</mat-label>
-                            <input matInput placeholder="Ej: Depósito bancario #1234 / Efectivo en recepción"
-                                [(ngModel)]="reserva.detalle_anticipo" name="detalle_anticipo" [readonly]="isDisabled || (reserva.id > 0 && !isEditReserva && getYaPagado() > 0)">
-                            <mat-icon matSuffix class="text-secondary">receipt_long</mat-icon>
+                            <mat-label>Detalle</mat-label>
+                            <input matInput
+                                [(ngModel)]="reserva.detalle_anticipo" name="detalle_anticipo" [readonly]="isDisabled || (reserva.id > 0 && !isEditReserva && getYaPagado() > 0)" [required]="!!(reserva.anticipo && +reserva.anticipo > 0)">
                         </mat-form-field>
                         }
                     </div>
