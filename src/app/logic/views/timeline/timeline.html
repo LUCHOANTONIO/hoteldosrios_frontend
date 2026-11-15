@@ -60,6 +60,54 @@
     </div>
 
     <div class="timeline-actions">
+      <div class="timeline-search-wrapper" (click)="$event.stopPropagation()">
+        <div class="timeline-search-box">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input
+            type="text"
+            class="search-input"
+            [(ngModel)]="terminoBusqueda"
+            (input)="onBuscarReserva()"
+            (focus)="onFocusBusqueda()"
+            (keydown.enter)="seleccionarPrimerResultado()"
+            placeholder="Buscar N° reserva o cliente..."
+            aria-label="Buscar por número de reserva o cliente">
+          <button
+            *ngIf="terminoBusqueda"
+            type="button"
+            class="clear-search-btn"
+            (click)="limpiarBusqueda()"
+            matTooltip="Limpiar búsqueda">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div *ngIf="mostrarResultadosBusqueda && terminoBusqueda.trim()" class="search-results-dropdown">
+          <ng-container *ngIf="resultadosBusqueda.length > 0; else sinResultados">
+            <button
+              type="button"
+              class="search-result-item"
+              *ngFor="let r of resultadosBusqueda"
+              (click)="irAReservaEnTimeline(r)">
+              <div class="result-top">
+                <span class="result-correlativo">#{{ r.correlativo || r.id }}</span>
+                <span class="result-cliente">{{ r.cliente }}</span>
+              </div>
+              <div class="result-meta">
+                <span class="result-hab">{{ getNombreHabitacionBusqueda(r) }}</span>
+                <span class="result-fechas">{{ formatearFechaCorta(r.fecha_ini) }} - {{ formatearFechaCorta(r.fecha_fin) }}</span>
+              </div>
+            </button>
+          </ng-container>
+          <ng-template #sinResultados>
+            <div class="search-no-results">
+              <mat-icon>search_off</mat-icon>
+              <span>No se encontraron reservas</span>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
       <button type="button" class="action-btn btn-alimentos" (click)="irAlimentos()" matTooltip="Acceso directo a Servicio de Alimentos">
         <mat-icon>restaurant</mat-icon>
         <span>Alimentos</span>

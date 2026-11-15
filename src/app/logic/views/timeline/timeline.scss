@@ -1,4 +1,4 @@
-.timeline-page {
+﻿.timeline-page {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -79,7 +79,7 @@
     transition: all 0.2s ease;
   }
 
-  /* --- CADA DIVISIÓN CON SU IDENTIDAD VISUAL PROPIA --- */
+  /* --- CADA DIVISIÃ“N CON SU IDENTIDAD VISUAL PROPIA --- */
   &.tab-habitaciones {
     border-color: #dbeafe;
     color: #1e40af;
@@ -238,6 +238,170 @@
   align-items: center;
   gap: 8px;
 
+  .timeline-search-wrapper {
+    position: relative;
+  }
+
+  .timeline-search-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 5px 10px;
+    min-width: 240px;
+    transition: all 0.15s ease;
+
+    &:focus-within {
+      background: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .search-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #64748b;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      color: #0f172a;
+      width: 100%;
+      min-width: 160px;
+
+      &::placeholder {
+        color: #94a3b8;
+      }
+    }
+
+    .clear-search-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      padding: 2px;
+      border-radius: 50%;
+      color: #64748b;
+      cursor: pointer;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+
+      &:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+    }
+  }
+
+  .search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 340px;
+    max-width: 90vw;
+    max-height: 320px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    z-index: 1050;
+    padding: 4px;
+
+    .search-result-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background 0.12s ease;
+
+      &:hover {
+        background: #eff6ff;
+      }
+
+      .result-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+
+        .result-correlativo {
+          background: #dbeafe;
+          color: #1e40af;
+          font-weight: 700;
+          font-size: 11.5px;
+          padding: 1px 6px;
+          border-radius: 5px;
+          flex-shrink: 0;
+        }
+
+        .result-cliente {
+          font-weight: 600;
+          color: #0f172a;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .result-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 11.5px;
+        color: #64748b;
+
+        .result-hab {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .result-fechas {
+          flex-shrink: 0;
+          font-weight: 500;
+          color: #475569;
+        }
+      }
+    }
+
+    .search-no-results {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 10px;
+      font-size: 13px;
+      color: #64748b;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
   .action-btn {
     display: inline-flex;
     align-items: center;
@@ -308,7 +472,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE DESIGN (MÓVILES Y PANTALLAS PEQUEÑAS)
+   RESPONSIVE DESIGN (MÃ“VILES Y PANTALLAS PEQUEÃ‘AS)
    ========================================================= */
 @media (max-width: 767.98px) {
   .timeline-page {
@@ -323,7 +487,7 @@
     border-radius: 8px;
   }
 
-  /* Divisiones en cuadrícula 2x2 clara y ordenada en celular */
+  /* Divisiones en cuadrÃ­cula 2x2 clara y ordenada en celular */
   .timeline-tabs {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -376,6 +540,15 @@
     width: 100%;
     gap: 8px;
 
+    .timeline-search-wrapper {
+      width: 100%;
+    }
+
+    .timeline-search-box {
+      width: 100%;
+      min-width: 0;
+    }
+
     .action-btn {
       flex: 1;
       justify-content: center;
@@ -424,7 +597,7 @@
 
 
 /* =========================================================
-   MENÚ RÁPIDO DE ESTADO DE HABITACIÓN (CLICK DERECHO)
+   MENÃš RÃPIDO DE ESTADO DE HABITACIÃ“N (CLICK DERECHO)
    ========================================================= */
 .room-status-context-menu {
   position: fixed;

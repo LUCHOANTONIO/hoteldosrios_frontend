@@ -56,12 +56,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-timeline',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatMenuModule,
     MatIconModule,
     MatButtonModule,
@@ -84,6 +86,11 @@ export class TimelineComponent implements AfterViewInit {
   menuEstadoLeft = '0px';
   habitacionMenuSeleccionada: HabitacionModel | null = null;
   cambiandoEstadoHabitacion = false;
+
+  // Buscador de reservas por número o cliente
+  terminoBusqueda: string = '';
+  resultadosBusqueda: ReservaModel[] = [];
+  mostrarResultadosBusqueda: boolean = false;
   productos: ProductoModel[] = [];
   tipo_documentos: TipoDocumentoModel[] = [];
   estado_civil: EstadoCivilModel[] = [];
@@ -665,6 +672,7 @@ export class TimelineComponent implements AfterViewInit {
     if (this.menuEstadoVisible) {
       this.cerrarMenuEstadoHabitacion();
     }
+    this.mostrarResultadosBusqueda = false;
   }
 
   @HostListener('document:keydown.escape')
@@ -672,6 +680,7 @@ export class TimelineComponent implements AfterViewInit {
     if (this.menuEstadoVisible) {
       this.cerrarMenuEstadoHabitacion();
     }
+    this.mostrarResultadosBusqueda = false;
   }
 
   mostrarMenuEstadoHabitacion(event: MouseEvent, habitacion: HabitacionModel) {
@@ -983,6 +992,101 @@ export class TimelineComponent implements AfterViewInit {
   readonly router = inject(Router);
   irAlimentos() {
     this.router.navigate(['/reporte_alimentos']);
+  }
+
+  onBuscarReserva() {
+    const term = this.terminoBusqueda.trim().toLowerCase();
+    if (!term) {
+      this.resultadosBusqueda = [];
+      this.mostrarResultadosBusqueda = false;
+      return;
+    }
+
+    const termSinNumeral = term.replace(/^#/, '');
+    const filtradas = (this.reservas || []).filter((r) => {
+      const correlativo = String(r.correlativo || '').toLowerCase();
+      const idStr = String(r.id || '').toLowerCase();
+      const cliente = (r.cliente || '').toLowerCase();
+      const nombreCorto = (r.nombre_corto_cliente || '').toLowerCase();
+      const nombreCompleto = `${r.nombre || ''} ${r.primer_apellido || ''} ${r.segundo_apellido || ''}`.toLowerCase();
+
+      return (
+        (termSinNumeral && (correlativo.includes(termSinNumeral) || idStr === termSinNumeral)) ||
+        cliente.includes(term) ||
+        nombreCorto.includes(term) ||
+        nombreCompleto.includes(term)
+      );
+    });
+
+    filtradas.sort((a, b) => {
+      const exactA = String(a.correlativo || '').toLowerCase() === termSinNumeral ? 1 : 0;
+      const exactB = String(b.correlativo || '').toLowerCase() === termSinNumeral ? 1 : 0;
+      if (exactA !== exactB) return exactB - exactA;
+      return moment(b.fecha_ini).valueOf() - moment(a.fecha_ini).valueOf();
+    });
+
+    this.resultadosBusqueda = filtradas.slice(0, 15);
+    this.mostrarResultadosBusqueda = true;
+  }
+
+  onFocusBusqueda() {
+    if (this.terminoBusqueda.trim()) {
+      this.onBuscarReserva();
+    }
+  }
+
+  limpiarBusqueda() {
+    this.terminoBusqueda = '';
+    this.resultadosBusqueda = [];
+    this.mostrarResultadosBusqueda = false;
+  }
+
+  seleccionarPrimerResultado() {
+    if (this.resultadosBusqueda.length > 0) {
+      this.irAReservaEnTimeline(this.resultadosBusqueda[0]);
+    }
+  }
+
+  irAReservaEnTimeline(reserva: ReservaModel) {
+    if (!reserva || !this.timeLine) return;
+
+    this.mostrarResultadosBusqueda = false;
+
+    const hab = this.habitaciones.find(h => Number(h.id) === Number(reserva.habitacion_id));
+    let cambioTab = false;
+    if (hab && this.tabActiva !== 'todas') {
+      const tabDestino: 'habitaciones' | 'fullday' | 'camping' =
+        this.isFullDay(hab) ? 'fullday' : (this.isCamping(hab) ? 'camping' : 'habitaciones');
+      if (this.tabActiva !== tabDestino) {
+        this.cambiarTab(tabDestino);
+        cambioTab = true;
+      }
+    }
+
+    const enfocarReserva = () => {
+      this.selectedItems = [reserva.id];
+      this.timeLine.setSelection([reserva.id]);
+      this.timeLine.focus(reserva.id, { animation: true, zoom: false });
+    };
+
+    if (cambioTab) {
+      setTimeout(enfocarReserva, 80);
+    } else {
+      enfocarReserva();
+    }
+  }
+
+  getNombreHabitacionBusqueda(reserva: ReservaModel): string {
+    const hab = this.habitaciones.find(h => Number(h.id) === Number(reserva.habitacion_id));
+    if (hab) {
+      return `${hab.nro_habitacion} - ${hab.descripcion}`;
+    }
+    return reserva.nro_habitacion ? `Hab. ${reserva.nro_habitacion}` : '';
+  }
+
+  formatearFechaCorta(fecha: string): string {
+    if (!fecha) return '';
+    return moment(fecha).format('DD/MM/YYYY');
   }
 
 }
