@@ -228,7 +228,7 @@ export class ReservaFormComponent {
     this.canal_reservas = data.canal_reservas;
     this.tipo_habitaciones = data.tipo_habitaciones || [];
     this.reservas = data.reservas || [];
-    this.is_externo = data.is_externo === true || Number(this.reserva?.is_externo) === 1;
+    this.is_externo = data.is_externo === true;
 
     // Configuración de suscripciones y servicios
     this.dialogRef.backdropClick().subscribe(x => { });
