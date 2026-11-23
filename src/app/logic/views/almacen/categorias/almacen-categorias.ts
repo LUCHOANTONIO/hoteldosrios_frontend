@@ -44,7 +44,7 @@ export class AlmacenCategoriasComponent implements AfterViewInit {
   categoria: InvCategoriaModel = { nombre: '', descripcion: '' };
   buttonEnabled = false;
 
-  displayedColumns: string[] = ['actions', 'nombre', 'descripcion'];
+  displayedColumns: string[] = ['actions', 'descripcion'];
   dataSource: MatTableDataSource<InvCategoriaModel> = new MatTableDataSource<InvCategoriaModel>([]);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;

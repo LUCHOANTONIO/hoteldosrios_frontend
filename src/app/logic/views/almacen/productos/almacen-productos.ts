@@ -13,11 +13,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
 
 import { SpanishPaginatorIntl } from '../../../../base/utils/spanish-paginator-intl';
 import { ConfirmarEliminarComponent } from '../../../../base/shared/views/confirmar-eliminar/confirmar-eliminar';
+import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-guardar.directive';
 import { AlertService } from '../../../../base/services/local/alert.service';
 import { AlmacenService } from '../../../services/almacen.service';
 import { InvCategoriaModel, InvProductoModel, InvUnidadMedidaModel } from '../../../models/almacen.model';
@@ -36,6 +38,8 @@ import { InvCategoriaModel, InvProductoModel, InvUnidadMedidaModel } from '../..
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    MatProgressSpinnerModule,
+    BotonGuardarDirective,
     CdkDrag,
     CdkDragHandle
   ],
@@ -50,26 +54,23 @@ import { InvCategoriaModel, InvProductoModel, InvUnidadMedidaModel } from '../..
 
       <mat-dialog-content class="mat-typography row row-cols-1 px-0 pt-2">
         <mat-form-field class="col">
-          <mat-label>Nombre de Categoría</mat-label>
-          <input matInput [(ngModel)]="categoria.nombre" name="nombre" required />
-        </mat-form-field>
-
-        <mat-form-field class="col">
           <mat-label>Descripción</mat-label>
-          <input matInput [(ngModel)]="categoria.descripcion" name="descripcion" />
+          <input matInput [(ngModel)]="categoria.descripcion" name="descripcion" required />
         </mat-form-field>
       </mat-dialog-content>
 
       <mat-dialog-actions class="d-flex justify-content-around bg-light">
         <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white">Cancelar</button>
-        <button mat-raised-button type="submit" class="bg-success text-black" [disabled]="guardando">Guardar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f">
+          <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Guardar
+        </button>
       </mat-dialog-actions>
     </form>
   `
 })
 export class AlmacenCategoriaFormComponent {
+  @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;
   categoria: InvCategoriaModel;
-  guardando = false;
 
   constructor(
     public dialogRef: MatDialogRef<AlmacenCategoriaFormComponent>,
@@ -81,11 +82,11 @@ export class AlmacenCategoriaFormComponent {
   }
 
   submit(f: NgForm): void {
-    if (!f.valid || !this.categoria.nombre?.trim()) {
+    if (!f.valid || !this.categoria.descripcion?.trim()) {
       this.alertService.show('Debe llenar los campos obligatorios', { duration: 3000, type: 'info' });
       return;
     }
-    this.guardando = true;
+    this.botonGuardarDirectiva.deshabilitarFormBoton();
     const obs = this.categoria.id
       ? this.almacenService.actualizarCategoria(this.categoria.id, this.categoria)
       : this.almacenService.crearCategoria(this.categoria);
@@ -95,12 +96,12 @@ export class AlmacenCategoriaFormComponent {
         if (res.correcto) {
           this.dialogRef.close(res);
         } else {
-          this.guardando = false;
+          this.botonGuardarDirectiva.habilitarFormBoton();
           this.alertService.show(res.mensaje || 'Error al guardar categoría', { duration: 3500, type: 'info' });
         }
       },
       error: () => {
-        this.guardando = false;
+        this.botonGuardarDirectiva.habilitarFormBoton();
         this.alertService.show('Error al guardar categoría', { duration: 3500, type: 'error' });
       }
     });
@@ -108,7 +109,84 @@ export class AlmacenCategoriaFormComponent {
 }
 
 // ============================================================================
-// DIALOG FORM: PRODUCTO DE ALMACÉN (CON ALTA DE CATEGORÍA EN OTRO MODAL)
+// DIALOG FORM: UNIDAD DE MEDIDA DE ALMACÉN
+// ============================================================================
+@Component({
+  selector: 'app-almacen-unidad-medida-form',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    BotonGuardarDirective,
+    CdkDrag,
+    CdkDragHandle
+  ],
+  template: `
+    <form autocomplete="off" (ngSubmit)="submit(f)" #f="ngForm">
+      <h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="text-bg-dark dialog-header">
+        UNIDAD DE MEDIDA
+        <button mat-icon-button mat-dialog-close type="button">
+          <mat-icon style="color:white">close</mat-icon>
+        </button>
+      </h1>
+
+      <mat-dialog-content class="mat-typography row row-cols-1 px-0 pt-2">
+        <mat-form-field class="col">
+          <mat-label>Descripción</mat-label>
+          <input matInput [(ngModel)]="descripcion" name="descripcion" required />
+        </mat-form-field>
+      </mat-dialog-content>
+
+      <mat-dialog-actions class="d-flex justify-content-around bg-light">
+        <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white">Cancelar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f">
+          <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Guardar
+        </button>
+      </mat-dialog-actions>
+    </form>
+  `
+})
+export class AlmacenUnidadMedidaFormComponent {
+  @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;
+  descripcion = '';
+
+  constructor(
+    public dialogRef: MatDialogRef<AlmacenUnidadMedidaFormComponent>,
+    private almacenService: AlmacenService,
+    private alertService: AlertService
+  ) {}
+
+  submit(f: NgForm): void {
+    if (!f.valid || !this.descripcion?.trim()) {
+      this.alertService.show('Debe ingresar la descripción', { duration: 3000, type: 'info' });
+      return;
+    }
+    this.botonGuardarDirectiva.deshabilitarFormBoton();
+    this.almacenService.crearUnidadMedida({ descripcion: this.descripcion.trim() }).subscribe({
+      next: res => {
+        if (res.correcto) {
+          this.dialogRef.close(res);
+        } else {
+          this.botonGuardarDirectiva.habilitarFormBoton();
+          this.alertService.show(res.mensaje || 'Error al crear unidad de medida', { duration: 3500, type: 'info' });
+        }
+      },
+      error: () => {
+        this.botonGuardarDirectiva.habilitarFormBoton();
+        this.alertService.show('Error al crear unidad de medida', { duration: 3500, type: 'error' });
+      }
+    });
+  }
+}
+
+// ============================================================================
+// DIALOG FORM: PRODUCTO DE ALMACÉN (CON ALTA DE CATEGORÍA Y UNIDAD EN MODAL)
 // ============================================================================
 @Component({
   selector: 'app-almacen-producto-form',
@@ -124,6 +202,8 @@ export class AlmacenCategoriaFormComponent {
     MatOptionModule,
     MatIconModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
+    BotonGuardarDirective,
     CdkDrag,
     CdkDragHandle
   ],
@@ -136,70 +216,93 @@ export class AlmacenCategoriaFormComponent {
         </button>
       </h1>
 
-      <mat-dialog-content class="mat-typography row row-cols-1 row-cols-md-2 px-0 pt-2">
-        <mat-form-field class="col">
-          <mat-label>SKU / Código</mat-label>
-          <input matInput [(ngModel)]="producto.sku" name="sku" required />
-        </mat-form-field>
+      <mat-dialog-content class="mat-typography px-3 pt-2">
+        <div class="row g-2">
+          <div class="col-12 col-md-6">
+            <mat-form-field class="w-100">
+              <mat-label>Código</mat-label>
+              <input matInput [(ngModel)]="producto.sku" name="sku" required />
+            </mat-form-field>
+          </div>
 
-        <mat-form-field class="col">
-          <mat-label>Nombre del Producto</mat-label>
-          <input matInput [(ngModel)]="producto.nombre" name="nombre" required />
-        </mat-form-field>
+          <div class="col-12 col-md-6">
+            <mat-form-field class="w-100">
+              <mat-label>Nombre del Producto</mat-label>
+              <input matInput [(ngModel)]="producto.nombre" name="nombre" required />
+            </mat-form-field>
+          </div>
 
-        <div class="col d-flex align-items-start gap-1">
-          <mat-form-field class="flex-grow-1">
-            <mat-label>Categoría</mat-label>
-            <mat-select [(ngModel)]="producto.categoria_id" name="categoria_id" required>
-              @for (x of categorias; track x.id) {
-                <mat-option [value]="x.id">{{ x.nombre }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <button
-            mat-icon-button
-            type="button"
-            class="bg-success text-black mt-2"
-            matTooltip="Nueva Categoría"
-            (click)="abrirModalNuevaCategoria()"
-          >
-            <mat-icon>add</mat-icon>
-          </button>
+          <div class="col-12 col-md-6 d-flex align-items-start gap-1">
+            <mat-form-field class="flex-grow-1" style="min-width: 0;">
+              <mat-label>Categoría</mat-label>
+              <mat-select [(ngModel)]="producto.categoria_id" name="categoria_id" required>
+                @for (x of categorias; track x.id) {
+                  <mat-option [value]="x.id">{{ x.descripcion || x.nombre }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <button
+              mat-icon-button
+              type="button"
+              class="bg-success text-black mt-2 flex-shrink-0"
+              matTooltip="Nueva Categoría"
+              (click)="abrirModalNuevaCategoria()"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <div class="col-12 col-md-6 d-flex align-items-start gap-1">
+            <mat-form-field class="flex-grow-1" style="min-width: 0;">
+              <mat-label>Unidad de Medida</mat-label>
+              <mat-select [(ngModel)]="producto.unidad_medida_id" name="unidad_medida_id" required>
+                @for (u of unidadesMedida; track u.unidad_medida_id) {
+                  <mat-option [value]="u.unidad_medida_id">{{ u.descripcion }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <button
+              mat-icon-button
+              type="button"
+              class="bg-success text-black mt-2 flex-shrink-0"
+              matTooltip="Nueva Unidad de Medida"
+              (click)="abrirModalNuevaUnidadMedida()"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <mat-form-field class="w-100">
+              <mat-label>Stock Mínimo</mat-label>
+              <input type="number" step="0.001" matInput [(ngModel)]="producto.stock_minimo" name="stock_minimo" required />
+            </mat-form-field>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <mat-form-field class="w-100">
+              <mat-label>Costo Referencial (Bs.)</mat-label>
+              <input type="number" step="0.01" matInput [(ngModel)]="producto.costo_referencial" name="costo_referencial" required />
+            </mat-form-field>
+          </div>
         </div>
-
-        <mat-form-field class="col">
-          <mat-label>Unidad de Medida</mat-label>
-          <mat-select [(ngModel)]="producto.unidad_medida_id" name="unidad_medida_id" required>
-            @for (u of unidadesMedida; track u.unidad_medida_id) {
-              <mat-option [value]="u.unidad_medida_id">{{ u.descripcion }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field class="col">
-          <mat-label>Stock Mínimo</mat-label>
-          <input type="number" step="0.001" matInput [(ngModel)]="producto.stock_minimo" name="stock_minimo" required />
-        </mat-form-field>
-
-        <mat-form-field class="col">
-          <mat-label>Costo Referencial (Bs.)</mat-label>
-          <input type="number" step="0.01" matInput [(ngModel)]="producto.costo_referencial" name="costo_referencial" required />
-        </mat-form-field>
       </mat-dialog-content>
 
       <mat-dialog-actions class="d-flex justify-content-around bg-light">
         <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white">Cancelar</button>
-        <button mat-raised-button type="submit" class="bg-success text-black" [disabled]="guardando">Guardar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f">
+          <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Guardar
+        </button>
       </mat-dialog-actions>
     </form>
   `
 })
 export class AlmacenProductoFormComponent {
+  @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;
   readonly dialog = inject(MatDialog);
   producto: InvProductoModel;
   categorias: InvCategoriaModel[] = [];
   unidadesMedida: InvUnidadMedidaModel[] = [];
-  guardando = false;
 
   constructor(
     public dialogRef: MatDialogRef<AlmacenProductoFormComponent>,
@@ -236,12 +339,32 @@ export class AlmacenProductoFormComponent {
     });
   }
 
+  abrirModalNuevaUnidadMedida(): void {
+    const umDialogRef = this.dialog.open(AlmacenUnidadMedidaFormComponent, {
+      width: '98vw',
+      maxWidth: '500px',
+      disableClose: true
+    });
+
+    umDialogRef.afterClosed().subscribe(res => {
+      if (res?.correcto) {
+        const data = JSON.parse(res.dato);
+        if (data.unidades_medida) {
+          this.unidadesMedida = data.unidades_medida;
+        }
+        if (data.unidad_medida?.unidad_medida_id) {
+          this.producto.unidad_medida_id = data.unidad_medida.unidad_medida_id;
+        }
+      }
+    });
+  }
+
   submit(f: NgForm): void {
     if (!f.valid || !this.producto.sku?.trim() || !this.producto.nombre?.trim() || !this.producto.categoria_id) {
       this.alertService.show('Debe llenar los campos obligatorios', { duration: 3000, type: 'info' });
       return;
     }
-    this.guardando = true;
+    this.botonGuardarDirectiva.deshabilitarFormBoton();
     const obs = this.producto.id
       ? this.almacenService.actualizarProducto(this.producto.id, this.producto)
       : this.almacenService.crearProducto(this.producto);
@@ -249,14 +372,14 @@ export class AlmacenProductoFormComponent {
     obs.subscribe({
       next: res => {
         if (res.correcto) {
-          this.dialogRef.close({ res, categorias: this.categorias });
+          this.dialogRef.close({ res, categorias: this.categorias, unidadesMedida: this.unidadesMedida });
         } else {
-          this.guardando = false;
+          this.botonGuardarDirectiva.habilitarFormBoton();
           this.alertService.show(res.mensaje || 'Error al guardar producto', { duration: 3500, type: 'info' });
         }
       },
       error: () => {
-        this.guardando = false;
+        this.botonGuardarDirectiva.habilitarFormBoton();
         this.alertService.show('Error al guardar producto', { duration: 3500, type: 'error' });
       }
     });
@@ -355,7 +478,7 @@ export class AlmacenProductosComponent implements AfterViewInit {
     this.producto = {
       ...this.nuevoProducto(),
       categoria_id: primeraCat?.id || 0,
-      sku: `ALM-${String(this.productos.length + 1).padStart(4, '0')}`
+      sku: ''
     };
     const dialogRef = this.dialog.open(AlmacenProductoFormComponent, {
       data: { producto: this.producto, categorias: this.categorias, unidadesMedida: this.unidadesMedida },
@@ -366,6 +489,7 @@ export class AlmacenProductosComponent implements AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       if (!result) return;
       if (result.categorias) this.categorias = result.categorias;
+      if (result.unidadesMedida) this.unidadesMedida = result.unidadesMedida;
       if (result.res?.correcto) {
         const data = JSON.parse(result.res.dato);
         this.actualizarDataSource(data.productos);
@@ -385,6 +509,7 @@ export class AlmacenProductosComponent implements AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         if (result.categorias) this.categorias = result.categorias;
+        if (result.unidadesMedida) this.unidadesMedida = result.unidadesMedida;
         if (result.res?.correcto) {
           const data = JSON.parse(result.res.dato);
           this.actualizarDataSource(data.productos);

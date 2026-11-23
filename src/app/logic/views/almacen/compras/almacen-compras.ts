@@ -14,12 +14,14 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
 import moment from 'moment';
 
 import { SpanishPaginatorIntl } from '../../../../base/utils/spanish-paginator-intl';
 import { ConfirmarEliminarComponent } from '../../../../base/shared/views/confirmar-eliminar/confirmar-eliminar';
+import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-guardar.directive';
 import { AlertService } from '../../../../base/services/local/alert.service';
 import { AlmacenService } from '../../../services/almacen.service';
 import { InvCompraModel, InvProductoModel } from '../../../models/almacen.model';
@@ -58,7 +60,7 @@ import { InvCompraModel, InvProductoModel } from '../../../models/almacen.model'
       <div class="px-3 py-2 bg-light border-bottom">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-100">
           <mat-label>Buscar producto...</mat-label>
-          <input matInput (keyup)="buscar(txtBusqueda.value)" #txtBusqueda placeholder="SKU, nombre o categoría..." />
+          <input matInput (keyup)="buscar(txtBusqueda.value)" #txtBusqueda placeholder="Código, nombre o categoría..." />
           <mat-icon matSuffix class="text-primary">search</mat-icon>
         </mat-form-field>
       </div>
@@ -84,7 +86,7 @@ import { InvCompraModel, InvProductoModel } from '../../../models/almacen.model'
             </ng-container>
 
             <ng-container matColumnDef="sku">
-              <th mat-header-cell *matHeaderCellDef>SKU</th>
+              <th mat-header-cell *matHeaderCellDef>Código</th>
               <td mat-cell *matCellDef="let row">{{ row.sku }}</td>
             </ng-container>
 
@@ -171,6 +173,8 @@ export class AlmacenSeleccionarProductoModalComponent implements AfterViewInit {
     MatIconModule,
     MatTooltipModule,
     MatDatepickerModule,
+    MatProgressSpinnerModule,
+    BotonGuardarDirective,
     CdkDrag,
     CdkDragHandle
   ],
@@ -246,7 +250,7 @@ export class AlmacenSeleccionarProductoModalComponent implements AfterViewInit {
           <table class="table table-sm align-middle mb-0">
             <thead class="bg-dark text-white">
               <tr>
-                <th>SKU</th>
+                <th>Código</th>
                 <th>Producto</th>
                 <th>Unidad</th>
                 <th class="text-end">Cantidad</th>
@@ -290,16 +294,18 @@ export class AlmacenSeleccionarProductoModalComponent implements AfterViewInit {
 
       <mat-dialog-actions class="d-flex justify-content-around bg-light">
         <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white">Cancelar</button>
-        <button mat-raised-button type="submit" class="bg-success text-black" [disabled]="guardando">Guardar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f">
+          <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Guardar
+        </button>
       </mat-dialog-actions>
     </form>
   `
 })
 export class AlmacenCompraFormComponent {
+  @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;
   readonly dialog = inject(MatDialog);
   compra: InvCompraModel;
   productos: InvProductoModel[] = [];
-  guardando = false;
 
   nuevoProductoId = 0;
   nuevoProductoTexto = '';
@@ -386,7 +392,7 @@ export class AlmacenCompraFormComponent {
       return;
     }
 
-    this.guardando = true;
+    this.botonGuardarDirectiva.deshabilitarFormBoton();
     const payload: InvCompraModel = {
       ...this.compra,
       fecha: moment(this.compra.fecha).format('YYYY-MM-DD')
@@ -400,12 +406,12 @@ export class AlmacenCompraFormComponent {
         if (res.correcto) {
           this.dialogRef.close(res);
         } else {
-          this.guardando = false;
+          this.botonGuardarDirectiva.habilitarFormBoton();
           this.alertService.show(res.mensaje || 'Error al guardar la compra', { duration: 3500, type: 'info' });
         }
       },
       error: () => {
-        this.guardando = false;
+        this.botonGuardarDirectiva.habilitarFormBoton();
         this.alertService.show('Error al guardar la compra', { duration: 3500, type: 'error' });
       }
     });

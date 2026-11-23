@@ -26,6 +26,10 @@ export class AlmacenService {
     return this.http.get<InvUnidadMedidaModel[]>(`${this.URL_API}/unidades_medida`);
   }
 
+  crearUnidadMedida(data: { descripcion: string }): Observable<RespuestaRequest<any>> {
+    return this.http.post<RespuestaRequest<any>>(`${this.URL_API}/unidades_medida`, data);
+  }
+
   // Categorías
   listarCategorias(): Observable<InvCategoriaModel[]> {
     return this.http.get<InvCategoriaModel[]>(`${this.URL_API}/categorias`);

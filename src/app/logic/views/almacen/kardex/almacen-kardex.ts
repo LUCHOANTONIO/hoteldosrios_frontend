@@ -13,10 +13,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
 
 import { SpanishPaginatorIntl } from '../../../../base/utils/spanish-paginator-intl';
+import { BotonGuardarDirective } from '../../../../base/shared/directives/boton-guardar.directive';
 import { AlertService } from '../../../../base/services/local/alert.service';
 import { AlmacenService } from '../../../services/almacen.service';
 import {
@@ -40,6 +42,8 @@ import {
     MatSelectModule,
     MatOptionModule,
     MatIconModule,
+    MatProgressSpinnerModule,
+    BotonGuardarDirective,
     CdkDrag,
     CdkDragHandle
   ],
@@ -96,12 +100,15 @@ import {
 
       <mat-dialog-actions class="d-flex justify-content-around bg-light">
         <button mat-raised-button mat-dialog-close type="button" class="bg-primary text-white">Cancelar</button>
-        <button mat-raised-button type="submit" class="bg-success text-black" [disabled]="guardando">Guardar</button>
+        <button mat-raised-button type="submit" class="bg-success text-black" appBotonGuardar [form]="f">
+          <mat-icon class="d-none"><mat-spinner diameter="18"></mat-spinner></mat-icon>Guardar
+        </button>
       </mat-dialog-actions>
     </form>
   `
 })
 export class AlmacenMovimientoFormComponent {
+  @ViewChild(BotonGuardarDirective) botonGuardarDirectiva!: BotonGuardarDirective;
   productos: InvConsolidadoItemModel[] = [];
   movimiento = {
     producto_id: 0,
@@ -110,7 +117,6 @@ export class AlmacenMovimientoFormComponent {
     costo_unitario: 0,
     observacion: ''
   };
-  guardando = false;
 
   constructor(
     public dialogRef: MatDialogRef<AlmacenMovimientoFormComponent>,
@@ -138,19 +144,19 @@ export class AlmacenMovimientoFormComponent {
       this.alertService.show('Debe llenar los campos obligatorios', { duration: 3000, type: 'info' });
       return;
     }
-    this.guardando = true;
+    this.botonGuardarDirectiva.deshabilitarFormBoton();
     this.almacenService.registrarMovimientoUeps(this.movimiento).subscribe({
       next: res => {
         if (res.correcto) {
           this.dialogRef.close(res);
         } else {
-          this.guardando = false;
-          this.alertService.show(res.mensaje || 'Error al registrar movimiento UEPS', { duration: 4000, type: 'info' });
+          this.botonGuardarDirectiva.habilitarFormBoton();
+          this.alertService.show(res.mensaje || 'Error al registrar movimiento', { duration: 4000, type: 'info' });
         }
       },
       error: () => {
-        this.guardando = false;
-        this.alertService.show('Error al registrar movimiento UEPS', { duration: 4000, type: 'error' });
+        this.botonGuardarDirectiva.habilitarFormBoton();
+        this.alertService.show('Error al registrar movimiento', { duration: 4000, type: 'error' });
       }
     });
   }
