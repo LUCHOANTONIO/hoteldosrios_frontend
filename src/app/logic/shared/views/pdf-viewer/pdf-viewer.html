@@ -9,10 +9,40 @@
 </div>
 
 <div mat-dialog-content class="pdf-dialog-content">
-    <iframe [src]="pdfBase64" class="pdf-frame" frameborder="0"></iframe>
+    @if (pdfError) {
+        <div class="pdf-fallback-container">
+            <mat-icon class="fallback-icon error-icon">error_outline</mat-icon>
+            <h3>No se pudo cargar el documento</h3>
+            <p>El archivo PDF no se encuentra disponible o tiene un formato inválido.</p>
+        </div>
+    } @else if (isIOS) {
+        <div class="pdf-fallback-container">
+            <mat-icon class="fallback-icon">picture_as_pdf</mat-icon>
+            <h3>{{ titulo_documento }}</h3>
+            <p>En Safari para iPhone/iPad, abre el comprobante en el visor nativo o descárgalo directamente.</p>
+            <div class="ios-actions">
+                <a mat-flat-button color="primary" class="btn-action-primary" [href]="pdfSafeUrl" target="_blank" rel="noopener noreferrer">
+                    <mat-icon>open_in_new</mat-icon>
+                    <span>Abrir PDF</span>
+                </a>
+                <button mat-stroked-button color="primary" type="button" class="btn-action-secondary" (click)="descargarPdf()">
+                    <mat-icon>download</mat-icon>
+                    <span>Descargar PDF</span>
+                </button>
+            </div>
+        </div>
+    } @else {
+        <iframe [src]="pdfSafeUrl" class="pdf-frame" frameborder="0"></iframe>
+    }
 </div>
 
 <div mat-dialog-actions align="end" class="pdf-dialog-actions">
+    @if (!pdfError) {
+        <button mat-stroked-button color="primary" type="button" class="btn-download-footer" (click)="descargarPdf()">
+            <mat-icon>download</mat-icon>
+            <span>Descargar</span>
+        </button>
+    }
     <button mat-flat-button color="primary" type="button" class="btn-close-footer" (click)="close()">
         <span>Cerrar</span>
     </button>

@@ -71,8 +71,25 @@
   margin: 0;
   padding: 8px 16px;
   min-height: 52px;
+  gap: 8px;
   background-color: #f8f9fa;
   border-top: 1px solid #e2e8f0;
+
+  .btn-download-footer {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px;
+    height: 38px;
+    font-weight: 500;
+    border-radius: 8px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
 
   .btn-close-footer {
     display: inline-flex;
@@ -96,6 +113,64 @@
     &:hover {
       background-color: #0968b3;
       box-shadow: 0 4px 6px rgba(11, 125, 212, 0.3);
+    }
+  }
+}
+
+.pdf-fallback-container {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background-color: #f8fafc;
+  color: #1e293b;
+
+  .fallback-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    color: #0b7dd4;
+    margin-bottom: 12px;
+
+    &.error-icon {
+      color: #ef4444;
+    }
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0 0 20px;
+    max-width: 340px;
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .ios-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 260px;
+
+    .btn-action-primary,
+    .btn-action-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 44px;
+      border-radius: 8px;
+      font-weight: 500;
+      text-decoration: none;
     }
   }
 }
