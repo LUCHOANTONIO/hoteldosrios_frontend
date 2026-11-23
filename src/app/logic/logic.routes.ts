@@ -32,6 +32,11 @@ import { TarifaComponent } from './views/tarifa/tarifa';
 import { ReservaExternaComponent } from './views/reserva_externa/reserva_externa';
 import { ReporteAlimentoComponent } from './views/reporte/alimento/alimento';
 import { ReporteReservaExternaComponent } from './views/reporte/reserva_externa/reserva_externa';
+import { AlmacenProductosComponent } from './views/almacen/productos/almacen-productos';
+import { AlmacenCategoriasComponent } from './views/almacen/categorias/almacen-categorias';
+import { AlmacenComprasComponent } from './views/almacen/compras/almacen-compras';
+import { AlmacenInventarioComponent } from './views/almacen/inventario/almacen-inventario';
+import { AlmacenKardexComponent } from './views/almacen/kardex/almacen-kardex';
 
 export const LOGIC_ROUTES: Routes = [
     { path: 'timeline', component: TimelineComponent, canActivate: [authGuard] },
@@ -65,6 +70,11 @@ export const LOGIC_ROUTES: Routes = [
     { path: 'inventarios', component: InventarioComponent, canActivate: [authGuard] },
     { path: 'cotizaciones', component: CotizacionComponent, canActivate: [authGuard] },
     { path: 'tarifas', component: TarifaComponent, canActivate: [authGuard] },
-    { path: 'reserva_externa', component: ReservaExternaComponent, canActivate: [authGuard] }
+    { path: 'reserva_externa', component: ReservaExternaComponent, canActivate: [authGuard] },
+    { path: 'almacen/productos', component: AlmacenProductosComponent, canActivate: [authGuard] },
+    { path: 'almacen/categorias', component: AlmacenCategoriasComponent, canActivate: [authGuard] },
+    { path: 'almacen/compras', component: AlmacenComprasComponent, canActivate: [authGuard] },
+    { path: 'almacen/inventario', component: AlmacenInventarioComponent, canActivate: [authGuard] },
+    { path: 'almacen/kardex', component: AlmacenKardexComponent, canActivate: [authGuard] }
 ];
 
