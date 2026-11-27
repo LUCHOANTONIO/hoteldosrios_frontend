@@ -40,11 +40,10 @@
                     <a mat-flat-button color="primary" class="btn-action-primary" [class.is-downloading]="descargando" [href]="pdfSafeUrl" [attr.download]="nombre_archivo" target="_blank" rel="noopener noreferrer" (click)="iniciarSpinnerDescarga()">
                         @if (descargando) {
                             <mat-spinner diameter="20" class="spinner-white"></mat-spinner>
-                            <span>Descargando PDF...</span>
                         } @else {
                             <mat-icon>download</mat-icon>
-                            <span>Descargar PDF</span>
                         }
+                        <span>{{ descargando ? 'Descargando PDF...' : 'Descargar PDF' }}</span>
                     </a>
                 </div>
             </div>
@@ -59,11 +58,10 @@
         <button mat-stroked-button color="primary" type="button" class="btn-download-footer" [disabled]="descargando" (click)="descargarPdf()">
             @if (descargando) {
                 <mat-spinner diameter="18"></mat-spinner>
-                <span>Descargando...</span>
             } @else {
                 <mat-icon>download</mat-icon>
-                <span>Descargar PDF</span>
             }
+            <span>{{ descargando ? 'Descargando...' : 'Descargar PDF' }}</span>
         </button>
     }
     <button mat-flat-button color="primary" type="button" class="btn-close-footer" (click)="close()">
