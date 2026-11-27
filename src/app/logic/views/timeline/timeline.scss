@@ -360,6 +360,27 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          flex: 1;
+        }
+
+        .result-grupo-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+          background: #ede9fe;
+          color: #6d28d9;
+          border: 1px solid #ddd6fe;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 1px 6px;
+          border-radius: 999px;
+          flex-shrink: 0;
+
+          mat-icon {
+            font-size: 13px;
+            width: 13px;
+            height: 13px;
+          }
         }
       }
 
@@ -736,5 +757,255 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   BADGE EN TIMELINE Y POPOVER DE RESERVA GRUPAL (SIN ABRIR FORM)
+   ========================================================= */
+::ng-deep .timeline-wrapper {
+  .timeline-group-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.28);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+    padding: 0 5px;
+    height: 15px;
+    font-size: 10.5px;
+    font-weight: 700;
+    margin: 0 3px;
+    line-height: 1;
+    flex-shrink: 0;
+    backdrop-filter: blur(2px);
+  }
+
+  .vis-item.group-peer-highlight {
+    box-shadow: 0 0 0 2.5px #2563eb, 0 4px 12px rgba(37, 99, 235, 0.35) !important;
+    z-index: 15 !important;
+    filter: brightness(1.04);
+  }
+}
+
+.group-rooms-popover {
+  position: fixed;
+  z-index: 9990;
+  width: 310px;
+  max-width: calc(100vw - 24px);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.22), 0 3px 8px rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+  user-select: none;
+  animation: fadeInRoomMenu 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .grp-popover-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: #ffffff;
+
+    .grp-header-main {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .grp-icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #93c5fd;
+      }
+    }
+
+    .grp-title-col {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
+      gap: 2px;
+
+      .grp-title-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+
+        .grp-correlativo {
+          font-size: 11px;
+          font-weight: 800;
+          background: #2563eb;
+          color: #ffffff;
+          padding: 1px 6px;
+          border-radius: 4px;
+          flex-shrink: 0;
+        }
+
+        .grp-name {
+          font-size: 13px;
+          font-weight: 700;
+          color: #ffffff;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .grp-client-sub {
+        font-size: 11px;
+        color: #cbd5e1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .grp-total-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.28);
+      border: 1px solid rgba(147, 197, 253, 0.45);
+      color: #eff6ff;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  }
+
+  .grp-popover-body {
+    padding: 9px 12px 11px;
+    background: #f8fafc;
+
+    .grp-section-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.4px;
+
+      .grp-caption-hint {
+        font-weight: 500;
+        color: #94a3b8;
+        font-size: 10px;
+      }
+    }
+
+    .grp-rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      max-height: 175px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .grp-room-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      width: 100%;
+      text-align: left;
+      padding: 5px 7px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #94a3b8;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      position: relative;
+
+      &:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        border-left-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(37, 99, 235, 0.12);
+      }
+
+      &.is-current {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        border-left-color: #2563eb;
+
+        .grp-room-num {
+          background: #2563eb;
+          color: #ffffff;
+          border-color: #1d4ed8;
+        }
+      }
+
+      .grp-room-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 26px;
+        height: 24px;
+        padding: 0 5px;
+        border-radius: 5px;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #1e293b;
+        font-size: 11.5px;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      .grp-room-meta {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+        line-height: 1.15;
+
+        .grp-room-desc {
+          font-size: 11.5px;
+          font-weight: 700;
+          color: #0f172a;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .grp-room-floor {
+          font-size: 10px;
+          color: #64748b;
+        }
+      }
+
+      .grp-current-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #2563eb;
+        flex-shrink: 0;
+      }
+    }
   }
 }

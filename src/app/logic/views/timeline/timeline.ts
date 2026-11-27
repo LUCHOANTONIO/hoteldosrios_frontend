@@ -87,6 +87,33 @@ export class TimelineComponent implements AfterViewInit {
   habitacionMenuSeleccionada: HabitacionModel | null = null;
   cambiandoEstadoHabitacion = false;
 
+  // Vista rápida (Popover) de Habitaciones en Reserva Grupal sin abrir el formulario
+  grupoPreviewVisible = false;
+  grupoPreviewTop = '0px';
+  grupoPreviewLeft = '0px';
+  grupoPreviewData: {
+    grupo_id: number | null;
+    correlativo: number | string;
+    grupo_nombre: string;
+    titular: string;
+    fechas: string;
+    currentHabitacionId: number;
+    labelPlural: string;
+    labelSeccion: string;
+    reservaIds: number[];
+    habitaciones: Array<{
+      reserva_id: number;
+      habitacion_id: number;
+      badge: string;
+      titulo: string;
+      subtitulo: string;
+      piso: string;
+    }>;
+  } | null = null;
+  private grupoPreviewShowTimer: any = null;
+  private grupoPreviewHideTimer: any = null;
+  private currentHoveredItemId: number | null = null;
+
   // Buscador de reservas por número o cliente
   terminoBusqueda: string = '';
   resultadosBusqueda: ReservaModel[] = [];
@@ -409,11 +436,37 @@ export class TimelineComponent implements AfterViewInit {
 
   loadItems() {
     const hexNaranja = '#FFA500';
+    // Precalcular mapa de grupos para identificar reservas grupales y sus habitaciones
+    const grupoMap = new Map<string, ReservaModel[]>();
+    (this.reservas || []).forEach((r) => {
+      const key = this.getGrupoKey(r);
+      if (key) {
+        const list = grupoMap.get(key) || [];
+        list.push(r);
+        grupoMap.set(key, list);
+      }
+    });
+
     const dataItems = this.reservas.map((reserva) => {
       const isNaranja = reserva.is_externo == 1 && reserva.estado_reserva_id == 1;
 
       const start = moment(reserva.fecha_ini);
       const end = moment(reserva.fecha_fin);
+
+      const key = this.getGrupoKey(reserva);
+      const miembros = key ? (grupoMap.get(key) || [reserva]) : [reserva];
+      const esGrupal = !!reserva.grupo_id || miembros.length > 1;
+      const habLabels = esGrupal
+        ? miembros
+            .map(m => {
+              const h = this.habitaciones.find(hab => Number(hab.id) === Number(m.habitacion_id));
+              return h ? (this.isHabitacion(h) ? h.nro_habitacion : h.descripcion) : (m.nro_habitacion || '');
+            })
+            .filter(Boolean)
+        : [];
+
+      const baseColor = isNaranja ? 'orange' : (reserva.color || '');
+      const groupCls = esGrupal ? ' is-group-reservation' : '';
 
       return {
         id: reserva.id,
@@ -421,11 +474,16 @@ export class TimelineComponent implements AfterViewInit {
         start: start,
         end: end,
         group: reserva.habitacion_id,
-        className: isNaranja ? 'orange' : reserva.color,
+        className: (baseColor + groupCls).trim(),
         style: isNaranja ? `background-color: ${hexNaranja} !important; color: ${this.getContrastColor(hexNaranja)} !important;` : '',
         cliente: reserva.cliente,
         tiene_mensaje: reserva.tiene_mensaje,
         saldo: reserva.saldo,
+        grupo_id: reserva.grupo_id,
+        grupo_nombre: reserva.grupo_nombre,
+        es_grupal: esGrupal,
+        grupo_count: miembros.length,
+        grupo_habs_short: habLabels.slice(0, 4).join(', ') + (habLabels.length > 4 ? ` +${habLabels.length - 4}` : ''),
       };
     });
 
@@ -532,6 +590,7 @@ export class TimelineComponent implements AfterViewInit {
       },
       //---------- EVENTO ACTUALIZANDO ITEM -----------------------
       onUpdate: (item, callback) => {
+        this.cerrarGrupoPreviewInmediato();
         this.item_original = this.items.get(item.id);//Se recupera el Item original para restablecer cuando se cancele la accion                
         let fechaInicio = moment(item.start);
         let fechaFin = moment(item.end);
@@ -548,6 +607,7 @@ export class TimelineComponent implements AfterViewInit {
       //    callback(null); 
       // },
       onMove: (item, callback) => {
+        this.cerrarGrupoPreviewInmediato();
         this.item_original = this.items.get(item.id);//Se recupera el Item original para restablecer cuando se cancele la accion                 
         let fechaInicio = moment(item.start);
         let fechaFin = moment(item.end);
@@ -648,19 +708,31 @@ export class TimelineComponent implements AfterViewInit {
       this.items.update(hoverItem);
     });
 
-    // 2. Al salir del área de grupos/filas
+    // 2. Al salir del área de grupos/filas o pasar sobre una reserva grupal
     this.timeLine.on('mouseOver', (props) => {
       if (!props.group) this.items.remove(HOVER_ID);
+    });
+
+    this.timeLine.on('itemover', (props: any) => {
+      if (props && props.item && props.item !== HOVER_ID) {
+        this.programarMostrarGrupoPreview(Number(props.item), props.event as MouseEvent);
+      }
+    });
+
+    this.timeLine.on('itemout', () => {
+      this.ocultarGrupoPreviewConRetraso();
     });
 
     // 3. SOLUCIÓN: Al salir totalmente del contenedor del Timeline
     this.timeLine.on('mouseOut', () => {
       this.items.remove(HOVER_ID);
+      this.ocultarGrupoPreviewConRetraso();
     });
 
     // 4. SOLUCIÓN: Al desplazar o mover el calendario (Scroll/Drag)
     this.timeLine.on('rangechange', () => {
       this.items.remove(HOVER_ID);
+      this.cerrarGrupoPreviewInmediato();
       if (this.menuEstadoVisible) {
         this.cerrarMenuEstadoHabitacion();
       }
@@ -672,6 +744,7 @@ export class TimelineComponent implements AfterViewInit {
     if (this.menuEstadoVisible) {
       this.cerrarMenuEstadoHabitacion();
     }
+    this.cerrarGrupoPreviewInmediato();
     this.mostrarResultadosBusqueda = false;
   }
 
@@ -680,6 +753,7 @@ export class TimelineComponent implements AfterViewInit {
     if (this.menuEstadoVisible) {
       this.cerrarMenuEstadoHabitacion();
     }
+    this.cerrarGrupoPreviewInmediato();
     this.mostrarResultadosBusqueda = false;
   }
 
@@ -1077,6 +1151,16 @@ export class TimelineComponent implements AfterViewInit {
   }
 
   getNombreHabitacionBusqueda(reserva: ReservaModel): string {
+    if (this.isReservaGrupal(reserva)) {
+      const miembros = this.getHabitacionesGrupo(reserva);
+      const etiquetas = miembros.map(m => {
+        const h = this.habitaciones.find(hab => Number(hab.id) === Number(m.habitacion_id));
+        return h ? (this.isHabitacion(h) ? h.nro_habitacion : h.descripcion) : (m.nro_habitacion || '');
+      }).filter(Boolean);
+      if (etiquetas.length > 0) {
+        return `Hab. ${etiquetas.join(', ')}`;
+      }
+    }
     const hab = this.habitaciones.find(h => Number(h.id) === Number(reserva.habitacion_id));
     if (hab) {
       return `${hab.nro_habitacion} - ${hab.descripcion}`;
@@ -1087,6 +1171,219 @@ export class TimelineComponent implements AfterViewInit {
   formatearFechaCorta(fecha: string): string {
     if (!fecha) return '';
     return moment(fecha).format('DD/MM/YYYY');
+  }
+
+  // =========================================================
+  // VISTA RÁPIDA DE HABITACIONES EN RESERVA GRUPAL (SIN ABRIR FORM)
+  // =========================================================
+  private getGrupoKey(reserva: ReservaModel): string | null {
+    if (!reserva) return null;
+    if (reserva.grupo_id && Number(reserva.grupo_id) > 0) {
+      return `grp_${reserva.grupo_id}`;
+    }
+    if (reserva.correlativo && Number(reserva.correlativo) > 0) {
+      return `corr_${reserva.correlativo}`;
+    }
+    return null;
+  }
+
+  getHabitacionesGrupo(reserva: ReservaModel): ReservaModel[] {
+    if (!reserva || !this.reservas) return reserva ? [reserva] : [];
+    const key = this.getGrupoKey(reserva);
+    if (!key) return [reserva];
+
+    const miembros = this.reservas.filter(r => this.getGrupoKey(r) === key);
+    if (miembros.length <= 1) return [reserva];
+
+    return [...miembros].sort((a, b) => {
+      const habA = this.habitaciones.find(h => Number(h.id) === Number(a.habitacion_id));
+      const habB = this.habitaciones.find(h => Number(h.id) === Number(b.habitacion_id));
+      const nroA = parseInt(habA?.nro_habitacion || a.nro_habitacion || '', 10);
+      const nroB = parseInt(habB?.nro_habitacion || b.nro_habitacion || '', 10);
+      if (!isNaN(nroA) && !isNaN(nroB) && nroA !== nroB) return nroA - nroB;
+      return (habA?.nro_habitacion || '').localeCompare(habB?.nro_habitacion || '', undefined, { numeric: true });
+    });
+  }
+
+  isReservaGrupal(reserva: ReservaModel): boolean {
+    if (!reserva) return false;
+    const miembros = this.getHabitacionesGrupo(reserva);
+    return !!reserva.grupo_id || miembros.length > 1;
+  }
+
+  programarMostrarGrupoPreview(itemId: number, event?: MouseEvent) {
+    if (this.menuEstadoVisible) return;
+    if (this.grupoPreviewHideTimer) {
+      clearTimeout(this.grupoPreviewHideTimer);
+      this.grupoPreviewHideTimer = null;
+    }
+
+    const reserva = (this.reservas || []).find(r => Number(r.id) === Number(itemId));
+    if (!reserva || !this.isReservaGrupal(reserva)) {
+      if (this.grupoPreviewVisible) {
+        this.ocultarGrupoPreviewConRetraso();
+      }
+      return;
+    }
+
+    // Si ya está mostrando el mismo item, solo mantenerlo activo
+    if (this.grupoPreviewVisible && this.currentHoveredItemId === itemId) {
+      return;
+    }
+
+    if (this.grupoPreviewShowTimer) {
+      clearTimeout(this.grupoPreviewShowTimer);
+    }
+
+    const targetEl = (event?.target as HTMLElement | null)?.closest('.vis-item') as HTMLElement | null;
+    const fallbackRect = targetEl ? targetEl.getBoundingClientRect() : null;
+    const mouseX = event?.clientX || 0;
+    const mouseY = event?.clientY || 0;
+
+    // Pequeño retardo (220ms) para que no sea intrusivo al mover rápido el cursor
+    this.grupoPreviewShowTimer = setTimeout(() => {
+      this.mostrarGrupoPreview(reserva, fallbackRect, mouseX, mouseY);
+    }, 220);
+  }
+
+  private mostrarGrupoPreview(
+    reserva: ReservaModel,
+    anchorRect: DOMRect | null,
+    mouseX: number,
+    mouseY: number
+  ) {
+    const miembros = this.getHabitacionesGrupo(reserva);
+    if (!reserva.grupo_id && miembros.length <= 1) return;
+
+    const habsDetalle = miembros.map(m => {
+      const hab = this.habitaciones.find(h => Number(h.id) === Number(m.habitacion_id));
+      const esArea = hab ? this.isFullDayOrCamping(hab) : false;
+      const nro = hab?.nro_habitacion || m.nro_habitacion || '';
+      const desc = hab?.descripcion || m.tipo_habitacion || 'Habitación';
+      return {
+        reserva_id: Number(m.id),
+        habitacion_id: Number(m.habitacion_id),
+        badge: (!esArea && nro) ? nro : (nro || desc.substring(0, 6)),
+        titulo: (!esArea && nro) ? `Hab. ${nro}` : desc,
+        subtitulo: desc,
+        piso: (!esArea && hab?.piso) ? String(hab.piso) : ''
+      };
+    });
+
+    const firstHab = this.habitaciones.find(h => Number(h.id) === Number(reserva.habitacion_id));
+    const esCamping = firstHab ? this.isCamping(firstHab) : false;
+    const esFD = firstHab ? this.isFullDay(firstHab) : false;
+
+    const titularNombre = [reserva.nombre, reserva.primer_apellido, reserva.segundo_apellido]
+      .filter(Boolean)
+      .join(' ')
+      .trim() || reserva.cliente;
+
+    const fIni = moment(reserva.fecha_ini).format('DD/MM');
+    const fFin = moment(reserva.fecha_fin).format('DD/MM/YYYY');
+
+    this.currentHoveredItemId = Number(reserva.id);
+    this.grupoPreviewData = {
+      grupo_id: reserva.grupo_id || null,
+      correlativo: reserva.correlativo || reserva.id,
+      grupo_nombre: reserva.grupo_nombre || reserva.cliente || 'Reserva Grupal',
+      titular: titularNombre,
+      fechas: `${fIni} al ${fFin}`,
+      currentHabitacionId: Number(reserva.habitacion_id),
+      labelPlural: esCamping ? 'campings' : (esFD ? 'áreas' : (habsDetalle.length === 1 ? 'habitación' : 'habitaciones')),
+      labelSeccion: esCamping ? 'CAMPINGS DEL GRUPO' : (esFD ? 'ÁREAS DEL GRUPO' : 'HABITACIONES DEL GRUPO'),
+      reservaIds: miembros.map(m => Number(m.id)),
+      habitaciones: habsDetalle
+    };
+
+    this.aplicarResaltadoGrupoEnTimeline(this.grupoPreviewData.reservaIds, true);
+
+    const cardWidth = 310;
+    const cardHeight = Math.min(280, 110 + Math.ceil(habsDetalle.length / 2) * 44);
+
+    let left = anchorRect ? (anchorRect.left + anchorRect.width / 2 - cardWidth / 2) : (mouseX - cardWidth / 2);
+    let top = anchorRect ? (anchorRect.bottom + 8) : (mouseY + 14);
+
+    if (left + cardWidth > window.innerWidth - 12) {
+      left = window.innerWidth - cardWidth - 12;
+    }
+    if (left < 12) {
+      left = 12;
+    }
+
+    if (top + cardHeight > window.innerHeight - 12 && anchorRect) {
+      top = Math.max(12, anchorRect.top - cardHeight - 8);
+    }
+
+    this.grupoPreviewLeft = `${Math.round(left)}px`;
+    this.grupoPreviewTop = `${Math.round(top)}px`;
+    this.grupoPreviewVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  mantenerGrupoPreview() {
+    if (this.grupoPreviewHideTimer) {
+      clearTimeout(this.grupoPreviewHideTimer);
+      this.grupoPreviewHideTimer = null;
+    }
+  }
+
+  ocultarGrupoPreviewConRetraso() {
+    if (this.grupoPreviewShowTimer) {
+      clearTimeout(this.grupoPreviewShowTimer);
+      this.grupoPreviewShowTimer = null;
+    }
+    if (this.grupoPreviewHideTimer) {
+      clearTimeout(this.grupoPreviewHideTimer);
+    }
+    this.grupoPreviewHideTimer = setTimeout(() => {
+      this.cerrarGrupoPreviewInmediato();
+    }, 180);
+  }
+
+  cerrarGrupoPreviewInmediato() {
+    if (this.grupoPreviewShowTimer) {
+      clearTimeout(this.grupoPreviewShowTimer);
+      this.grupoPreviewShowTimer = null;
+    }
+    if (this.grupoPreviewHideTimer) {
+      clearTimeout(this.grupoPreviewHideTimer);
+      this.grupoPreviewHideTimer = null;
+    }
+    if (this.grupoPreviewData?.reservaIds) {
+      this.aplicarResaltadoGrupoEnTimeline(this.grupoPreviewData.reservaIds, false);
+    }
+    if (!this.grupoPreviewVisible && !this.grupoPreviewData) return;
+    this.grupoPreviewVisible = false;
+    this.grupoPreviewData = null;
+    this.currentHoveredItemId = null;
+    this.cdr.detectChanges();
+  }
+
+  private aplicarResaltadoGrupoEnTimeline(reservaIds: number[], activo: boolean) {
+    if (!this.items || !reservaIds || reservaIds.length === 0) return;
+    const updates: any[] = [];
+    reservaIds.forEach(id => {
+      const it = this.items.get(id);
+      if (it) {
+        const clsActual = (it.className || '').replace(/\bgroup-peer-highlight\b/g, '').trim();
+        const nuevoCls = activo ? `${clsActual} group-peer-highlight`.trim() : clsActual;
+        if (it.className !== nuevoCls) {
+          updates.push({ id: it.id, className: nuevoCls });
+        }
+      }
+    });
+    if (updates.length > 0) {
+      this.items.update(updates);
+    }
+  }
+
+  enfocarHabitacionGrupo(habItem: { reserva_id: number; habitacion_id: number }) {
+    const reservaDestino = (this.reservas || []).find(r => Number(r.id) === Number(habItem.reserva_id));
+    this.cerrarGrupoPreviewInmediato();
+    if (reservaDestino) {
+      this.irAReservaEnTimeline(reservaDestino);
+    }
   }
 
 }

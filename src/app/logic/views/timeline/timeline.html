@@ -92,6 +92,10 @@
               <div class="result-top">
                 <span class="result-correlativo">#{{ r.correlativo || r.id }}</span>
                 <span class="result-cliente">{{ r.cliente }}</span>
+                <span *ngIf="isReservaGrupal(r)" class="result-grupo-badge">
+                  <mat-icon>groups</mat-icon>
+                  {{ getHabitacionesGrupo(r).length }} hab.
+                </span>
               </div>
               <div class="result-meta">
                 <span class="result-hab">{{ getNombreHabitacionBusqueda(r) }}</span>
@@ -126,6 +130,55 @@
   <!-- CONTENEDOR DEL CALENDARIO -->
   <div class="timeline-wrapper"> 
     <div class="timeline-container" #timelineContainer></div>
+  </div>
+</div>
+
+<!-- TARJETA FLOTANTE (POPOVER) DE HABITACIONES DE RESERVA GRUPAL -->
+<div
+  *ngIf="grupoPreviewVisible && grupoPreviewData"
+  class="group-rooms-popover"
+  [style.top]="grupoPreviewTop"
+  [style.left]="grupoPreviewLeft"
+  (mouseenter)="mantenerGrupoPreview()"
+  (mouseleave)="ocultarGrupoPreviewConRetraso()"
+  (click)="$event.stopPropagation()">
+  <div class="grp-popover-header">
+    <div class="grp-header-main">
+      <div class="grp-icon-box">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div class="grp-title-col">
+        <div class="grp-title-row">
+          <span class="grp-correlativo">#{{ grupoPreviewData.correlativo }}</span>
+          <span class="grp-name">{{ grupoPreviewData.grupo_nombre || 'Reserva Grupal' }}</span>
+        </div>
+        <span class="grp-client-sub">{{ grupoPreviewData.titular }} • {{ grupoPreviewData.fechas }}</span>
+      </div>
+    </div>
+    <span class="grp-total-pill">{{ grupoPreviewData.habitaciones.length }} {{ grupoPreviewData.labelPlural }}</span>
+  </div>
+
+  <div class="grp-popover-body">
+    <div class="grp-section-caption">
+      <span>{{ grupoPreviewData.labelSeccion }}</span>
+      <span class="grp-caption-hint">Clic para ubicar</span>
+    </div>
+    <div class="grp-rooms-grid">
+      <button
+        type="button"
+        *ngFor="let h of grupoPreviewData.habitaciones"
+        class="grp-room-pill"
+        [class.is-current]="h.habitacion_id === grupoPreviewData.currentHabitacionId"
+        (click)="enfocarHabitacionGrupo(h)"
+        [matTooltip]="'Ir a ' + h.titulo + ' (' + h.subtitulo + ')'">
+        <span class="grp-room-num">{{ h.badge }}</span>
+        <div class="grp-room-meta">
+          <span class="grp-room-desc">{{ h.subtitulo }}</span>
+          <span *ngIf="h.piso" class="grp-room-floor">Piso {{ h.piso }}</span>
+        </div>
+        <span *ngIf="h.habitacion_id === grupoPreviewData.currentHabitacionId" class="grp-current-dot" matTooltip="Ubicación actual"></span>
+      </button>
+    </div>
   </div>
 </div>
 

@@ -889,12 +889,23 @@ export class ReservaFormComponent {
 
           // Si es grupal y se crearon múltiples reservas, actualizarlas todas en el timeline
           if (data.reservas && Array.isArray(data.reservas) && data.reservas.length > 0) {
+            const esGrup = this.tipo_reserva === 'grupal' || data.reservas.length > 1 || !!this.reserva.grupo_id;
+            const habShortList = esGrup
+              ? data.reservas
+                  .map((rv: any) => {
+                    const hObj = this.habitaciones?.find(hb => Number(hb.id) === Number(rv.habitacion_id));
+                    return hObj ? (hObj.nro_habitacion || hObj.descripcion) : (rv.nro_habitacion || '');
+                  })
+                  .filter(Boolean)
+              : [];
+            const grupoHabsShort = habShortList.slice(0, 4).join(', ') + (habShortList.length > 4 ? ` +${habShortList.length - 4}` : '');
+
             data.reservas.forEach((r: any) => {
               const esMismoDia = moment(r.fecha_ini).isSame(moment(r.fecha_fin), 'day');
               const esFD = this.isFullDay() || esMismoDia;
               const r_ini = esFD ? moment(r.fecha_ini).format("YYYY-MM-DD 03:00") : moment(r.fecha_ini).format("YYYY-MM-DD 13:00");
               const r_fin = esFD ? moment(r.fecha_ini).format("YYYY-MM-DD 21:00") : moment(r.fecha_fin).format("YYYY-MM-DD 11:00");
-              const newCls = r.color ? r.color + ' new-reservation-highlight' : 'new-reservation-highlight';
+              const newCls = (r.color ? r.color + ' new-reservation-highlight' : 'new-reservation-highlight') + (esGrup ? ' is-group-reservation' : '');
               this.items.update({
                 id: r.id,
                 correlativo: r.correlativo,
@@ -903,7 +914,12 @@ export class ReservaFormComponent {
                 end: r_fin,
                 group: r.habitacion_id,
                 className: newCls,
-                saldo: r.saldo
+                saldo: r.saldo,
+                grupo_id: r.grupo_id,
+                grupo_nombre: r.grupo_nombre,
+                es_grupal: esGrup,
+                grupo_count: data.reservas.length,
+                grupo_habs_short: grupoHabsShort
               });
             });
             const msgSuccess = (this.tipo_reserva === 'grupal' && data.reservas && data.reservas.length > 1)
@@ -1051,12 +1067,23 @@ export class ReservaFormComponent {
           }
           // Si es grupal y se crearon/actualizaron múltiples reservas, actualizarlas todas en el timeline
           if (data.reservas && Array.isArray(data.reservas) && data.reservas.length > 0) {
+            const esGrup = this.tipo_reserva === 'grupal' || data.reservas.length > 1 || !!this.reserva.grupo_id;
+            const habShortList = esGrup
+              ? data.reservas
+                  .map((rv: any) => {
+                    const hObj = this.habitaciones?.find(hb => Number(hb.id) === Number(rv.habitacion_id));
+                    return hObj ? (hObj.nro_habitacion || hObj.descripcion) : (rv.nro_habitacion || '');
+                  })
+                  .filter(Boolean)
+              : [];
+            const grupoHabsShort = habShortList.slice(0, 4).join(', ') + (habShortList.length > 4 ? ` +${habShortList.length - 4}` : '');
+
             data.reservas.forEach((r: any) => {
               const esMismoDia = moment(r.fecha_ini).isSame(moment(r.fecha_fin), 'day');
               const esFD = this.isFullDay() || esMismoDia;
               const r_ini = esFD ? moment(r.fecha_ini).format("YYYY-MM-DD 03:00") : moment(r.fecha_ini).format("YYYY-MM-DD 13:00");
               const r_fin = esFD ? moment(r.fecha_ini).format("YYYY-MM-DD 21:00") : moment(r.fecha_fin).format("YYYY-MM-DD 11:00");
-              const newCls = r.color ? r.color + ' new-reservation-highlight' : 'new-reservation-highlight';
+              const newCls = (r.color ? r.color + ' new-reservation-highlight' : 'new-reservation-highlight') + (esGrup ? ' is-group-reservation' : '');
               this.items.update({
                 id: r.id,
                 correlativo: r.correlativo,
@@ -1065,7 +1092,12 @@ export class ReservaFormComponent {
                 end: r_fin,
                 group: r.habitacion_id,
                 className: newCls,
-                saldo: r.saldo
+                saldo: r.saldo,
+                grupo_id: r.grupo_id,
+                grupo_nombre: r.grupo_nombre,
+                es_grupal: esGrup,
+                grupo_count: data.reservas.length,
+                grupo_habs_short: grupoHabsShort
               });
             });
             const msgSuccess = (this.tipo_reserva === 'grupal' && data.reservas && data.reservas.length > 1)
