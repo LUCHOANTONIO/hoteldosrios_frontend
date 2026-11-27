@@ -40,6 +40,7 @@ export class ReservaModel {
     tiene_mensaje: boolean = false;
     is_externo: number = 0;
     usuario_alta_id: number | null = null;
+    usuario_alta: string = "";
     saldo: number = 0;
     total: number = 0;
     anticipo: number | null = null;

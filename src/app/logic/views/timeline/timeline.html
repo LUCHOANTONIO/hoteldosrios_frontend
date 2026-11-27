@@ -101,6 +101,10 @@
                 <span class="result-hab">{{ getNombreHabitacionBusqueda(r) }}</span>
                 <span class="result-fechas">{{ formatearFechaCorta(r.fecha_ini) }} - {{ formatearFechaCorta(r.fecha_fin) }}</span>
               </div>
+              <div *ngIf="$any(r).usuario_alta" class="result-user-row">
+                <mat-icon>badge</mat-icon>
+                <span>Reservado por: <strong>{{ $any(r).usuario_alta }}</strong></span>
+              </div>
             </button>
           </ng-container>
           <ng-template #sinResultados>
@@ -133,7 +137,7 @@
   </div>
 </div>
 
-<!-- TARJETA FLOTANTE (POPOVER) DE HABITACIONES DE RESERVA GRUPAL -->
+<!-- TARJETA FLOTANTE (POPOVER) DE VISTA RÁPIDA DE RESERVA (INDIVIDUAL Y GRUPAL) -->
 <div
   *ngIf="grupoPreviewVisible && grupoPreviewData"
   class="group-rooms-popover"
@@ -145,14 +149,18 @@
   <div class="grp-popover-header">
     <div class="grp-header-main">
       <div class="grp-icon-box">
-        <mat-icon>groups</mat-icon>
+        <mat-icon>{{ grupoPreviewData.es_grupal ? 'groups' : 'person' }}</mat-icon>
       </div>
       <div class="grp-title-col">
         <div class="grp-title-row">
           <span class="grp-correlativo">#{{ grupoPreviewData.correlativo }}</span>
-          <span class="grp-name">{{ grupoPreviewData.grupo_nombre || 'Reserva Grupal' }}</span>
+          <span class="grp-name">{{ grupoPreviewData.titulo_principal }}</span>
         </div>
-        <span class="grp-client-sub">{{ grupoPreviewData.titular }} • {{ grupoPreviewData.fechas }}</span>
+        <span class="grp-client-sub">{{ grupoPreviewData.subtitulo_cabecera }}</span>
+        <div class="grp-user-sub">
+          <mat-icon>person_pin</mat-icon>
+          <span>Reservó: <strong>{{ grupoPreviewData.usuario_alta || 'No especificado' }}</strong></span>
+        </div>
       </div>
     </div>
     <span class="grp-total-pill">{{ grupoPreviewData.habitaciones.length }} {{ grupoPreviewData.labelPlural }}</span>
@@ -161,9 +169,9 @@
   <div class="grp-popover-body">
     <div class="grp-section-caption">
       <span>{{ grupoPreviewData.labelSeccion }}</span>
-      <span class="grp-caption-hint">Clic para ubicar</span>
+      <span *ngIf="grupoPreviewData.es_grupal" class="grp-caption-hint">Clic para ubicar</span>
     </div>
-    <div class="grp-rooms-grid">
+    <div class="grp-rooms-grid" [class.single-room-grid]="!grupoPreviewData.es_grupal">
       <button
         type="button"
         *ngFor="let h of grupoPreviewData.habitaciones"
@@ -176,7 +184,7 @@
           <span class="grp-room-desc">{{ h.subtitulo }}</span>
           <span *ngIf="h.piso" class="grp-room-floor">Piso {{ h.piso }}</span>
         </div>
-        <span *ngIf="h.habitacion_id === grupoPreviewData.currentHabitacionId" class="grp-current-dot" matTooltip="Ubicación actual"></span>
+        <span *ngIf="grupoPreviewData.es_grupal && h.habitacion_id === grupoPreviewData.currentHabitacionId" class="grp-current-dot" matTooltip="Ubicación actual"></span>
       </button>
     </div>
   </div>

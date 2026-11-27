@@ -13,9 +13,17 @@
             <mat-dialog-content class="mat-typography">
                 <!-- CARD 1: DATOS DEL CLIENTE -->
                 <div class="form-section-card">
-                    <div class="section-header">
-                        <mat-icon class="section-icon">person</mat-icon>
-                        <span class="section-title">Datos del Cliente</span>
+                    <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <mat-icon class="section-icon">person</mat-icon>
+                            <span class="section-title">Datos del Cliente</span>
+                        </div>
+                        @if (reserva.id > 0 && $any(reserva).usuario_alta) {
+                        <div class="reservado-por-badge" matTooltip="Usuario que registró esta reserva">
+                            <mat-icon>person_pin</mat-icon>
+                            <span>Reservado por: <strong>{{ $any(reserva).usuario_alta }}</strong></span>
+                        </div>
+                        }
                     </div>
                     <div class="row row-cols-1 row-cols-md-2 g-2">
                         @if (!is_externo) {

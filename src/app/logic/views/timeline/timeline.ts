@@ -87,16 +87,20 @@ export class TimelineComponent implements AfterViewInit {
   habitacionMenuSeleccionada: HabitacionModel | null = null;
   cambiandoEstadoHabitacion = false;
 
-  // Vista rápida (Popover) de Habitaciones en Reserva Grupal sin abrir el formulario
+  // Vista rápida (Popover) de Reserva en el Timeline (Individual y Grupal) sin abrir el formulario
   grupoPreviewVisible = false;
   grupoPreviewTop = '0px';
   grupoPreviewLeft = '0px';
   grupoPreviewData: {
+    es_grupal: boolean;
     grupo_id: number | null;
     correlativo: number | string;
+    titulo_principal: string;
+    subtitulo_cabecera: string;
     grupo_nombre: string;
     titular: string;
     fechas: string;
+    usuario_alta: string;
     currentHabitacionId: number;
     labelPlural: string;
     labelSeccion: string;
@@ -1219,7 +1223,7 @@ export class TimelineComponent implements AfterViewInit {
     }
 
     const reserva = (this.reservas || []).find(r => Number(r.id) === Number(itemId));
-    if (!reserva || !this.isReservaGrupal(reserva)) {
+    if (!reserva) {
       if (this.grupoPreviewVisible) {
         this.ocultarGrupoPreviewConRetraso();
       }
@@ -1253,7 +1257,7 @@ export class TimelineComponent implements AfterViewInit {
     mouseY: number
   ) {
     const miembros = this.getHabitacionesGrupo(reserva);
-    if (!reserva.grupo_id && miembros.length <= 1) return;
+    const esGrupal = this.isReservaGrupal(reserva);
 
     const habsDetalle = miembros.map(m => {
       const hab = this.habitaciones.find(h => Number(h.id) === Number(m.habitacion_id));
@@ -1281,22 +1285,45 @@ export class TimelineComponent implements AfterViewInit {
 
     const fIni = moment(reserva.fecha_ini).format('DD/MM');
     const fFin = moment(reserva.fecha_fin).format('DD/MM/YYYY');
+    const fechasTexto = `${fIni} al ${fFin}`;
+    const usuarioReserva = reserva.usuario_alta || miembros.find(m => !!m.usuario_alta)?.usuario_alta || '';
+
+    const tituloPrincipal = esGrupal
+      ? (reserva.grupo_nombre || reserva.cliente || 'Reserva Grupal')
+      : (titularNombre || reserva.cliente || 'Reserva Individual');
+    const subtituloCabecera = esGrupal
+      ? `${titularNombre} • ${fechasTexto}`
+      : `Fechas: ${fechasTexto}`;
+
+    if (this.grupoPreviewData?.reservaIds) {
+      this.aplicarResaltadoGrupoEnTimeline(this.grupoPreviewData.reservaIds, false);
+    }
 
     this.currentHoveredItemId = Number(reserva.id);
     this.grupoPreviewData = {
+      es_grupal: esGrupal,
       grupo_id: reserva.grupo_id || null,
       correlativo: reserva.correlativo || reserva.id,
+      titulo_principal: tituloPrincipal,
+      subtitulo_cabecera: subtituloCabecera,
       grupo_nombre: reserva.grupo_nombre || reserva.cliente || 'Reserva Grupal',
       titular: titularNombre,
-      fechas: `${fIni} al ${fFin}`,
+      fechas: fechasTexto,
+      usuario_alta: usuarioReserva,
       currentHabitacionId: Number(reserva.habitacion_id),
-      labelPlural: esCamping ? 'campings' : (esFD ? 'áreas' : (habsDetalle.length === 1 ? 'habitación' : 'habitaciones')),
-      labelSeccion: esCamping ? 'CAMPINGS DEL GRUPO' : (esFD ? 'ÁREAS DEL GRUPO' : 'HABITACIONES DEL GRUPO'),
+      labelPlural: esCamping
+        ? (habsDetalle.length === 1 ? 'camping' : 'campings')
+        : (esFD ? (habsDetalle.length === 1 ? 'área' : 'áreas') : (habsDetalle.length === 1 ? 'habitación' : 'habitaciones')),
+      labelSeccion: esGrupal
+        ? (esCamping ? 'CAMPINGS DEL GRUPO' : (esFD ? 'ÁREAS DEL GRUPO' : 'HABITACIONES DEL GRUPO'))
+        : (esCamping ? 'CAMPING ASIGNADO' : (esFD ? 'ÁREA ASIGNADA' : 'HABITACIÓN ASIGNADA')),
       reservaIds: miembros.map(m => Number(m.id)),
       habitaciones: habsDetalle
     };
 
-    this.aplicarResaltadoGrupoEnTimeline(this.grupoPreviewData.reservaIds, true);
+    if (esGrupal) {
+      this.aplicarResaltadoGrupoEnTimeline(this.grupoPreviewData.reservaIds, true);
+    }
 
     const cardWidth = 310;
     const cardHeight = Math.min(280, 110 + Math.ceil(habsDetalle.length / 2) * 44);

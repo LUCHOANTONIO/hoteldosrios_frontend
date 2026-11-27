@@ -404,6 +404,27 @@
           color: #475569;
         }
       }
+
+      .result-user-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        color: #475569;
+        margin-top: 1px;
+
+        mat-icon {
+          font-size: 13px;
+          width: 13px;
+          height: 13px;
+          color: #2563eb;
+        }
+
+        strong {
+          color: #1e3a8a;
+          font-weight: 600;
+        }
+      }
     }
 
     .search-no-results {
@@ -878,6 +899,31 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
+      .grp-user-sub {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 2px;
+        font-size: 10.5px;
+        color: #bfdbfe;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        mat-icon {
+          font-size: 13px;
+          width: 13px;
+          height: 13px;
+          color: #60a5fa;
+          flex-shrink: 0;
+        }
+
+        strong {
+          color: #ffffff;
+          font-weight: 700;
+        }
+      }
     }
 
     .grp-total-pill {
@@ -924,6 +970,10 @@
       max-height: 175px;
       overflow-y: auto;
       padding-right: 2px;
+
+      &.single-room-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .grp-room-pill {
