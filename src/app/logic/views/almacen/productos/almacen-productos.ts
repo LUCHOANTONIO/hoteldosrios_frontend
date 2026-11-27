@@ -232,57 +232,45 @@ export class AlmacenUnidadMedidaFormComponent {
             </mat-form-field>
           </div>
 
-          <div class="col-12 col-md-6 d-flex align-items-start gap-1">
-            <mat-form-field class="flex-grow-1" style="min-width: 0;">
+          <div class="col-12 col-md-6">
+            <mat-form-field class="w-100">
               <mat-label>Categoría</mat-label>
               <mat-select [(ngModel)]="producto.categoria_id" name="categoria_id" required>
                 @for (x of categorias; track x.id) {
                   <mat-option [value]="x.id">{{ x.descripcion || x.nombre }}</mat-option>
                 }
               </mat-select>
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                color="primary"
+                matTooltip="Nueva Categoría"
+                (click)="$event.stopPropagation(); abrirModalNuevaCategoria()"
+              >
+                <mat-icon>add_circle_outline</mat-icon>
+              </button>
             </mat-form-field>
-            <button
-              mat-icon-button
-              type="button"
-              class="bg-success text-black mt-2 flex-shrink-0"
-              matTooltip="Nueva Categoría"
-              (click)="abrirModalNuevaCategoria()"
-            >
-              <mat-icon>add</mat-icon>
-            </button>
           </div>
 
-          <div class="col-12 col-md-6 d-flex align-items-start gap-1">
-            <mat-form-field class="flex-grow-1" style="min-width: 0;">
+          <div class="col-12 col-md-6">
+            <mat-form-field class="w-100">
               <mat-label>Unidad de Medida</mat-label>
               <mat-select [(ngModel)]="producto.unidad_medida_id" name="unidad_medida_id" required>
                 @for (u of unidadesMedida; track u.unidad_medida_id) {
                   <mat-option [value]="u.unidad_medida_id">{{ u.descripcion }}</mat-option>
                 }
               </mat-select>
-            </mat-form-field>
-            <button
-              mat-icon-button
-              type="button"
-              class="bg-success text-black mt-2 flex-shrink-0"
-              matTooltip="Nueva Unidad de Medida"
-              (click)="abrirModalNuevaUnidadMedida()"
-            >
-              <mat-icon>add</mat-icon>
-            </button>
-          </div>
-
-          <div class="col-12 col-md-6">
-            <mat-form-field class="w-100">
-              <mat-label>Stock Mínimo</mat-label>
-              <input type="number" step="0.001" matInput [(ngModel)]="producto.stock_minimo" name="stock_minimo" required />
-            </mat-form-field>
-          </div>
-
-          <div class="col-12 col-md-6">
-            <mat-form-field class="w-100">
-              <mat-label>Costo Referencial (Bs.)</mat-label>
-              <input type="number" step="0.01" matInput [(ngModel)]="producto.costo_referencial" name="costo_referencial" required />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                color="primary"
+                matTooltip="Nueva Unidad de Medida"
+                (click)="$event.stopPropagation(); abrirModalNuevaUnidadMedida()"
+              >
+                <mat-icon>add_circle_outline</mat-icon>
+              </button>
             </mat-form-field>
           </div>
         </div>
@@ -424,9 +412,7 @@ export class AlmacenProductosComponent implements AfterViewInit {
     'nombre',
     'categoria_nombre',
     'unidad_medida',
-    'stock_actual',
-    'stock_minimo',
-    'costo_referencial'
+    'stock_actual'
   ];
   dataSource: MatTableDataSource<InvProductoModel> = new MatTableDataSource<InvProductoModel>([]);
 

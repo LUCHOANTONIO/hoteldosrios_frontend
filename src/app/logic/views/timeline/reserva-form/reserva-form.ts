@@ -526,20 +526,68 @@ export class ReservaFormComponent {
   //End: Filtrar habitacion   
 
   //Begin: Metodos para Reserva Grupal
+  getLabelSeleccionadasPanel(): string {
+    if (this.isCamping()) return `${this.tipoCamping?.descripcion || 'Campings'} Seleccionados`;
+    if (this.isFullDay()) return `${this.tipoFullDay?.descripcion || 'Servicios / Áreas'} Seleccionados`;
+    return 'Habitaciones Seleccionadas';
+  }
+
+  getSelectedHabitacionesObjects(): HabitacionModel[] {
+    if (!this.selectedHabitaciones || this.selectedHabitaciones.length === 0 || !this.habitaciones) {
+      return [];
+    }
+    return this.habitaciones.filter(h =>
+      this.selectedHabitaciones.some(id => Number(id) === Number(h.id))
+    );
+  }
+
+  isHabitacionPrincipal(habId: number): boolean {
+    return Number(habId) === Number(this.reserva?.habitacion_id);
+  }
+
+  removeHabitacionSeleccionada(habId: number, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (this.isDisabled) return;
+    this.selectedHabitaciones = (this.selectedHabitaciones || []).filter(id => Number(id) !== Number(habId));
+    this.reserva.habitacion_ids = [...this.selectedHabitaciones];
+    if (this.selectedHabitaciones.length > 0) {
+      if (!this.reserva.habitacion_id || !this.selectedHabitaciones.includes(Number(this.reserva.habitacion_id))) {
+        this.reserva.habitacion_id = this.selectedHabitaciones[0];
+      }
+    } else {
+      this.reserva.habitacion_id = null as any;
+    }
+    this.calcularPrecioGrupal();
+  }
+
+  clearSelectedHabitaciones(): void {
+    if (this.isDisabled) return;
+    this.selectedHabitaciones = [];
+    this.reserva.habitacion_ids = [];
+    this.reserva.habitacion_id = null as any;
+    this.calcularPrecioGrupal();
+  }
+
   getSelectedHabitacionesText(): string {
     if (!this.selectedHabitaciones || this.selectedHabitaciones.length === 0) {
       if (this.isCamping()) return 'Ningún camping seleccionado';
       if (this.isFullDay()) return 'Ningún servicio seleccionado';
       return 'Ninguna habitación seleccionada';
     }
+    const seleccionadas = this.getSelectedHabitacionesObjects();
     if (this.isFullDay()) {
-      const nombres = this.habitaciones
-        .filter(h => this.selectedHabitaciones.some(id => Number(id) === Number(h.id)))
-        .map(h => h.descripcion);
+      const nombres = seleccionadas.map(h => h.descripcion);
       return nombres.length > 0 ? nombres.join(', ') : `${this.selectedHabitaciones.length} seleccionado(s)`;
     }
     if (this.isCamping()) {
-      return `${this.selectedHabitaciones.length} ${this.selectedHabitaciones.length === 1 ? 'camping seleccionado' : 'campings seleccionados'}`;
+      const nombres = seleccionadas.map(h => h.descripcion);
+      return nombres.length > 0 ? `${seleccionadas.length}: ${nombres.join(', ')}` : `${this.selectedHabitaciones.length} ${this.selectedHabitaciones.length === 1 ? 'camping seleccionado' : 'campings seleccionados'}`;
+    }
+    const nros = seleccionadas.map(h => h.nro_habitacion || h.descripcion);
+    if (nros.length > 0) {
+      return `Hab. ${nros.join(', ')} (${nros.length})`;
     }
     return `${this.selectedHabitaciones.length} ${this.selectedHabitaciones.length === 1 ? 'habitación seleccionada' : 'habitaciones seleccionadas'}`;
   }

@@ -87,23 +87,8 @@
 
           <ng-container matColumnDef="stock_actual">
             <th mat-header-cell *matHeaderCellDef>Stock Actual</th>
-            <td mat-cell *matCellDef="let x" [class.text-danger]="x.alerta_stock" [class.fw-bold]="x.alerta_stock">
-              {{ x.stock_actual }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="stock_minimo">
-            <th mat-header-cell *matHeaderCellDef>Stock Mín.</th>
-            <td mat-cell *matCellDef="let x">{{ x.stock_minimo }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="costo_referencial">
-            <th mat-header-cell *matHeaderCellDef>Costo Ref.</th>
             <td mat-cell *matCellDef="let x">
-              <div style="display: flex; align-items: center;">
-                {{ x.costo_referencial | number:'1.2-2' }}
-                <mat-icon style="margin-left: 8px;" class="text-primary">money</mat-icon>
-              </div>
+              {{ x.stock_actual }}
             </td>
           </ng-container>
 
