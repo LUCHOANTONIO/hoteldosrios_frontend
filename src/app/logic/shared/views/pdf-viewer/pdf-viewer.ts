@@ -15,9 +15,13 @@ import { MatIconModule } from '@angular/material/icon';
 export class PdfViewerComponent implements OnDestroy {
   pdfSafeUrl: SafeResourceUrl | null = null;
   titulo_documento: string;
+  nombre_archivo: string;
   isIOS: boolean = false;
+  isSafari: boolean = false;
+  canNativeShare: boolean = false;
   pdfError: boolean = false;
   private blobUrl: string | null = null;
+  private pdfBlob: Blob | null = null;
 
   constructor(
     private dialogRef: MatDialogRef<PdfViewerComponent>,
@@ -25,7 +29,9 @@ export class PdfViewerComponent implements OnDestroy {
     private sanitizer: DomSanitizer
   ) {
     this.titulo_documento = this.data?.titulo_documento || 'Comprobante';
+    this.nombre_archivo = this.getNombreArchivo();
     this.isIOS = this.detectIOS();
+    this.isSafari = this.detectSafari();
     this.inicializarPdf();
   }
 
@@ -35,6 +41,14 @@ export class PdfViewerComponent implements OnDestroy {
     }
     const ua = navigator.userAgent || '';
     return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  private detectSafari(): boolean {
+    if (typeof navigator === 'undefined') {
+      return false;
+    }
+    const ua = navigator.userAgent || '';
+    return /Safari/i.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS|OPiOS|Android/i.test(ua);
   }
 
   private inicializarPdf(): void {
@@ -54,16 +68,36 @@ export class PdfViewerComponent implements OnDestroy {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      this.pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
 
-      this.blobUrl = URL.createObjectURL(blob);
+      this.blobUrl = URL.createObjectURL(this.pdfBlob);
       this.pdfSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.blobUrl);
+      this.canNativeShare = this.checkNativeShareSupport();
     } catch {
       this.pdfError = true;
     }
   }
 
-  private getNombreArchivo(): string {
+  private checkNativeShareSupport(): boolean {
+    if (typeof navigator === 'undefined' || !this.pdfBlob) {
+      return false;
+    }
+    try {
+      const nav: any = navigator;
+      if (typeof nav.share !== 'function') {
+        return false;
+      }
+      const file = new File([this.pdfBlob], this.nombre_archivo, { type: 'application/pdf' });
+      if (typeof nav.canShare === 'function') {
+        return nav.canShare({ files: [file] });
+      }
+      return this.isIOS;
+    } catch {
+      return false;
+    }
+  }
+
+  getNombreArchivo(): string {
     const base = (this.titulo_documento || 'Comprobante')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -73,17 +107,76 @@ export class PdfViewerComponent implements OnDestroy {
     return `${base || 'Comprobante'}.pdf`;
   }
 
-  descargarPdf(): void {
+  async compartirODescargarIOS(): Promise<void> {
+    if (!this.pdfBlob) {
+      return;
+    }
+    const nav: any = navigator;
+    if (this.canNativeShare && typeof nav.share === 'function') {
+      try {
+        const file = new File([this.pdfBlob], this.nombre_archivo, {
+          type: 'application/pdf',
+          lastModified: Date.now()
+        });
+        await nav.share({
+          files: [file],
+          title: this.titulo_documento
+        });
+        return;
+      } catch (err: any) {
+        if (err && err.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+    this.ejecutarDescargaDirecta();
+  }
+
+  async descargarPdf(): Promise<void> {
+    if (!this.pdfBlob || !this.blobUrl) {
+      return;
+    }
+
+    // En iPhone / iPad (Safari iOS), el menú nativo (navigator.share con File) es la forma más confiable
+    // de "Guardar en Archivos", enviar por WhatsApp, AirDrop o Imprimir con el nombre exacto del PDF
+    if (this.isIOS && this.canNativeShare) {
+      await this.compartirODescargarIOS();
+      return;
+    }
+
+    this.ejecutarDescargaDirecta();
+  }
+
+  ejecutarDescargaDirecta(): void {
     if (!this.blobUrl) {
       return;
     }
+    const fileName = this.getNombreArchivo();
     const link = document.createElement('a');
     link.href = this.blobUrl;
-    link.download = this.getNombreArchivo();
+    link.setAttribute('download', fileName);
+    if (this.isIOS || this.isSafari) {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      if (link.parentNode) {
+        document.body.removeChild(link);
+      }
+    }, 250);
+  }
+
+  abrirEnNuevaPestana(): void {
+    if (!this.blobUrl) {
+      return;
+    }
+    const win = window.open(this.blobUrl, '_blank', 'noopener,noreferrer');
+    if (!win) {
+      window.location.assign(this.blobUrl);
+    }
   }
 
   close(): void {
@@ -92,8 +185,12 @@ export class PdfViewerComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     if (this.blobUrl) {
-      URL.revokeObjectURL(this.blobUrl);
+      const urlToRevoke = this.blobUrl;
       this.blobUrl = null;
+      // En Safari iOS dar margen de tiempo para que una descarga o pestaña recién abierta no pierda el Blob URL
+      setTimeout(() => {
+        URL.revokeObjectURL(urlToRevoke);
+      }, 60000);
     }
   }
 }

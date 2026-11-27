@@ -1,11 +1,18 @@
 <div class="pdf-viewer-header">
     <h2 mat-dialog-title class="pdf-viewer-title">
         <mat-icon class="title-icon">description</mat-icon>
-        <span>{{ titulo_documento }}</span>
+        <span class="title-text">{{ titulo_documento }}</span>
     </h2>
-    <button mat-icon-button type="button" class="btn-close-header" (click)="close()" aria-label="Cerrar ventana">
-        <mat-icon>close</mat-icon>
-    </button>
+    <div class="header-right-actions">
+        @if (!pdfError) {
+            <button mat-icon-button type="button" class="btn-download-header" (click)="descargarPdf()" title="Descargar PDF" aria-label="Descargar PDF">
+                <mat-icon>download</mat-icon>
+            </button>
+        }
+        <button mat-icon-button type="button" class="btn-close-header" (click)="close()" aria-label="Cerrar ventana">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
 </div>
 
 <div mat-dialog-content class="pdf-dialog-content">
@@ -16,19 +23,33 @@
             <p>El archivo PDF no se encuentra disponible o tiene un formato inválido.</p>
         </div>
     } @else if (isIOS) {
-        <div class="pdf-fallback-container">
-            <mat-icon class="fallback-icon">picture_as_pdf</mat-icon>
-            <h3>{{ titulo_documento }}</h3>
-            <p>En Safari para iPhone/iPad, abre el comprobante en el visor nativo o descárgalo directamente.</p>
-            <div class="ios-actions">
-                <a mat-flat-button color="primary" class="btn-action-primary" [href]="pdfSafeUrl" target="_blank" rel="noopener noreferrer">
-                    <mat-icon>open_in_new</mat-icon>
-                    <span>Abrir PDF</span>
-                </a>
-                <button mat-stroked-button color="primary" type="button" class="btn-action-secondary" (click)="descargarPdf()">
-                    <mat-icon>download</mat-icon>
-                    <span>Descargar PDF</span>
-                </button>
+        <div class="pdf-fallback-container ios-pdf-container">
+            <div class="ios-pdf-card">
+                <div class="ios-pdf-badge">
+                    <mat-icon class="fallback-icon">picture_as_pdf</mat-icon>
+                </div>
+                <h3>{{ titulo_documento }}</h3>
+                <span class="ios-filename">{{ nombre_archivo }}</span>
+                <p>Compatible con Safari en iPhone / iPad. Puedes guardar o compartir el archivo PDF directamente en tu dispositivo o abrirlo en el visor nativo.</p>
+
+                <div class="ios-actions">
+                    <button mat-flat-button color="primary" type="button" class="btn-action-primary" (click)="descargarPdf()">
+                        <mat-icon>{{ canNativeShare ? 'ios_share' : 'download' }}</mat-icon>
+                        <span>{{ canNativeShare ? 'Guardar / Compartir PDF' : 'Descargar PDF' }}</span>
+                    </button>
+
+                    @if (canNativeShare) {
+                        <a mat-stroked-button color="primary" class="btn-action-secondary" [href]="pdfSafeUrl" [attr.download]="nombre_archivo" target="_blank" rel="noopener noreferrer">
+                            <mat-icon>download</mat-icon>
+                            <span>Descarga Directa en Safari</span>
+                        </a>
+                    }
+
+                    <a mat-stroked-button color="primary" class="btn-action-secondary" [href]="pdfSafeUrl" target="_blank" rel="noopener noreferrer">
+                        <mat-icon>open_in_new</mat-icon>
+                        <span>Ver PDF en Safari</span>
+                    </a>
+                </div>
             </div>
         </div>
     } @else {
@@ -38,10 +59,16 @@
 
 <div mat-dialog-actions align="end" class="pdf-dialog-actions">
     @if (!pdfError) {
-        <button mat-stroked-button color="primary" type="button" class="btn-download-footer" (click)="descargarPdf()">
+        @if (isIOS && canNativeShare) {
+            <button mat-stroked-button color="primary" type="button" class="btn-download-footer" (click)="compartirODescargarIOS()">
+                <mat-icon>ios_share</mat-icon>
+                <span>Guardar / Compartir</span>
+            </button>
+        }
+        <a mat-stroked-button color="primary" class="btn-download-footer" [href]="pdfSafeUrl" [attr.download]="nombre_archivo" target="_blank" rel="noopener noreferrer" (click)="!isIOS && $event.preventDefault(); !isIOS && descargarPdf()">
             <mat-icon>download</mat-icon>
-            <span>Descargar</span>
-        </button>
+            <span>Descargar PDF</span>
+        </a>
     }
     <button mat-flat-button color="primary" type="button" class="btn-close-footer" (click)="close()">
         <span>Cerrar</span>

@@ -174,6 +174,68 @@ export class CotizacionComponent implements AfterViewInit {
     });
   }
 
+  descargarDocumento(item: CotizacionModel) {
+    this.documentoService.obtenerVoucherCotizacion(item.id).subscribe({
+      next: (pdfBase64: string) => {
+        if (pdfBase64) {
+          this.descargarPdfBase64(pdfBase64, `Cotizacion_${item.correlativo || item.id}.pdf`, `Cotización #${item.correlativo || item.id}`);
+        } else {
+          this.alertService.show("No se pudo generar el documento PDF", { duration: 3000, type: 'warning' });
+        }
+      },
+      error: () => {
+        this.alertService.show("Error al descargar el documento PDF", { duration: 3000, type: 'error' });
+      }
+    });
+  }
+
+  private async descargarPdfBase64(pdfBase64: string, fileName: string, title: string): Promise<void> {
+    try {
+      const rawBase64 = (pdfBase64 || '').replace(/^data:application\/pdf;base64,/, '').replace(/\s+/g, '');
+      const byteCharacters = atob(rawBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+      const ua = typeof navigator !== 'undefined' ? (navigator.userAgent || '') : '';
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (typeof navigator !== 'undefined' && navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const nav: any = typeof navigator !== 'undefined' ? navigator : null;
+
+      if (isIOS && nav && typeof nav.share === 'function') {
+        const file = new File([blob], fileName, { type: 'application/pdf', lastModified: Date.now() });
+        if (!nav.canShare || nav.canShare({ files: [file] })) {
+          try {
+            await nav.share({ files: [file], title });
+            return;
+          } catch (err: any) {
+            if (err && err.name === 'AbortError') return;
+          }
+        }
+      }
+
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', fileName);
+      if (isIOS) {
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      }
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (link.parentNode) document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 60000);
+    } catch {
+      this.alertService.show("Error al procesar la descarga del PDF", { duration: 3000, type: 'error' });
+    }
+  }
+
   mostrarDetalles(item: CotizacionModel) {
     this.cotizacion = { ...item };
     this.dialog.open(CotizacionDetalleComponent, {

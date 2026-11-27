@@ -1196,23 +1196,26 @@ export class ReservaFormComponent {
 
   mostrarVisorPdf(pdf_base64: string) {
     if (this.reserva) {
+      const nro = this.reserva.correlativo || this.reserva.id || '';
+      const titulo = nro ? `Comprobante de Reserva #${nro}` : 'Comprobante de Reserva';
       if (!pdf_base64) {
         this.documentoService.obtenerVoucherReserva(this.reserva.id).subscribe({
           next: (res) => {
-            this.cargarVisorPdf(res, "Comprobante");
+            this.cargarVisorPdf(res, titulo);
           }
         });
       } else {
-        this.cargarVisorPdf(pdf_base64, "Comprobante");
+        this.cargarVisorPdf(pdf_base64, titulo);
       }
     }
   }
 
   private cargarVisorPdf(pdf_base64: string, titulo_documento: string): void {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 850;
     this.dialogVoucherRef = this.dialog.open(PdfViewerComponent, {
-      width: '50vw',
-      maxWidth: '95vw',
-      height: '80vh',
+      width: isMobile ? '96vw' : '50vw',
+      maxWidth: '96vw',
+      height: isMobile ? '85vh' : '80vh',
       data: { pdf_base64, titulo_documento },
       disableClose: true,
     });

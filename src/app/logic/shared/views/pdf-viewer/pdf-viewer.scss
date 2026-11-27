@@ -22,15 +22,41 @@
     gap: 8px;
     margin: 0;
     padding: 0;
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: #1e293b;
+    min-width: 0;
+    flex: 1;
 
     .title-icon {
       color: #0b7dd4;
       font-size: 22px;
       width: 22px;
       height: 22px;
+      flex-shrink: 0;
+    }
+
+    .title-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .header-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .btn-download-header {
+    color: #0b7dd4;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #e0f2fe;
+      color: #0369a1;
     }
   }
 
@@ -124,9 +150,43 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 24px;
-  background-color: #f8fafc;
+  padding: 20px;
+  background-color: #f1f5f9;
   color: #1e293b;
+  overflow-y: auto;
+
+  .ios-pdf-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px 20px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  }
+
+  .ios-pdf-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    margin-bottom: 14px;
+
+    .fallback-icon {
+      margin-bottom: 0;
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+      color: #dc2626;
+    }
+  }
 
   .fallback-icon {
     font-size: 56px;
@@ -141,25 +201,42 @@
   }
 
   h3 {
-    margin: 0 0 8px;
+    margin: 0 0 4px;
     font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .ios-filename {
+    display: inline-block;
+    font-size: 0.8rem;
     font-weight: 600;
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 2px 10px;
+    margin-bottom: 12px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   p {
     margin: 0 0 20px;
     max-width: 340px;
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1.45;
   }
 
   .ios-actions {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
-    max-width: 260px;
+    max-width: 280px;
 
     .btn-action-primary,
     .btn-action-secondary {
@@ -168,9 +245,16 @@
       justify-content: center;
       gap: 8px;
       height: 44px;
-      border-radius: 8px;
-      font-weight: 500;
+      border-radius: 10px;
+      font-weight: 600;
       text-decoration: none;
+      width: 100%;
+    }
+
+    .btn-action-primary {
+      background-color: #0b7dd4;
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(11, 125, 212, 0.25);
     }
   }
 }
