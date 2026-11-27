@@ -1299,7 +1299,7 @@ export class TimelineComponent implements AfterViewInit {
       .join(' ')
       .trim() || reserva.cliente;
 
-    const fIni = moment(reserva.fecha_ini).format('DD/MM');
+    const fIni = moment(reserva.fecha_ini).format('DD/MM/YYYY');
     const fFin = moment(reserva.fecha_fin).format('DD/MM/YYYY');
     const fechasTexto = `${fIni} al ${fFin}`;
     const usuarioReserva = reserva.usuario_alta || miembros.find(m => !!m.usuario_alta)?.usuario_alta || '';
@@ -1342,8 +1342,8 @@ export class TimelineComponent implements AfterViewInit {
       this.aplicarResaltadoGrupoEnTimeline(this.grupoPreviewData.reservaIds, true);
     }
 
-    const cardWidth = 310;
-    const cardHeight = Math.min(325, 150 + Math.ceil(habsDetalle.length / 2) * 44);
+    const cardWidth = 335;
+    const cardHeight = Math.min(350, 175 + Math.ceil(habsDetalle.length / 2) * 44);
 
     let left = anchorRect ? (anchorRect.left + anchorRect.width / 2 - cardWidth / 2) : (mouseX - cardWidth / 2);
     let top = anchorRect ? (anchorRect.bottom + 8) : (mouseY + 14);

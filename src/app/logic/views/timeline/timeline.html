@@ -147,23 +147,38 @@
   (mouseleave)="ocultarGrupoPreviewConRetraso()"
   (click)="$event.stopPropagation()">
   <div class="grp-popover-header">
-    <div class="grp-header-main">
-      <div class="grp-icon-box">
-        <mat-icon>{{ grupoPreviewData.es_grupal ? 'groups' : 'person' }}</mat-icon>
+    <!-- Fila 1: Identificador principal (Correlativo + Nombre/Grupo + Badge cantidad) -->
+    <div class="grp-header-top">
+      <div class="grp-identity">
+        <div class="grp-icon-box">
+          <mat-icon>{{ grupoPreviewData.es_grupal ? 'groups' : 'person' }}</mat-icon>
+        </div>
+        <span class="grp-correlativo">#{{ grupoPreviewData.correlativo }}</span>
+        <span class="grp-name" [title]="grupoPreviewData.titulo_principal">{{ grupoPreviewData.titulo_principal }}</span>
       </div>
-      <div class="grp-title-col">
-        <div class="grp-title-row">
-          <span class="grp-correlativo">#{{ grupoPreviewData.correlativo }}</span>
-          <span class="grp-name">{{ grupoPreviewData.titulo_principal }}</span>
-        </div>
-        <span class="grp-client-sub">{{ grupoPreviewData.subtitulo_cabecera }}</span>
-        <div class="grp-user-sub">
-          <mat-icon>person_pin</mat-icon>
-          <span>Reservó: <strong>{{ grupoPreviewData.usuario_alta || 'No especificado' }}</strong></span>
-        </div>
+      <span class="grp-total-pill">{{ grupoPreviewData.habitaciones.length }} {{ grupoPreviewData.labelPlural }}</span>
+    </div>
+
+    <!-- Fila 2: Lista estructurada de detalles (Titular, Estadía, Reservado por) -->
+    <div class="grp-header-details">
+      <div *ngIf="grupoPreviewData.es_grupal && grupoPreviewData.titular" class="grp-detail-item">
+        <mat-icon class="detail-icon">badge</mat-icon>
+        <span class="detail-label">Titular:</span>
+        <span class="detail-value">{{ grupoPreviewData.titular }}</span>
+      </div>
+
+      <div class="grp-detail-item">
+        <mat-icon class="detail-icon">calendar_today</mat-icon>
+        <span class="detail-label">Estadía:</span>
+        <span class="detail-value">{{ grupoPreviewData.fechas }}</span>
+      </div>
+
+      <div class="grp-detail-item">
+        <mat-icon class="detail-icon">verified_user</mat-icon>
+        <span class="detail-label">Reservó:</span>
+        <span class="detail-value highlight-user">{{ grupoPreviewData.usuario_alta || 'No especificado' }}</span>
       </div>
     </div>
-    <span class="grp-total-pill">{{ grupoPreviewData.habitaciones.length }} {{ grupoPreviewData.labelPlural }}</span>
   </div>
 
   <div class="grp-popover-body">
