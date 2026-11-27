@@ -255,6 +255,15 @@
       background-color: #0b7dd4;
       color: #ffffff;
       box-shadow: 0 3px 8px rgba(11, 125, 212, 0.25);
+
+      &.is-downloading {
+        opacity: 0.85;
+        pointer-events: none;
+      }
+
+      ::ng-deep .spinner-white circle {
+        stroke: #ffffff !important;
+      }
     }
   }
 }

@@ -167,67 +167,6 @@
                             }
                         </mat-select>
                     </mat-form-field>
-
-                    <!-- PANEL VISUAL DE HABITACIONES SELECCIONADAS EN RESERVA GRUPAL -->
-                    <div class="col-12">
-                        <div class="selected-rooms-panel" [class.has-selection]="selectedHabitaciones && selectedHabitaciones.length > 0">
-                            <div class="selected-rooms-header">
-                                <div class="header-title-group">
-                                    <mat-icon class="panel-icon">{{ isCamping() ? 'forest' : (isFullDay() ? 'wb_sunny' : 'meeting_room') }}</mat-icon>
-                                    <span class="panel-title">{{ getLabelSeleccionadasPanel() }}</span>
-                                    <span class="rooms-count-badge">{{ selectedHabitaciones?.length || 0 }}</span>
-                                </div>
-                                @if (!isDisabled) {
-                                <div class="header-actions">
-                                    <button type="button" class="btn-panel-action btn-open-select" (click)="cboHabitacionesMulti.open()" matTooltip="Agregar o quitar {{ isCamping() ? 'campings' : (isFullDay() ? 'servicios' : 'habitaciones') }}">
-                                        <mat-icon>playlist_add</mat-icon>
-                                        <span>Seleccionar</span>
-                                    </button>
-                                    @if (selectedHabitaciones && selectedHabitaciones.length > 1) {
-                                    <button type="button" class="btn-panel-action btn-clear-all" (click)="clearSelectedHabitaciones()" matTooltip="Quitar todas">
-                                        <mat-icon>delete_sweep</mat-icon>
-                                        <span>Limpiar</span>
-                                    </button>
-                                    }
-                                </div>
-                                }
-                            </div>
-
-                            @if (getSelectedHabitacionesObjects().length > 0) {
-                            <div class="selected-rooms-grid">
-                                @for (hab of getSelectedHabitacionesObjects(); track hab.id) {
-                                <div class="room-chip-card" [class.is-principal]="isHabitacionPrincipal(hab.id)">
-                                    <div class="room-chip-icon">
-                                        @if (!isFullDay(hab) && !isCamping(hab) && hab.nro_habitacion) {
-                                        <span class="room-number-badge">{{ hab.nro_habitacion }}</span>
-                                        } @else {
-                                        <mat-icon>{{ isCamping(hab) ? 'forest' : (isFullDay(hab) ? 'wb_sunny' : 'bed') }}</mat-icon>
-                                        }
-                                    </div>
-                                    <div class="room-chip-info">
-                                        <span class="room-chip-title" [matTooltip]="getNombreHabitacionMulti(hab)">
-                                            {{ (!isFullDay(hab) && !isCamping(hab) && hab.nro_habitacion) ? ('Hab. ' + hab.nro_habitacion) : hab.descripcion }}
-                                        </span>
-                                        <span class="room-chip-subtitle" [matTooltip]="hab.descripcion">
-                                            {{ (!isFullDay(hab) && !isCamping(hab) && hab.nro_habitacion) ? hab.descripcion : (hab.tipo_habitacion || 'Seleccionado') }}
-                                        </span>
-                                    </div>
-                                    @if (!isDisabled) {
-                                    <button type="button" class="room-chip-remove" (click)="removeHabitacionSeleccionada(hab.id, $event)" matTooltip="Quitar de la selección">
-                                        <mat-icon>close</mat-icon>
-                                    </button>
-                                    }
-                                </div>
-                                }
-                            </div>
-                            } @else {
-                            <div class="selected-rooms-empty" (click)="!isDisabled && cboHabitacionesMulti.open()" [class.clickable]="!isDisabled">
-                                <mat-icon>touch_app</mat-icon>
-                                <span>No hay {{ isCamping() ? 'campings seleccionados' : (isFullDay() ? 'servicios seleccionados' : 'habitaciones seleccionadas') }}. Haga clic aquí o en el selector para elegir.</span>
-                            </div>
-                            }
-                        </div>
-                    </div>
                     }
 
                     <mat-form-field appearance="outline" class="col-12 col-md-6">

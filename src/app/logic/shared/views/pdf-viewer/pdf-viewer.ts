@@ -4,13 +4,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-pdf-viewer',
   templateUrl: './pdf-viewer.html',
   styleUrls: ['./pdf-viewer.scss'],
   standalone: true,
-  imports: [MatDialogModule, MatButtonModule, MatIconModule]
+  imports: [MatDialogModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule]
 })
 export class PdfViewerComponent implements OnDestroy {
   pdfSafeUrl: SafeResourceUrl | null = null;
@@ -20,6 +21,7 @@ export class PdfViewerComponent implements OnDestroy {
   isSafari: boolean = false;
   canNativeShare: boolean = false;
   pdfError: boolean = false;
+  descargando: boolean = false;
   private blobUrl: string | null = null;
   private pdfBlob: Blob | null = null;
 
@@ -132,18 +134,19 @@ export class PdfViewerComponent implements OnDestroy {
     this.ejecutarDescargaDirecta();
   }
 
-  async descargarPdf(): Promise<void> {
-    if (!this.pdfBlob || !this.blobUrl) {
+  iniciarSpinnerDescarga(): void {
+    this.descargando = true;
+    setTimeout(() => {
+      this.descargando = false;
+    }, 1500);
+  }
+
+  descargarPdf(): void {
+    if (!this.pdfBlob || !this.blobUrl || this.descargando) {
       return;
     }
 
-    // En iPhone / iPad (Safari iOS), el menú nativo (navigator.share con File) es la forma más confiable
-    // de "Guardar en Archivos", enviar por WhatsApp, AirDrop o Imprimir con el nombre exacto del PDF
-    if (this.isIOS && this.canNativeShare) {
-      await this.compartirODescargarIOS();
-      return;
-    }
-
+    this.iniciarSpinnerDescarga();
     this.ejecutarDescargaDirecta();
   }
 
