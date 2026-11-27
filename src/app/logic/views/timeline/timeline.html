@@ -178,13 +178,35 @@
         class="grp-room-pill"
         [class.is-current]="h.habitacion_id === grupoPreviewData.currentHabitacionId"
         (click)="enfocarHabitacionGrupo(h)"
-        [matTooltip]="'Ir a ' + h.titulo + ' (' + h.subtitulo + ')'">
+        [title]="'Ir a ' + h.titulo + ' (' + h.subtitulo + ')'">
         <span class="grp-room-num">{{ h.badge }}</span>
         <div class="grp-room-meta">
           <span class="grp-room-desc">{{ h.subtitulo }}</span>
           <span *ngIf="h.piso" class="grp-room-floor">Piso {{ h.piso }}</span>
         </div>
-        <span *ngIf="grupoPreviewData.es_grupal && h.habitacion_id === grupoPreviewData.currentHabitacionId" class="grp-current-dot" matTooltip="Ubicación actual"></span>
+        <span *ngIf="grupoPreviewData.es_grupal && h.habitacion_id === grupoPreviewData.currentHabitacionId" class="grp-current-dot" title="Ubicación actual"></span>
+      </button>
+    </div>
+
+    <div class="grp-popover-actions">
+      <button
+        type="button"
+        class="grp-action-btn btn-comprobante"
+        [disabled]="cargandoPdfPopover !== null"
+        (click)="verComprobanteDesdePopover(grupoPreviewData)"
+        title="Ver Comprobante de Reserva (PDF)">
+        <mat-icon>{{ cargandoPdfPopover === 'comprobante' ? 'hourglass_top' : 'description' }}</mat-icon>
+        <span>{{ cargandoPdfPopover === 'comprobante' ? 'Cargando...' : 'Comprobante' }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="grp-action-btn btn-estado-cuenta"
+        [disabled]="cargandoPdfPopover !== null"
+        (click)="verEstadoCuentaDesdePopover(grupoPreviewData)"
+        title="Ver Estado de Cuenta (PDF)">
+        <mat-icon>{{ cargandoPdfPopover === 'estado_cuenta' ? 'hourglass_top' : 'receipt_long' }}</mat-icon>
+        <span>{{ cargandoPdfPopover === 'estado_cuenta' ? 'Cargando...' : 'Estado Cuenta' }}</span>
       </button>
     </div>
   </div>

@@ -27,6 +27,8 @@ import { EstadoCivilService } from '../../../base/services/estadocivil.service';
 import { TipoHabitacionService } from '../../services/tipo_habitacion.service';
 import { EstadoHabitacionService } from '../../services/estado_habitacion.service';
 import { AppService } from '../../../base/services/local/app.service';
+import { DocumentoService } from '../../services/documento.service';
+import { AlertService } from '../../../base/services/local/alert.service';
 
 
 //COMPONENT
@@ -34,6 +36,7 @@ import { ReservaFormComponent } from './reserva-form/reserva-form';
 import { ContextMenuComponent } from '../context-menu/context-menu';
 import { ConfirmarEliminarComponent } from '../../../base/shared/views/confirmar-eliminar/confirmar-eliminar';
 import { IrFechaModalComponent } from './ir-fecha-modal/ir-fecha-modal';
+import { PdfViewerComponent } from '../../shared/views/pdf-viewer/pdf-viewer';
 
 //VARIOS
 import { Component, ElementRef, inject, effect, ViewChild, AfterViewInit, signal, HostListener, ChangeDetectorRef } from '@angular/core';
@@ -91,7 +94,9 @@ export class TimelineComponent implements AfterViewInit {
   grupoPreviewVisible = false;
   grupoPreviewTop = '0px';
   grupoPreviewLeft = '0px';
+  cargandoPdfPopover: 'comprobante' | 'estado_cuenta' | null = null;
   grupoPreviewData: {
+    reserva_id: number;
     es_grupal: boolean;
     grupo_id: number | null;
     correlativo: number | string;
@@ -117,6 +122,7 @@ export class TimelineComponent implements AfterViewInit {
   private grupoPreviewShowTimer: any = null;
   private grupoPreviewHideTimer: any = null;
   private currentHoveredItemId: number | null = null;
+  private isMouseInsidePopover: boolean = false;
 
   // Buscador de reservas por número o cliente
   terminoBusqueda: string = '';
@@ -164,6 +170,8 @@ export class TimelineComponent implements AfterViewInit {
     private tipoHabitacionService: TipoHabitacionService,
     private estadoHabitacionService: EstadoHabitacionService,
     private appService: AppService,
+    private documentoService: DocumentoService,
+    private alertService: AlertService,
 
     private cdr: ChangeDetectorRef
   ) {
@@ -724,13 +732,17 @@ export class TimelineComponent implements AfterViewInit {
     });
 
     this.timeLine.on('itemout', () => {
-      this.ocultarGrupoPreviewConRetraso();
+      if (!this.isMouseInsidePopover) {
+        this.ocultarGrupoPreviewConRetraso();
+      }
     });
 
     // 3. SOLUCIÓN: Al salir totalmente del contenedor del Timeline
     this.timeLine.on('mouseOut', () => {
       this.items.remove(HOVER_ID);
-      this.ocultarGrupoPreviewConRetraso();
+      if (!this.isMouseInsidePopover) {
+        this.ocultarGrupoPreviewConRetraso();
+      }
     });
 
     // 4. SOLUCIÓN: Al desplazar o mover el calendario (Scroll/Drag)
@@ -1217,6 +1229,10 @@ export class TimelineComponent implements AfterViewInit {
 
   programarMostrarGrupoPreview(itemId: number, event?: MouseEvent) {
     if (this.menuEstadoVisible) return;
+    // Si el cursor ya está dentro del popover interactuando con habitaciones o botones, no cambiar ni cerrar el popover
+    if (this.isMouseInsidePopover && this.grupoPreviewVisible) {
+      return;
+    }
     if (this.grupoPreviewHideTimer) {
       clearTimeout(this.grupoPreviewHideTimer);
       this.grupoPreviewHideTimer = null;
@@ -1301,6 +1317,7 @@ export class TimelineComponent implements AfterViewInit {
 
     this.currentHoveredItemId = Number(reserva.id);
     this.grupoPreviewData = {
+      reserva_id: Number(reserva.id),
       es_grupal: esGrupal,
       grupo_id: reserva.grupo_id || null,
       correlativo: reserva.correlativo || reserva.id,
@@ -1326,7 +1343,7 @@ export class TimelineComponent implements AfterViewInit {
     }
 
     const cardWidth = 310;
-    const cardHeight = Math.min(280, 110 + Math.ceil(habsDetalle.length / 2) * 44);
+    const cardHeight = Math.min(325, 150 + Math.ceil(habsDetalle.length / 2) * 44);
 
     let left = anchorRect ? (anchorRect.left + anchorRect.width / 2 - cardWidth / 2) : (mouseX - cardWidth / 2);
     let top = anchorRect ? (anchorRect.bottom + 8) : (mouseY + 14);
@@ -1349,6 +1366,11 @@ export class TimelineComponent implements AfterViewInit {
   }
 
   mantenerGrupoPreview() {
+    this.isMouseInsidePopover = true;
+    if (this.grupoPreviewShowTimer) {
+      clearTimeout(this.grupoPreviewShowTimer);
+      this.grupoPreviewShowTimer = null;
+    }
     if (this.grupoPreviewHideTimer) {
       clearTimeout(this.grupoPreviewHideTimer);
       this.grupoPreviewHideTimer = null;
@@ -1356,6 +1378,10 @@ export class TimelineComponent implements AfterViewInit {
   }
 
   ocultarGrupoPreviewConRetraso() {
+    this.isMouseInsidePopover = false;
+    if (this.cargandoPdfPopover !== null) {
+      return;
+    }
     if (this.grupoPreviewShowTimer) {
       clearTimeout(this.grupoPreviewShowTimer);
       this.grupoPreviewShowTimer = null;
@@ -1364,11 +1390,14 @@ export class TimelineComponent implements AfterViewInit {
       clearTimeout(this.grupoPreviewHideTimer);
     }
     this.grupoPreviewHideTimer = setTimeout(() => {
-      this.cerrarGrupoPreviewInmediato();
-    }, 180);
+      if (!this.isMouseInsidePopover && this.cargandoPdfPopover === null) {
+        this.cerrarGrupoPreviewInmediato();
+      }
+    }, 320);
   }
 
   cerrarGrupoPreviewInmediato() {
+    this.isMouseInsidePopover = false;
     if (this.grupoPreviewShowTimer) {
       clearTimeout(this.grupoPreviewShowTimer);
       this.grupoPreviewShowTimer = null;
@@ -1411,6 +1440,65 @@ export class TimelineComponent implements AfterViewInit {
     if (reservaDestino) {
       this.irAReservaEnTimeline(reservaDestino);
     }
+  }
+
+  verComprobanteDesdePopover(data: { reserva_id: number; correlativo: number | string }) {
+    if (!data || !data.reserva_id || this.cargandoPdfPopover) return;
+    this.cargandoPdfPopover = 'comprobante';
+    this.cdr.detectChanges();
+
+    const nro = data.correlativo || data.reserva_id;
+    this.documentoService.obtenerVoucherReserva(data.reserva_id).subscribe({
+      next: (pdfBase64: string) => {
+        this.cargandoPdfPopover = null;
+        this.cerrarGrupoPreviewInmediato();
+        if (pdfBase64) {
+          this.abrirModalPdfDesdeTimeline(pdfBase64, `Comprobante de Reserva #${nro}`);
+        } else {
+          this.alertService.show("No se pudo obtener el comprobante de la reserva", { duration: 3000, type: 'warning' });
+        }
+      },
+      error: () => {
+        this.cargandoPdfPopover = null;
+        this.cdr.detectChanges();
+        this.alertService.show("Error al obtener el comprobante de la reserva", { duration: 3000, type: 'error' });
+      }
+    });
+  }
+
+  verEstadoCuentaDesdePopover(data: { reserva_id: number; correlativo: number | string }) {
+    if (!data || !data.reserva_id || this.cargandoPdfPopover) return;
+    this.cargandoPdfPopover = 'estado_cuenta';
+    this.cdr.detectChanges();
+
+    const nro = data.correlativo || data.reserva_id;
+    this.documentoService.obtenerVoucherCargo(data.reserva_id).subscribe({
+      next: (pdfBase64: string) => {
+        this.cargandoPdfPopover = null;
+        this.cerrarGrupoPreviewInmediato();
+        if (pdfBase64) {
+          this.abrirModalPdfDesdeTimeline(pdfBase64, `Estado de Cuenta #${nro}`);
+        } else {
+          this.alertService.show("No se pudo obtener el estado de cuenta", { duration: 3000, type: 'warning' });
+        }
+      },
+      error: () => {
+        this.cargandoPdfPopover = null;
+        this.cdr.detectChanges();
+        this.alertService.show("Error al obtener el estado de cuenta", { duration: 3000, type: 'error' });
+      }
+    });
+  }
+
+  private abrirModalPdfDesdeTimeline(pdf_base64: string, titulo_documento: string) {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 850;
+    this.dialog.open(PdfViewerComponent, {
+      width: isMobile ? '96vw' : '55vw',
+      maxWidth: '96vw',
+      height: isMobile ? '85vh' : '82vh',
+      data: { pdf_base64, titulo_documento },
+      disableClose: true
+    });
   }
 
 }
